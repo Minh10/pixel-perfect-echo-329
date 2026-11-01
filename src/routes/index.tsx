@@ -3,7 +3,13 @@ import { useQueries, useSuspenseQueries, useSuspenseQuery } from "@tanstack/reac
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/http-service";
-import { api, documentsQuery, evidenceQuery, DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
+import {
+  api,
+  documentsQuery,
+  evidenceQuery,
+  DEFAULT_DOCUMENT_ID,
+  IS_DEMO,
+} from "@/lib/api/service";
 import type { Evidence } from "@/lib/api/types";
 import { DemoBadge, ErrorState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";

@@ -9,7 +9,7 @@ import pymupdf
 from app.indexing.store import ChunkStore
 from app.qa.llm import ImagePart
 from app.qa.schemas import ChartPoint
-from app.visual.charts import ChartStore, cross_check, evidence_text, interpret_chart, render_crop
+from app.visual.charts import ChartStore, chart_caveat, cross_check, evidence_text, interpret_chart, render_crop
 from tests.unit.test_qa import qa_env  # noqa: F401 - fixture reuse
 
 FIX = Path(__file__).parents[1] / "fixtures" / "annual_report_excerpt.pdf"
@@ -41,6 +41,15 @@ def test_cross_check_uses_the_same_year_not_the_nearer_number() -> None:
     assert cross_check([P("West", "21")], FACTS)[0].status == "no_table_evidence"
     earlier = cross_check([P("North", "2290", "2024")], FACTS)[0]
     assert earlier.table_value == "2300" and earlier.status == "consistent"
+
+
+def test_chart_caveat_separates_printed_labels_from_estimates() -> None:
+    printed = chart_caveat([P("North", "240"), P("East", "90")])
+    assert "printed label" in printed and "visual estimate" not in printed
+    estimated = chart_caveat([P("North", "50").model_copy(update={"printed_on_chart": False})])
+    assert "visual estimate" in estimated and "printed label" not in estimated
+    mixed = chart_caveat([P("North", "240"), P("South", "30").model_copy(update={"printed_on_chart": False})])
+    assert "Printed chart labels: North" in mixed and "Visual estimates from the graphic: South" in mixed
 
 
 def test_missing_period_or_unreadable_value_is_not_matched() -> None:

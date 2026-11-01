@@ -55,7 +55,8 @@ export function OverviewMetrics({
     },
     {
       label: "Figures",
-      value: evidence.filter((item) => item.category === "figure" || item.category === "chart").length,
+      value: evidence.filter((item) => item.category === "figure" || item.category === "chart")
+        .length,
       detail: "Extracted chart regions",
       icon: ScanSearch,
     },

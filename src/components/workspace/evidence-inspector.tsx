@@ -45,7 +45,10 @@ export function EvidenceInspector({
   return (
     <div className="flex min-h-0 h-full flex-col">
       {selected ? (
-        <section className="border-b border-l-2 border-l-evidence bg-evidence-soft/40 p-4" aria-label="Selected evidence">
+        <section
+          className="border-b border-l-2 border-l-evidence bg-evidence-soft/40 p-4"
+          aria-label="Selected evidence"
+        >
           <div className="mb-3 flex items-start justify-between gap-2">
             <div>
               <p className="eyebrow">

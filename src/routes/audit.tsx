@@ -158,7 +158,9 @@ function AuditWorkspace() {
                 >
                   <Minus className="size-4" />
                 </Button>
-                <span className="w-10 text-center font-mono text-xs tabular">{Math.round(zoom * 100)}%</span>
+                <span className="w-10 text-center font-mono text-xs tabular">
+                  {Math.round(zoom * 100)}%
+                </span>
                 <Button
                   type="button"
                   variant="ghost"
@@ -180,13 +182,20 @@ function AuditWorkspace() {
                   className="mx-auto"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">The parser did not provide a crop image.</p>
+                <p className="text-sm text-muted-foreground">
+                  The parser did not provide a crop image.
+                </p>
               )}
             </div>
             <p className="mt-3 text-sm">{crop?.figure?.caption ?? figure.excerpt}</p>
             <div className="mt-2 flex items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground">Page {figure.page}</p>
-              <SourceLink documentId={selectedId} page={figure.page} evidenceId={figure.id} label="Open chart page" />
+              <SourceLink
+                documentId={selectedId}
+                page={figure.page}
+                evidenceId={figure.id}
+                label="Open chart page"
+              />
             </div>
           </article>
           <ChartSummary
@@ -222,6 +231,27 @@ function figureBlock(pages: { blocks: PageBlock[] }[], evidence: Evidence): Page
     if (block) return block;
   }
   return null;
+}
+
+function caveatFor(reading: ChartInterpretation): string {
+  if (reading.points.length === 0) return "No chart values were extracted.";
+  const printed = reading.points
+    .filter((point) => point.printedOnChart)
+    .map((point) => point.label);
+  const estimated = reading.points
+    .filter((point) => !point.printedOnChart)
+    .map((point) => point.label);
+  const parts: string[] = [];
+  if (printed.length > 0 && estimated.length === 0) {
+    parts.push("Every number was copied from a printed label on the chart.");
+  } else if (estimated.length > 0 && printed.length === 0) {
+    parts.push("Every number is a visual estimate. No printed data label was read.");
+  } else {
+    parts.push(`Printed chart labels: ${printed.join(", ")}.`);
+    parts.push(`Visual estimates from the graphic: ${estimated.join(", ")}.`);
+  }
+  parts.push("These readings are not reported table figures.");
+  return parts.join(" ");
 }
 
 function Kpi({ label, value }: { label: string; value: number | string }) {
@@ -260,7 +290,12 @@ function ChartSummary({
             {reading?.title || reading?.chartType || "No stored reading"}
           </h2>
         </div>
-        <Button type="button" variant={reading ? "outline" : "default"} disabled={!canRead || pending} onClick={onRead}>
+        <Button
+          type="button"
+          variant={reading ? "outline" : "default"}
+          disabled={!canRead || pending}
+          onClick={onRead}
+        >
           {pending ? "Reading…" : reading ? "Re-analyse" : "Read chart"}
         </Button>
       </div>
@@ -277,7 +312,9 @@ function ChartSummary({
       ) : null}
       {reading ? (
         <>
-          {reading.summary && <p className="max-w-prose text-[15px] leading-7">{reading.summary}</p>}
+          {reading.summary && (
+            <p className="max-w-prose text-[15px] leading-7">{reading.summary}</p>
+          )}
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground">
               <tr className="border-b">
@@ -292,7 +329,9 @@ function ChartSummary({
                   <td className="px-2 py-2">
                     {point.label}
                     {point.series ? ` · ${point.series}` : ""}
-                    {point.period ? <span className="text-muted-foreground"> · {point.period}</span> : null}
+                    {point.period ? (
+                      <span className="text-muted-foreground"> · {point.period}</span>
+                    ) : null}
                   </td>
                   <td className="px-2 py-2 text-right font-mono tabular">
                     {point.value}
@@ -305,7 +344,7 @@ function ChartSummary({
               ))}
             </tbody>
           </table>
-          <p className="text-xs leading-5 text-muted-foreground">{reading.caveat}</p>
+          <p className="text-xs leading-5 text-muted-foreground">{caveatFor(reading)}</p>
           <p className="text-xs text-muted-foreground">
             {reading.provider} · {reading.model}
           </p>
@@ -339,7 +378,8 @@ function ComparisonTable({
   if (rows.length === 0) {
     return (
       <p className="text-sm">
-        <ReviewStatus status="INSUFFICIENT_EVIDENCE" /> The reading did not include a table comparison.
+        <ReviewStatus status="INSUFFICIENT_EVIDENCE" /> The reading did not include a table
+        comparison.
       </p>
     );
   }
@@ -348,8 +388,8 @@ function ComparisonTable({
       <div>
         <h2 className="font-serif text-2xl">Chart versus reported table</h2>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          A potential discrepancy means the chart point and one aligned reported fact differ. It is not a
-          verified finding of financial fraud.
+          A potential discrepancy means the chart point and one aligned reported fact differ. It is
+          not a verified finding of financial fraud.
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -384,8 +424,12 @@ function ComparisonTable({
                   <td className="px-2 py-3">{check.label}</td>
                   <td className="px-2 py-3">{check.period ?? "—"}</td>
                   <td className="px-2 py-3 text-right font-mono tabular">{check.estimate}</td>
-                  <td className="px-2 py-3 text-right font-mono tabular">{check.tableValue ?? "—"}</td>
-                  <td className="px-2 py-3 text-right font-mono tabular">{check.absoluteDifference ?? "—"}</td>
+                  <td className="px-2 py-3 text-right font-mono tabular">
+                    {check.tableValue ?? "—"}
+                  </td>
+                  <td className="px-2 py-3 text-right font-mono tabular">
+                    {check.absoluteDifference ?? "—"}
+                  </td>
                   <td className="px-2 py-3 text-right font-mono tabular">
                     {check.relativeDifference == null
                       ? "—"

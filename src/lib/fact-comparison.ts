@@ -144,15 +144,16 @@ export function visualDiscrepancy(
   if (!aligned || check.status === "no_table_evidence") {
     return {
       status: "INSUFFICIENT_EVIDENCE",
-      detail:
-        "No single reported fact shares this chart label, period, unit, currency, and scope.",
+      detail: "No single reported fact shares this chart label, period, unit, currency, and scope.",
       page: null,
       evidenceId: null,
     };
   }
   const page = linked.page;
   const evidenceId = linked.tableId ? `ev-${linked.tableId}` : null;
-  const difference = check.absoluteDifference ? ` Absolute difference ${check.absoluteDifference}.` : "";
+  const difference = check.absoluteDifference
+    ? ` Absolute difference ${check.absoluteDifference}.`
+    : "";
   const period = linked.period.label ?? check.period ?? "the same period";
   if (check.status === "consistent") {
     return {

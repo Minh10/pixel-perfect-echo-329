@@ -228,4 +228,7 @@ class ChartInterpretation(ApiModel):
     provider: str
     model: str
     created_at: str
-    caveat: str = "Values are visual estimates read from the chart image by a vision-language model, not reported figures."
+    caveat: str = (
+        "Printed labels and visual estimates are distinguished on each point. "
+        "Chart readings are not reported table figures."
+    )

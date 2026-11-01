@@ -135,7 +135,10 @@ function LiveComparison() {
           <fieldset className="max-h-72 space-y-1 overflow-auto pr-1">
             <legend className="mb-2 text-xs text-muted-foreground">Processed reports</legend>
             {visible.map((doc) => (
-              <label key={doc.id} className="flex items-start gap-2 rounded-sm px-1 py-1.5 text-sm hover:bg-muted/60">
+              <label
+                key={doc.id}
+                className="flex items-start gap-2 rounded-sm px-1 py-1.5 text-sm hover:bg-muted/60"
+              >
                 <input
                   type="checkbox"
                   className="mt-1"
@@ -161,7 +164,7 @@ function LiveComparison() {
             )}
           </fieldset>
         </section>
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <div className="flex flex-wrap gap-2">
             {(labels.length ? labels : ["Revenue", "Operating profit"]).map((label) => (
               <button
@@ -169,7 +172,9 @@ function LiveComparison() {
                 type="button"
                 disabled={!labels.includes(label)}
                 className={`rounded-sm border px-3 py-1.5 text-sm ${
-                  activeMetric === label ? "border-foreground bg-foreground text-background" : "bg-card"
+                  activeMetric === label
+                    ? "border-foreground bg-foreground text-background"
+                    : "bg-card"
                 } disabled:opacity-40`}
                 onClick={() => setMetric(label)}
               >
@@ -177,78 +182,82 @@ function LiveComparison() {
               </button>
             ))}
           </div>
-      {selected.length < 2 && (
-        <EmptyState
-          title="Two reports are required"
-          description="A single report is not shown as a trend."
-        />
-      )}
-      {selected.length >= 2 && factsLoading && (
-        <p className="text-sm text-muted-foreground">Loading reported values…</p>
-      )}
-      {selected.length >= 2 && !factsLoading && reportCount < 2 && (
-        <EmptyState
-          title="No aligned values"
-          description={
-            comparison.note ||
-            "The metric is not present in two reports with the same unit, currency, and scope."
-          }
-        />
-      )}
-      {selected.length >= 2 && !factsLoading && reportCount >= 2 && (
-        <section className="space-y-4 rounded-md border bg-card p-5">
-          <p className="eyebrow">
-            {new Set(comparison.points.map((point) => point.periodLabel)).size >= 3
-              ? "Source-grounded series from parsed reports"
-              : "Comparison, not a comprehensive trend"}
-          </p>
-          <p className="text-sm text-muted-foreground">{comparison.note}</p>
-          <ChartContainer config={liveConfig} className="h-72 w-full">
-            <BarChart data={chartData}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="axis" tickLine={false} axisLine={false} interval={0} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={56}
-                tickFormatter={(value) => formatReported(Number(value))}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="value" fill="var(--color-value)" radius={1} />
-            </BarChart>
-          </ChartContainer>
-          <ul className="divide-y text-sm">
-            {comparison.points.map((point) => (
-              <li key={point.factId} className="flex items-center justify-between gap-3 py-2">
-                <span>
-                  <span className="font-mono tabular">{point.periodLabel}</span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    · {formatReported(point.value)} {point.currency ?? ""} {point.scale}
-                  </span>
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    navigate({
-                      to: "/intelligence",
-                      search: {
-                        doc: point.documentId,
-                        page: point.page,
-                        ev: point.tableEvidenceId,
-                      },
-                    })
-                  }
-                >
-                  {point.documentTitle} · p. {point.page}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {selected.length < 2 && (
+            <EmptyState
+              title="Two reports are required"
+              description="A single report is not shown as a trend."
+            />
+          )}
+          {selected.length >= 2 && factsLoading && (
+            <p className="text-sm text-muted-foreground">Loading reported values…</p>
+          )}
+          {selected.length >= 2 && !factsLoading && reportCount < 2 && (
+            <EmptyState
+              title="No aligned values"
+              description={
+                comparison.note ||
+                "The metric is not present in two reports with the same unit, currency, and scope."
+              }
+            />
+          )}
+          {selected.length >= 2 && !factsLoading && reportCount >= 2 && (
+            <section className="min-w-0 space-y-4 overflow-hidden rounded-md border bg-card p-5">
+              <p className="eyebrow">
+                {new Set(comparison.points.map((point) => point.periodLabel)).size >= 3
+                  ? "Source-grounded series from parsed reports"
+                  : "Comparison, not a comprehensive trend"}
+              </p>
+              <p className="text-sm text-muted-foreground">{comparison.note}</p>
+              <ChartContainer config={liveConfig} className="aspect-auto h-72 w-full min-w-0">
+                <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="axis" tickLine={false} axisLine={false} interval={0} />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    width={56}
+                    tickFormatter={(value) => formatReported(Number(value))}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="value" fill="var(--color-value)" radius={1} maxBarSize={72} />
+                </BarChart>
+              </ChartContainer>
+              <ul className="divide-y text-sm">
+                {comparison.points.map((point) => (
+                  <li
+                    key={point.factId}
+                    className="flex min-w-0 flex-col gap-2 py-2 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <span className="min-w-0">
+                      <span className="font-mono tabular">{point.periodLabel}</span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        · {formatReported(point.value)} {point.currency ?? ""} {point.scale}
+                      </span>
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-auto max-w-full whitespace-normal text-left"
+                      onClick={() =>
+                        navigate({
+                          to: "/intelligence",
+                          search: {
+                            doc: point.documentId,
+                            page: point.page,
+                            ev: point.tableEvidenceId,
+                          },
+                        })
+                      }
+                    >
+                      {point.documentTitle} · p. {point.page}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </div>
     </div>

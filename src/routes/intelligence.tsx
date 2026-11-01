@@ -243,7 +243,13 @@ function WorkspaceReady({ docId }: { docId: string }) {
             {IS_DEMO && <DemoBadge className="shrink-0" />}
           </div>
           <p className="text-xs text-muted-foreground">
-            {[doc.issuer, doc.type, doc.period, `${doc.pages} pp`, `${evidence.length} evidence regions`]
+            {[
+              doc.issuer,
+              doc.type,
+              doc.period,
+              `${doc.pages} pp`,
+              `${evidence.length} evidence regions`,
+            ]
               .filter(Boolean)
               .join(" · ")}
             {!IS_DEMO && doc.parser ? ` · ${doc.parser.name}` : ""}
