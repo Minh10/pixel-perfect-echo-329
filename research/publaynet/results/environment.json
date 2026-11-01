@@ -1,0 +1,42 @@
+{
+ "versions": {
+  "python": "3.13.18",
+  "platform": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+  "docling": "2.145.0",
+  "docling-core": "2.105.0",
+  "docling-ibm-models": "4.0.4",
+  "transformers": "5.22.1",
+  "torch": "2.15.0",
+  "torchvision": "0.29.2",
+  "pillow": "13.0.0",
+  "numpy": "2.5.4",
+  "pycocotools": "2.0.11"
+ },
+ "docling_default_layout": {
+  "options_class": "LayoutObjectDetectionOptions (LayoutOptions is the deprecated alias)",
+  "model_spec": {
+   "name": "layout_heron",
+   "repo_id": "docling-project/docling-layout-heron",
+   "revision": "main",
+   "onnx_override": {
+    "onnxruntime": "docling-project/docling-layout-heron-onnx"
+   }
+  },
+  "engine": "transformers",
+  "score_threshold": 0.3,
+  "torch_dtype": null,
+  "compile_model": false,
+  "keep_empty_clusters": false,
+  "create_orphan_clusters": true,
+  "skip_cell_assignment": false
+ },
+ "label_vocabulary": "NOT VERIFIED: read at run time from the model's config.json id2label (hosted on huggingface.co, denied)",
+ "network": {
+  "huggingface.co": "403 policy denial (CONNECT)",
+  "hf-mirror.com": "403",
+  "dax-cdn.cdn.appdomain.cloud": "403",
+  "zenodo.org": "403",
+  "modelscope.cn": "403",
+  "datasets-server.huggingface.co": "403"
+ }
+}

@@ -1,0 +1,5 @@
+status,class,role,docling_labels,gt,pred,tp,fp,fn,precision,recall,f1,iou_threshold,score_threshold,coco_AP,coco_AP50,coco_AP75
+NOT_RUN: model weights and PubLayNet unavailable (network policy 403),table,primary,table,,,,,,,,,,,,,
+NOT_RUN: model weights and PubLayNet unavailable (network policy 403),figure,primary,picture,,,,,,,,,,,,,
+NOT_RUN: model weights and PubLayNet unavailable (network policy 403),title,secondary,title+section_header,,,,,,,,,,,,,
+NOT_RUN: model weights and PubLayNet unavailable (network policy 403),text,secondary,text+caption+footnote+formula,,,,,,,,,,,,,

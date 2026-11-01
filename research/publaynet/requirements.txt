@@ -1,0 +1,11 @@
+docling==2.145.0
+docling-core==2.105.0
+docling-ibm-models==4.0.4
+transformers==5.22.1
+torch==2.15.0
+torchvision==0.29.2
+pillow==13.0.0
+numpy==2.5.4
+pycocotools==2.0.11
+huggingface-hub==1.33.0
+pytest

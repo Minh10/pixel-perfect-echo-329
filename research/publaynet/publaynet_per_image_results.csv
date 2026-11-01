@@ -1,0 +1,2 @@
+status,image_id,file_name,width,height,n_pred_all,preprocess_ms,inference_ms,postprocess_ms,table_gt,table_pred,table_tp,table_fp,table_fn,figure_gt,figure_pred,figure_tp,figure_fp,figure_fn,title_gt,title_pred,title_tp,title_fp,title_fn,text_gt,text_pred,text_tp,text_fp,text_fn
+NOT_RUN: no images evaluated (PubLayNet unavailable),,,,,,,,,,,,,,,,,,,,,,,,,,,,
