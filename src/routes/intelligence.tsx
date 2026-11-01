@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Highlighter, Minus, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Highlighter,
+  Minus,
+  Plus,
+  PanelLeft,
+  PanelRight,
+} from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_DOCUMENT_ID, documentQuery, evidenceQuery, pagesQuery } from "@/lib/api/service";
 import type { EvidenceCategory } from "@/lib/api/types";
@@ -27,18 +37,29 @@ export const Route = createFileRoute("/intelligence")({
   },
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Document Intelligence — FINAUDIT AI" },
-      { name: "description", content: "Inspect financial report pages, tables and charts with linked evidence." },
+      {
+        name: "description",
+        content: "Inspect financial report pages, tables and charts with linked evidence.",
+      },
       { property: "og:title", content: "Document Intelligence — FINAUDIT AI" },
-      { property: "og:description", content: "Inspect financial report pages, tables and charts with linked evidence." },
+      {
+        property: "og:description",
+        content: "Inspect financial report pages, tables and charts with linked evidence.",
+      },
     ],
   }),
   pendingComponent: WorkspaceSkeleton,
-  errorComponent: ({ error }) => {
+  errorComponent: function WorkspaceError({ error }) {
     const router = useRouter();
     return (
       <div className="p-8">
-        <ErrorState message={error instanceof Error ? error.message : String(error)} onRetry={() => router.invalidate()} />
+        <ErrorState
+          message={error instanceof Error ? error.message : String(error)}
+          onRetry={() => router.invalidate()}
+        />
       </div>
     );
   },
@@ -57,10 +78,15 @@ function Workspace() {
   const [filter, setFilter] = useState<EvidenceCategory | "all">("all");
   const [showHighlights, setShowHighlights] = useState(true);
   const [zoom, setZoom] = useState(1);
+  const [showPages, setShowPages] = useState(true);
+  const [showInspector, setShowInspector] = useState(true);
 
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
-  const selected = useMemo(() => evidence.find((e) => e.id === selectedId) ?? null, [evidence, selectedId]);
+  const selected = useMemo(
+    () => evidence.find((e) => e.id === selectedId) ?? null,
+    [evidence, selectedId],
+  );
 
   const goTo = (n: number) => navigate({ search: (s) => ({ ...s, page: n }), replace: true });
   const select = (id: string | null) => {
@@ -71,7 +97,12 @@ function Workspace() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.closest("input,textarea")) return;
+      if (
+        (e.target as HTMLElement)?.closest(
+          "input,textarea,select,[contenteditable=true],[role=separator]",
+        )
+      )
+        return;
       if (e.key === "ArrowRight" && current < pages.length) goTo(current + 1);
       if (e.key === "ArrowLeft" && current > 1) goTo(current - 1);
       if (e.key === "Escape") setSelectedId(null);
@@ -84,61 +115,209 @@ function Workspace() {
     return (
       <div className="p-8">
         <EmptyState
-          title={doc.status === "processing" ? "Document is still processing" : doc.status === "failed" ? "Processing failed" : "No pages available"}
+          title={
+            doc.status === "processing"
+              ? "Document is still processing"
+              : doc.status === "failed"
+                ? "Processing failed"
+                : "No pages available"
+          }
           description={`${doc.title} has no parsed pages to display yet.`}
-          action={<Button asChild variant="outline" size="sm"><Link to="/intelligence" search={{}}>Open demo report</Link></Button>}
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link to="/intelligence" search={{}}>
+                Open demo report
+              </Link>
+            </Button>
+          }
         />
       </div>
     );
   }
 
   return (
-    <div className="grid h-[calc(100svh-3.5rem)] grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-[220px_minmax(0,1fr)_340px]">
+    <div className="flex min-w-0 flex-col lg:h-[calc(100svh-3.5rem)]">
       {/* Toolbar */}
-      <div className="col-span-full flex flex-wrap items-center gap-x-4 gap-y-2 border-b bg-card px-4 py-2">
+      <div className="grid shrink-0 grid-cols-1 items-center gap-3 border-b bg-card px-4 py-3 xl:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{doc.title}</p>
-          <p className="font-mono text-[11px] text-muted-foreground">{doc.type} · {doc.period} · {doc.pages} pp · {evidence.length} evidence regions</p>
+          <div className="flex min-w-0 items-center gap-3">
+            <p className="truncate text-sm font-semibold">{doc.title}</p>
+            <DemoBadge className="shrink-0" />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {doc.type} · {doc.period} · {doc.pages} pp · {evidence.length} evidence regions
+          </p>
         </div>
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="size-8" disabled={current <= 1} onClick={() => goTo(current - 1)} aria-label="Previous page"><ChevronLeft className="size-4" /></Button>
-          <span className="w-16 text-center font-mono text-xs tabular">{current} / {pages.length}</span>
-          <Button variant="ghost" size="icon" className="size-8" disabled={current >= pages.length} onClick={() => goTo(current + 1)} aria-label="Next page"><ChevronRight className="size-4" /></Button>
-        </div>
-        <div className="flex items-center gap-1 border-l pl-3">
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setZoom((z) => Math.max(0.7, +(z - 0.1).toFixed(1)))} aria-label="Zoom out"><Minus className="size-4" /></Button>
-          <span className="w-10 text-center font-mono text-xs tabular">{Math.round(zoom * 100)}%</span>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setZoom((z) => Math.min(1.5, +(z + 0.1).toFixed(1)))} aria-label="Zoom in"><Plus className="size-4" /></Button>
-        </div>
-        <div className="flex items-center gap-2 border-l pl-3">
-          <Highlighter className="size-4 text-evidence" />
-          <Label htmlFor="hl" className="text-xs">Highlights</Label>
-          <Switch id="hl" checked={showHighlights} onCheckedChange={setShowHighlights} />
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={current <= 1}
+              onClick={() => goTo(current - 1)}
+              title="Previous page"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <span className="w-16 text-center font-mono text-xs tabular">
+              {current} / {pages.length}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={current >= pages.length}
+              onClick={() => goTo(current + 1)}
+              title="Next page"
+              aria-label="Next page"
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-1 border-l pl-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setZoom((z) => Math.max(0.7, +(z - 0.1).toFixed(1)))}
+              title="Zoom out"
+              aria-label="Zoom out"
+            >
+              <Minus className="size-4" />
+            </Button>
+            <span className="w-10 text-center font-mono text-xs tabular">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setZoom((z) => Math.min(1.5, +(z + 0.1).toFixed(1)))}
+              title="Zoom in"
+              aria-label="Zoom in"
+            >
+              <Plus className="size-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2 border-l pl-3">
+            <Highlighter className="size-4 text-evidence" />
+            <Label htmlFor="hl" className="text-xs">
+              Highlights
+            </Label>
+            <Switch id="hl" checked={showHighlights} onCheckedChange={setShowHighlights} />
+          </div>
+          <div className="flex shrink-0 items-center gap-1 border-l pl-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              title="Toggle page navigator"
+              aria-label="Toggle page navigator"
+              aria-pressed={showPages}
+              onClick={() => setShowPages((v) => !v)}
+            >
+              <PanelLeft />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              title="Toggle evidence inspector"
+              aria-label="Toggle evidence inspector"
+              aria-pressed={showInspector}
+              onClick={() => setShowInspector((v) => !v)}
+            >
+              <PanelRight />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <aside className="hidden overflow-y-auto border-r bg-card lg:block">
-        <PageNavigator pages={pages} current={current} evidence={evidence} onSelect={goTo} />
-      </aside>
-
-      <main className="overflow-auto bg-canvas px-4 py-8 md:px-10">
-        {page && (
-          <DocumentPageView
-            page={page}
-            totalPages={pages.length}
-            evidence={evidence}
-            selectedId={selectedId}
-            showHighlights={showHighlights}
-            zoom={zoom}
-            onSelect={select}
-            documentTitle={doc.title}
-          />
+      <div className="hidden min-h-0 flex-1 lg:block">
+        <ResizablePanelGroup orientation="horizontal" id="document-workspace">
+          {showPages && (
+            <>
+              <ResizablePanel id="pages" defaultSize="17%" minSize="140px" maxSize="25%">
+                <aside className="h-full overflow-y-auto bg-card">
+                  <PageNavigator
+                    pages={pages}
+                    current={current}
+                    evidence={evidence}
+                    onSelect={goTo}
+                  />
+                </aside>
+              </ResizablePanel>
+              <ResizableHandle withHandle aria-label="Resize page navigator" />
+            </>
+          )}
+          <ResizablePanel id="document" minSize="35%">
+            <main className="h-full overflow-auto bg-canvas px-6 py-8">
+              {page && (
+                <DocumentPageView
+                  page={page}
+                  totalPages={pages.length}
+                  evidence={evidence}
+                  selectedId={selectedId}
+                  showHighlights={showHighlights}
+                  zoom={zoom}
+                  onSelect={select}
+                  documentTitle={doc.title}
+                />
+              )}
+            </main>
+          </ResizablePanel>
+          {showInspector && (
+            <>
+              <ResizableHandle withHandle aria-label="Resize evidence inspector" />
+              <ResizablePanel id="inspector" defaultSize="29%" minSize="280px" maxSize="40%">
+                <aside className="h-full overflow-y-auto bg-card">
+                  <EvidenceInspector
+                    evidence={evidence}
+                    selected={selected}
+                    filter={filter}
+                    onFilter={setFilter}
+                    onSelect={select}
+                  />
+                </aside>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
+      </div>
+      <div className="min-w-0 lg:hidden">
+        {showPages && (
+          <aside className="max-h-48 overflow-y-auto border-b bg-card">
+            <PageNavigator pages={pages} current={current} evidence={evidence} onSelect={goTo} />
+          </aside>
         )}
-      </main>
-
-      <aside className="border-t bg-card lg:overflow-hidden lg:border-l lg:border-t-0">
-        <EvidenceInspector evidence={evidence} selected={selected} filter={filter} onFilter={setFilter} onSelect={select} />
-      </aside>
+        <main className="max-h-[75svh] overflow-auto bg-canvas px-3 py-6 sm:px-8">
+          {page && (
+            <DocumentPageView
+              page={page}
+              totalPages={pages.length}
+              evidence={evidence}
+              selectedId={selectedId}
+              showHighlights={showHighlights}
+              zoom={zoom}
+              onSelect={select}
+              documentTitle={doc.title}
+            />
+          )}
+        </main>
+        {showInspector && (
+          <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
+            <EvidenceInspector
+              evidence={evidence}
+              selected={selected}
+              filter={filter}
+              onFilter={setFilter}
+              onSelect={select}
+            />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

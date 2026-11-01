@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { documentsQuery, evidenceQuery, DEFAULT_DOCUMENT_ID } from "@/lib/api/service";
 import { DemoBadge, PageHeader, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
+import { OverviewMetrics, OverviewPanels } from "@/components/app/overview-panels";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
@@ -14,10 +15,18 @@ export const Route = createFileRoute("/")({
     ]),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Overview — FINAUDIT AI" },
-      { name: "description", content: "Workspace overview of financial documents, evidence and audit readiness." },
+      {
+        name: "description",
+        content: "Workspace overview of financial documents, evidence and audit readiness.",
+      },
       { property: "og:title", content: "Overview — FINAUDIT AI" },
-      { property: "og:description", content: "Workspace overview of financial documents, evidence and audit readiness." },
+      {
+        property: "og:description",
+        content: "Workspace overview of financial documents, evidence and audit readiness.",
+      },
     ],
   }),
   pendingComponent: PageSkeleton,
@@ -27,33 +36,41 @@ export const Route = createFileRoute("/")({
 function Overview() {
   const { data: docs } = useSuspenseQuery(documentsQuery());
   const { data: evidence } = useSuspenseQuery(evidenceQuery(DEFAULT_DOCUMENT_ID));
-  const stats = [
-    { label: "Documents", value: docs.length },
-    { label: "Ready for review", value: docs.filter((d) => d.status === "ready").length },
-    { label: "Pages indexed", value: docs.filter((d) => d.status === "ready").reduce((a, d) => a + d.pages, 0) },
-    { label: "Evidence regions", value: evidence.length },
-  ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 p-6 md:p-8">
+    <div className="page-layout space-y-7">
       <PageHeader
-        eyebrow="Workspace"
         title="Overview"
-        description="Financial reports under review, parsed into text, tables and charts with traceable evidence."
-        actions={<Button asChild><Link to="/intelligence">Open workspace <ArrowRight /></Link></Button>}
+        description="Your financial report library, processing status and source evidence — in one workspace."
+        actions={
+          <>
+            <Button asChild variant="ghost">
+              <Link to="/documents">View Documents</Link>
+            </Button>
+            <Button asChild className="h-10">
+              <Link to="/intelligence">
+                Open Document Workspace <ArrowRight />
+              </Link>
+            </Button>
+          </>
+        }
       />
-      <dl className="grid grid-cols-2 divide-x divide-y rounded-md border bg-card md:grid-cols-4 md:divide-y-0">
-        {stats.map((s) => (
-          <div key={s.label} className="p-5">
-            <dt className="eyebrow">{s.label}</dt>
-            <dd className="mt-2 font-serif text-3xl font-semibold tabular">{s.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <OverviewMetrics documents={docs} evidence={evidence} />
+      <OverviewPanels documents={docs} />
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Recent documents</h2>
-          <DemoBadge />
+          <div>
+            <h2 className="text-base font-semibold">Recent Documents</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Financial reports in your library</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <DemoBadge />
+            <Button asChild variant="link" size="sm">
+              <Link to="/documents">
+                View all <ArrowRight />
+              </Link>
+            </Button>
+          </div>
         </div>
         <DocumentsTable documents={docs} />
       </section>

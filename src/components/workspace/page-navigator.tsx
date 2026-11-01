@@ -1,7 +1,18 @@
 import type { DocumentPage, Evidence } from "@/lib/api/types";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function PageNavigator({ pages, current, evidence, onSelect }: { pages: DocumentPage[]; current: number; evidence: Evidence[]; onSelect: (n: number) => void }) {
+export function PageNavigator({
+  pages,
+  current,
+  evidence,
+  onSelect,
+}: {
+  pages: DocumentPage[];
+  current: number;
+  evidence: Evidence[];
+  onSelect: (n: number) => void;
+}) {
   return (
     <nav aria-label="Pages" className="space-y-1 p-3">
       <p className="eyebrow px-1 pb-2">Pages · {pages.length}</p>
@@ -9,14 +20,15 @@ export function PageNavigator({ pages, current, evidence, onSelect }: { pages: D
         const count = evidence.filter((e) => e.page === p.number).length;
         const active = p.number === current;
         return (
-          <button
+          <Button
+            variant="ghost"
             key={p.number}
             type="button"
             onClick={() => onSelect(p.number)}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex w-full items-center gap-3 rounded-sm p-1.5 text-left transition-colors hover:bg-muted",
-              active && "bg-accent",
+              "flex h-auto w-full items-center gap-3 rounded-sm p-1.5 text-left transition-colors hover:bg-muted",
+              active && "bg-primary-soft text-primary-deep",
             )}
           >
             <span
@@ -32,13 +44,17 @@ export function PageNavigator({ pages, current, evidence, onSelect }: { pages: D
               {count > 0 && <span className="mt-1 block h-1.5 w-full bg-evidence/40" />}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block font-mono text-[11px] text-muted-foreground">p. {p.number}</span>
+              <span className="block font-mono text-[11px] text-muted-foreground">
+                p. {p.number}
+              </span>
               <span className="block truncate text-xs font-medium">{p.section}</span>
             </span>
             {count > 0 && (
-              <span className="rounded-sm bg-evidence-soft px-1.5 font-mono text-[10px] text-evidence">{count}</span>
+              <span className="rounded-sm bg-evidence-soft px-1.5 font-mono text-[10px] text-evidence">
+                {count}
+              </span>
             )}
-          </button>
+          </Button>
         );
       })}
     </nav>

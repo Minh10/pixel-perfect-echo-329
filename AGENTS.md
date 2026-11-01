@@ -15,3 +15,6 @@
 - No database / Lovable Cloud and no live LLM calls until an explicit architecture decision is made; the backend will be FastAPI.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.
+
+- Overview summaries derive from query-loaded service values; do not introduce a second data source for dashboard visuals.
+- Document workspace uses the installed resizable panel primitives on desktop and stacked, bounded views on smaller screens, preserving URL-driven page navigation.
