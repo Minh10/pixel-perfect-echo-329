@@ -61,5 +61,6 @@ jobs:
           python-version: "3.12"
       - name: Backend advisories (pip-audit)
         continue-on-error: true
-        run: pip install pip-audit && pip-audit -r <(pip install --dry-run --quiet --report - ./services/api 2>/dev/null | python -c "import json,sys; [print(f\"{i['metadata']['name']}=={i['metadata']['version']}\") for i in json.load(sys.stdin)['install']]")
+        # resolved third-party pins only (the local finaudit-api package is not on PyPI)
+        run: pip install pip-audit && pip-audit --no-deps --disable-pip -r <(pip install --dry-run --quiet --report - ./services/api 2>/dev/null | python -c "import json,sys; [print(f\"{i['metadata']['name']}=={i['metadata']['version']}\") for i in json.load(sys.stdin)['install'] if i['metadata']['name'] != 'finaudit-api']")
         shell: bash
