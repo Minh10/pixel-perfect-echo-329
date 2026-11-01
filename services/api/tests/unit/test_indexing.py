@@ -191,3 +191,11 @@ def test_data_row_is_never_a_header_and_periods_recovered_from_context(parse) ->
     _emit_table(out2, pb, page, META, [], "hdr", [ctx2, pb], [ctx2])
     assert "Commercial Airplanes: $25,867; $19,493; $16,162" in out2[0].content
     assert out2[0].meta["columnsSource"] is None
+
+
+def test_dense_falls_back_to_bm25_when_embedder_unavailable(tmp_path: Path, parse) -> None:
+    s, _, store = _setup(tmp_path, parse)
+    store.replace_document_chunks("doc_syn", "layout", "layout-v1", chunk_layout(parse, META), PROV)
+    res = Retriever(s, store=store).search("operating profit", method="dense", chunk_set="layout")
+    assert res.effective_method == "bm25" and res.hits
+    assert "dense degraded to bm25 only" in res.warnings

@@ -193,11 +193,12 @@ The main ones are `FINAUDIT_PARSER`, `FINAUDIT_DATA_DIR`, `FINAUDIT_MAX_UPLOAD_M
 - **The QA pipeline has not been evaluated end to end.** No LLM credentials were available in the
   development environment. Its validation and calculation logic is covered by tests with a scripted
   test double, and `eval/run_qa_eval.py` is ready to run once a provider is configured.
-- Retrieval quality is modest: Recall@10 of about 0.4–0.57 when the gold document is known (see
+- Retrieval quality is modest: Recall@10 of 0.41–0.57 when the gold document is known (see
   `eval/results/retrieval_report.md`). Numerical and multi-page questions are the weakest. After
   multiple-comparison correction, differences between configurations are not significant on this
   63-query benchmark.
-- Hybrid fusion and reranking have not shown measurable gains here. The reranker is pluggable but was
+- Layout-aware chunking improved evidence structure, not recall. Hybrid fusion and reranking have not
+  shown measurable gains here. The reranker is pluggable but was
   not evaluated (no weights reachable). ColPali-style visual retrieval was investigated but not
   implemented (see `docs/ARCHITECTURE.md`).
 - Embedded Qdrant (no `FINAUDIT_QDRANT_URL`) allows a single process only. Qdrant server mode is

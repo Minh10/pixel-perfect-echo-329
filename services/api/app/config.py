@@ -82,7 +82,9 @@ class Settings(BaseSettings):
     llm_price_input_per_mtok: float | None = None
     llm_price_output_per_mtok: float | None = None
     qa_top_k: int = 8
-    qa_method: str = "hybrid"                  # retrieval method used by /qa (see eval/results for evidence)
+    # Retrieval used by /qa. Dense over layout chunks: best point estimates in eval/results/retrieval_report.md
+    # (layout-v2), hybrid fusion showed no measured benefit; dense falls back to BM25 if the embedder is down.
+    qa_method: str = "dense"
     qa_chunk_set: str = "layout"
     qa_max_evidence_chars: int = 24000
 

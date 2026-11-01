@@ -25,14 +25,16 @@
 | SQLite `chart_interpretations` | cached VLM chart readings + table checks | Cascade on document delete |
 | Qdrant `finaudit_{chunkSet}_{embedderId}` | vectors, payload `{chunk_id, document_id, kind, page}` | One collection per embedder, so models are never mixed |
 
-## Chunking (`app/indexing/chunker.py`, version `layout-v1`)
+## Chunking (`app/indexing/chunker.py`, version `layout-v2`)
 
 - **text:** consecutive body blocks under one section on one page, up to ~220 words. A block is never
   split unless it alone exceeds the budget; it is then split at sentence boundaries. Running
   headers/footers (short lines repeated on ≥ 30% of pages) and page numbers are dropped.
 - **table:** a normalised table view. Currency-symbol cells (`$`) are merged into their numbers, empty
   spacer columns are dropped, and leading rows with no non-year numbers become column headers (the
-  periods). Units come from the caption, headers, first rows or preceding text (`(Millions)`,
+  periods). A header row may contain no non-year numbers, whatever the parser flagged (the v1 bug).
+  When a table has no header row, periods printed above it are used only if their count exactly
+  matches the value columns. Units come from the caption, headers, first rows or preceding text (`(Millions)`,
   `in thousands`, ...). Rows serialise as `Label: 2018 = (1,577); 2017 = (1,373)`. Tables over ~320
   words split into row groups, preferably at section rows (`[Cash Flows from Investing Activities]`),
   and **every group repeats the title, units and column headers**. Row-group citations carry the bbox
@@ -72,7 +74,9 @@ the development environment.
 1. **Route:** match issuer names (suffix-normalised, whole-word for short names) and years against
    document metadata. Explicit `documentIds` override this; with no match the whole corpus is searched,
    with a warning.
-2. **Retrieve:** `qa_method`/`qa_chunk_set`/`qa_top_k` (default hybrid/layout/8).
+2. **Retrieve:** `qa_method`/`qa_chunk_set`/`qa_top_k` (default **dense**/layout/8). Dense had the
+   best point estimates among layout configurations; hybrid RRF showed no measured benefit (see
+   `eval/README.md`). Dense falls back to BM25 with a warning when the embedder is unavailable.
 3. **Prompt:** evidence is labelled `[E#] TABLE|TEXT|FIGURE | company | period | page | section`. The
    rules: use only the evidence, abstain when it is insufficient, quote numbers verbatim, never do
    arithmetic, prefer tables over narrative and over visual estimates.

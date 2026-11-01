@@ -146,6 +146,11 @@ class Retriever:
             dense = self._dense(query, chunk_set, document_ids, depth, warnings, timings)
             if dense is not None:
                 per_method["dense"] = dense
+            elif method == "dense":  # never return zero evidence just because the embedder is down
+                t = time.perf_counter()
+                per_method["bm25"] = self.store.bm25(query, chunk_set, document_ids, depth)
+                timings["bm25_ms"] = (time.perf_counter() - t) * 1000
+                warnings.append("dense degraded to bm25 only")
         effective = "+".join(sorted(per_method)) or "none"
         if method == "hybrid" and len(per_method) == 2:
             fused = rrf({m: [c for c, _ in r] for m, r in per_method.items()}, self.s.rrf_k)

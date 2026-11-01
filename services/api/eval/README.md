@@ -82,8 +82,69 @@ them, so they are downloaded into `eval/data/`, which is git-ignored.
   - Abstention precision/recall/F1 (unanswerable = positive) and false-abstain rate.
   - Latency p50/p95, tokens, and cost (only when prices are configured).
 
-## Results
+## Results (retrieval, chunker `layout-v2`, 63 items with gold evidence)
 
-See `results/retrieval_report.md` for the full tables. The QA evaluation has **not been run** in this
-environment because no LLM credentials were available. It is not reported, and no placeholder numbers
-exist.
+Full tables, CIs and per-tag results are in `results/retrieval_report.md`; per-query rankings are in
+`results/raw/` (git-ignored). Setup:
+- Corpus: 14 documents, 10,081 layout chunks and 8,029 flat chunks. Parsed with PyMuPDF (Docling
+  models unreachable).
+- Embedder: all-MiniLM-L6-v2 ONNX. WordLlama was run as an ablation.
+- Hardware: one shared 4-vCPU container, embedded Qdrant.
+
+Recall@10 [95% CI] / MRR:
+
+| Config | Gold doc given: Recall@10 | MRR | Open corpus: Recall@10 | MRR |
+|---|---|---|---|---|
+| B1 BM25 · flat | 0.413 [0.302, 0.532] | 0.275 | 0.349 [0.238, 0.460] | 0.184 |
+| B2 dense · flat | **0.571** [0.452, 0.690] | 0.323 | **0.500** [0.381, 0.619] | 0.267 |
+| B3 BM25 · layout | 0.405 [0.294, 0.524] | 0.275 | 0.294 [0.183, 0.405] | 0.185 |
+| B4 hybrid (RRF) · layout | 0.516 [0.397, 0.635] | 0.287 | 0.444 [0.325, 0.563] | 0.224 |
+| dense · layout (ablation; QA default) | 0.563 [0.437, 0.683] | **0.337** | 0.444 [0.325, 0.571] | 0.266 |
+
+What the evidence supports, and what it does not:
+1. **Layout-aware chunking alone did not improve retrieval** (B3 vs B1: Δ Recall@10 −0.008 with the
+   gold document given; −0.056 in the open corpus, p = 0.22). Every gold page is covered by at least
+   one chunk in both chunk sets (80/80), so misses are ranking failures, not parsing gaps. The benefit
+   of layout chunks in this milestone is *evidence quality*: units, period columns, row labels and
+   exact block bboxes for citations and calculations. It is not recall.
+2. **Dense retrieval accounts for the gains.** B2 vs B1 Recall@10 is +0.159 (uncorrected p = 0.029)
+   with the gold document given and +0.151 (p = 0.057) in the open corpus. B4 vs B3 open-corpus
+   Recall@10 is +0.151 (p = 0.0023).
+3. **Hybrid RRF fusion did not beat dense alone** (B4 vs B2: −0.056 Recall@10, p = 0.51). The QA
+   default is therefore *dense over layout chunks*. It has the best point estimates among layout
+   configurations, particularly on numerical items (Recall@10 0.435 vs 0.261 for B4, n = 23). It falls
+   back to BM25 if the embedder is unavailable.
+4. **None of these differences survive Holm–Bonferroni correction** over the 30 reported comparisons
+   (smallest adjusted p = 0.069). With 63 queries they are directional evidence, not established
+   improvements.
+5. **Weak spots:**
+   - Numerical questions: Recall@10 0.15 (BM25) to 0.44 (dense · layout).
+   - Multi-page evidence: 0.11 for every configuration.
+   - The static WordLlama embedder is worse than MiniLM everywhere (e.g. B2 0.381 vs 0.571).
+6. **Reranking** was not evaluated (no reranker weights reachable), so no reranking claim is made.
+7. **Latency** is in-process with embedded Qdrant, so treat it as order-of-magnitude only: it varied
+   up to ~1.7× between two runs of identical code (B4 p50 168 vs 288 ms). Operating cost of retrieval
+   is local CPU only, with no API calls.
+
+**Chunker change log.** `layout-v1` (results archived in `results/archive/layout-v1/`) let PyMuPDF's
+row-0 header flag turn data rows into column labels. In one real Boeing table, values were serialised
+under other values ("Defense, Space & Security: $25,867 = 23,162"). The defect was found by
+inspecting `sample_retrievals.md`, not by tuning on the metrics. `layout-v2` accepts only header rows
+without non-year numbers, and recovers periods from the text above a table only on an exact count
+match. Retrieval metrics are essentially unchanged by the fix (B4 Recall@10 0.548 → 0.516, within CI);
+the fix is a correctness fix.
+
+## QA results
+
+**Not run.** No LLM credentials were available in this environment, so answer correctness, numerical
+accuracy, citation precision/recall, abstention quality, LLM latency and token cost are **not
+measured**, and no placeholder figures are given. To run:
+
+```bash
+FINAUDIT_LLM_PROVIDER=anthropic FINAUDIT_LLM_MODEL=claude-opus-5-5 FINAUDIT_LLM_API_KEY=... \
+FINAUDIT_LLM_PRICE_INPUT_PER_MTOK=4 FINAUDIT_LLM_PRICE_OUTPUT_PER_MTOK=20 \
+PYTHONPATH=. python eval/run_qa_eval.py
+```
+
+Free-text answers then need human or LLM-judge review of `results/raw/qa_runs.jsonl`. Token F1 alone
+is not a correctness measure.
