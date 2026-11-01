@@ -1,11 +1,14 @@
 import type {
+  ChartInterpretation,
   ChunkRef,
   DocumentPage,
   Evidence,
   FinDocument,
+  FinancialFact,
   Job,
   QARequest,
   QAResponse,
+  RetrieveResponse,
   TrendPoint,
   UploadMeta,
 } from "./types";
@@ -158,6 +161,29 @@ export const httpService = {
       QA_TIMEOUT_MS,
     ),
   getCitation: (chunkId: string) => req<ChunkRef>(`/citations/${encodeURIComponent(chunkId)}`),
+  getFacts: (id: string) => req<FinancialFact[]>(`/documents/${encodeURIComponent(id)}/facts`),
+  getFigureInterpretation: (documentId: string, blockId: string) =>
+    req<ChartInterpretation>(
+      `/documents/${encodeURIComponent(documentId)}/figures/${encodeURIComponent(blockId)}/interpretation`,
+    ),
+  interpretFigure: (documentId: string, blockId: string) =>
+    req<ChartInterpretation>(
+      `/documents/${encodeURIComponent(documentId)}/figures/${encodeURIComponent(blockId)}/interpret`,
+      { method: "POST" },
+      QA_TIMEOUT_MS,
+    ),
+  searchEvidence: (query: string, documentIds: string[]) =>
+    req<RetrieveResponse>("/retrieve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        documentIds: documentIds.length > 0 ? documentIds : null,
+        method: "hybrid",
+        chunkSet: "layout",
+        k: 5,
+      }),
+    }),
   deleteDocument: (id: string) =>
     req<void>(`/documents/${encodeURIComponent(id)}`, { method: "DELETE" }),
   reprocessDocument: (id: string) =>

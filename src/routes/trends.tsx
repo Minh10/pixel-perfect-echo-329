@@ -1,49 +1,108 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { DEFAULT_DOCUMENT_ID, IS_DEMO, trendsQuery } from "@/lib/api/service";
-import { DemoBadge, PageHeader, PageSkeleton } from "@/components/app/states";
+import { Button } from "@/components/ui/button";
+import { DemoBadge, EmptyState, PageHeader, PageSkeleton } from "@/components/app/states";
+import { compareReports } from "@/lib/fact-comparison";
+import { DEFAULT_DOCUMENT_ID, IS_DEMO, api, documentsQuery, trendsQuery } from "@/lib/api/service";
 
 export const Route = createFileRoute("/trends")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(trendsQuery(DEFAULT_DOCUMENT_ID)),
+  loader: ({ context }) =>
+    IS_DEMO
+      ? context.queryClient.ensureQueryData(trendsQuery(DEFAULT_DOCUMENT_ID))
+      : context.queryClient.ensureQueryData(documentsQuery()),
   head: () => ({
     meta: [
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
       { title: "Trends — FINAUDIT AI" },
       {
         name: "description",
-        content: "Multi-period revenue and profitability trends from parsed reports.",
-      },
-      { property: "og:title", content: "Trends — FINAUDIT AI" },
-      {
-        property: "og:description",
-        content: "Multi-period revenue and profitability trends from parsed reports.",
+        content: "Compare reported financial values across processed reports.",
       },
     ],
   }),
   pendingComponent: PageSkeleton,
-  component: Trends,
+  component: () => (IS_DEMO || !api.getFacts ? <DemoTrends /> : <LiveComparison />),
 });
 
-const config = {
+const demoConfig = {
   revenue: { label: "Revenue", color: "var(--chart-1)" },
   operatingIncome: { label: "Operating profit", color: "var(--chart-2)" },
   netIncome: { label: "Net profit", color: "var(--chart-3)" },
-  margin: { label: "Operating margin", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
-function Trends() {
+function DemoTrends() {
   const { data } = useSuspenseQuery(trendsQuery(DEFAULT_DOCUMENT_ID));
-  const withMargin = data.map((d) => ({
-    ...d,
-    margin: +((d.operatingIncome / d.revenue) * 100).toFixed(1),
+  return (
+    <div className="page-layout space-y-6">
+      <PageHeader
+        eyebrow="Analysis"
+        title="Trends"
+        description="Northwind Holdings (demo issuer) · five-year series, £ millions."
+        actions={<DemoBadge />}
+      />
+      <section className="rounded-md border bg-card p-5">
+        <ChartContainer config={demoConfig} className="h-72 w-full">
+          <BarChart data={data}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="period" tickLine={false} axisLine={false} />
+            <YAxis tickLine={false} axisLine={false} width={44} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="revenue" fill="var(--color-revenue)" radius={1} />
+            <Bar dataKey="operatingIncome" fill="var(--color-operatingIncome)" radius={1} />
+            <Bar dataKey="netIncome" fill="var(--color-netIncome)" radius={1} />
+          </BarChart>
+        </ChartContainer>
+      </section>
+    </div>
+  );
+}
+
+const liveConfig = {
+  value: { label: "Reported value", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+function LiveComparison() {
+  const navigate = useNavigate();
+  const documents = useSuspenseQuery(documentsQuery());
+  const ready = documents.data.filter((doc) => doc.status === "ready");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [metric, setMetric] = useState("Revenue");
+  const factQueries = useQueries({
+    queries: selected.map((id) => ({
+      queryKey: ["facts", id],
+      queryFn: () => api.getFacts!(id),
+    })),
+  });
+  const labels = [
+    ...new Set(
+      factQueries.flatMap((query) =>
+        (query.data ?? [])
+          .filter((fact) => fact.valueStatus === "parsed")
+          .map((fact) => fact.rowLabel),
+      ),
+    ),
+  ].sort();
+  const activeMetric = labels.includes(metric) ? metric : (labels[0] ?? "");
+  const comparison = compareReports(
+    selected.map((id, index) => ({
+      documentId: id,
+      title: ready.find((doc) => doc.id === id)?.title ?? id,
+      facts: factQueries[index]?.data ?? [],
+    })),
+    activeMetric,
+  );
+  const factsLoading = factQueries.some((query) => query.isPending);
+  const reportCount = new Set(comparison.points.map((point) => point.documentId)).size;
+  const chartData = comparison.points.map((point) => ({
+    ...point,
+    axis: `${point.periodLabel} · ${point.documentTitle}`,
   }));
 
   return (
@@ -51,72 +110,101 @@ function Trends() {
       <PageHeader
         eyebrow="Analysis"
         title="Trends"
-        description={
-          IS_DEMO
-            ? "Northwind Holdings (demo issuer) · five-year series, £ millions."
-            : "Demo series only. Uploaded PDFs are not turned into multi-period trends."
-        }
-        actions={<DemoBadge />}
+        description="Compare one reported metric across processed reports. Values come only from parsed table facts."
       />
-      <div className="grid gap-4 lg:grid-cols-5">
-        <section className="rounded-md border bg-card p-5 lg:col-span-3">
-          <p className="eyebrow mb-4">Revenue and profit</p>
-          <ChartContainer config={config} className="h-72 w-full">
-            <BarChart data={data} barGap={2}>
+      <fieldset className="space-y-2">
+        <legend className="text-xs text-muted-foreground">
+          Choose at least two processed reports.
+        </legend>
+        {ready.map((doc) => (
+          <label key={doc.id} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={selected.includes(doc.id)}
+              onChange={() =>
+                setSelected((current) =>
+                  current.includes(doc.id)
+                    ? current.filter((id) => id !== doc.id)
+                    : [...current, doc.id],
+                )
+              }
+            />
+            {doc.title}
+          </label>
+        ))}
+      </fieldset>
+      <label className="block max-w-md text-sm">
+        <span className="text-xs text-muted-foreground">Shared metric</span>
+        <select
+          className="mt-1 h-9 w-full rounded-md border bg-transparent px-3"
+          value={activeMetric}
+          onChange={(event) => setMetric(event.target.value)}
+        >
+          {labels.length === 0 && <option value="">Select reports to load metrics</option>}
+          {labels.map((label) => (
+            <option key={label} value={label}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      {selected.length < 2 && (
+        <EmptyState
+          title="Two reports are required"
+          description="A single report is not shown as a trend."
+        />
+      )}
+      {selected.length >= 2 && factsLoading && (
+        <p className="text-sm text-muted-foreground">Loading reported values…</p>
+      )}
+      {selected.length >= 2 && !factsLoading && reportCount < 2 && (
+        <EmptyState
+          title="No aligned values"
+          description={
+            comparison.note ||
+            "The metric is not present in two reports with the same unit, currency, and scope."
+          }
+        />
+      )}
+      {selected.length >= 2 && !factsLoading && reportCount >= 2 && (
+        <section className="space-y-4 rounded-md border bg-card p-5">
+          <p className="eyebrow">Comparison, not a comprehensive trend</p>
+          <p className="text-sm text-muted-foreground">{comparison.note}</p>
+          <ChartContainer config={liveConfig} className="h-72 w-full">
+            <BarChart data={chartData}>
               <CartesianGrid vertical={false} />
-              <XAxis dataKey="period" tickLine={false} axisLine={false} className="font-mono" />
-              <YAxis tickLine={false} axisLine={false} width={44} />
+              <XAxis dataKey="axis" tickLine={false} axisLine={false} interval={0} />
+              <YAxis tickLine={false} axisLine={false} width={48} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="revenue" fill="var(--color-revenue)" radius={1} />
-              <Bar dataKey="operatingIncome" fill="var(--color-operatingIncome)" radius={1} />
-              <Bar dataKey="netIncome" fill="var(--color-netIncome)" radius={1} />
+              <Bar dataKey="value" fill="var(--color-value)" radius={1} />
             </BarChart>
           </ChartContainer>
-        </section>
-        <section className="rounded-md border bg-card p-5 lg:col-span-2">
-          <p className="eyebrow mb-4">Operating margin (%)</p>
-          <ChartContainer config={config} className="h-72 w-full">
-            <LineChart data={withMargin}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="period" tickLine={false} axisLine={false} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                width={32}
-                domain={["dataMin - 1", "dataMax + 1"]}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line dataKey="margin" stroke="var(--color-margin)" strokeWidth={2} dot={{ r: 3 }} />
-            </LineChart>
-          </ChartContainer>
-        </section>
-      </div>
-      <div className="overflow-x-auto rounded-md border bg-card">
-        <table className="w-full text-sm tabular">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="eyebrow p-3 text-left">£m</th>
-              {data.map((d) => (
-                <th key={d.period} className="eyebrow p-3 text-right">
-                  {d.period}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(["revenue", "operatingIncome", "netIncome"] as const).map((k) => (
-              <tr key={k} className="border-t">
-                <td className="p-3">{config[k].label}</td>
-                {data.map((d) => (
-                  <td key={d.period} className="p-3 text-right font-mono">
-                    {d[k].toLocaleString()}
-                  </td>
-                ))}
-              </tr>
+          <ul className="space-y-2 text-sm">
+            {comparison.points.map((point) => (
+              <li key={point.factId}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    navigate({
+                      to: "/intelligence",
+                      search: {
+                        doc: point.documentId,
+                        page: point.page,
+                        ev: point.tableEvidenceId,
+                      },
+                    })
+                  }
+                >
+                  {point.documentTitle} · {point.periodLabel} · {point.displayValue}{" "}
+                  {point.currency ?? ""} {point.scale} · p. {point.page}
+                </Button>
+              </li>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

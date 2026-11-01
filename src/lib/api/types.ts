@@ -358,3 +358,43 @@ export interface FinancialFact {
   parser: string;
   parserVersion: string;
 }
+
+export interface ChartPoint {
+  series: string | null;
+  label: string;
+  value: string;
+  unit: string | null;
+  valueKind: "visual_estimate";
+  printedOnChart: boolean;
+}
+
+export interface TableCheck {
+  label: string;
+  estimate: string;
+  tableValue: string | null;
+  tableChunkId: string | null;
+  relativeDifference: number | null;
+  status: "consistent" | "conflict" | "no_table_evidence";
+}
+
+export interface ChartInterpretation {
+  documentId: string;
+  blockId: string;
+  chartType: string | null;
+  title: string | null;
+  points: ChartPoint[];
+  tableChecks: TableCheck[];
+  cropUrl: string;
+  provider: string;
+  model: string;
+  createdAt: string;
+  caveat: string;
+}
+
+export interface RetrieveResponse {
+  query: string;
+  method: string;
+  effectiveMethod: string;
+  warnings: string[];
+  results: { rank: number; score: number; chunk: ChunkRef }[];
+}

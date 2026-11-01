@@ -5,13 +5,16 @@ import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";
 import { API_URL, httpService } from "./http-service";
 import type {
+  ChartInterpretation,
   ChunkRef,
   DocumentPage,
   Evidence,
   FinDocument,
+  FinancialFact,
   Job,
   QARequest,
   QAResponse,
+  RetrieveResponse,
   TrendPoint,
   UploadMeta,
 } from "./types";
@@ -30,6 +33,10 @@ export interface FinAuditService {
   getJob?(jobId: string): Promise<Job>;
   ask?(body: QARequest): Promise<QAResponse>;
   getCitation?(chunkId: string): Promise<ChunkRef>;
+  getFacts?(id: string): Promise<FinancialFact[]>;
+  getFigureInterpretation?(documentId: string, blockId: string): Promise<ChartInterpretation>;
+  interpretFigure?(documentId: string, blockId: string): Promise<ChartInterpretation>;
+  searchEvidence?(query: string, documentIds: string[]): Promise<RetrieveResponse>;
 }
 
 const delay = <T>(value: T, ms = 350) => new Promise<T>((r) => setTimeout(() => r(value), ms));
@@ -74,8 +81,7 @@ export const pagesQuery = (id: string) =>
 export const evidenceQuery = (id: string) =>
   queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id) });
 
-// Multi-period trends are not produced by the ingestion API. The Trends page
-// keeps calling the labelled demo series explicitly.
+// Demo mode keeps the labelled fictional series. Live mode does not call this.
 export const trendsQuery = (id: string | null) =>
   queryOptions({
     queryKey: ["trends", "demo", id ?? "none"],
