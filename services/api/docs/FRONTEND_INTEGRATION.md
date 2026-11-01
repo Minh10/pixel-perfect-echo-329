@@ -230,7 +230,8 @@ and the Trends page keeps its `DemoBadge`:
 - `src/routes/index.tsx`: the "Evidence regions" stat uses `evidenceQuery(DEFAULT_DOCUMENT_ID)`. In
   live mode, either drop the stat or sum `getEvidence` over ready documents. Show `DemoBadge` only
   when `IS_DEMO`.
-- `src/components/app/app-header.tsx`: render `<DemoBadge />` only when `IS_DEMO`.
+- `src/components/app/app-header.tsx` and `src/components/app/overview-panels.tsx`: render
+  `<DemoBadge />` only when `IS_DEMO`.
 - `src/routes/documents.tsx`: enable the Upload button when `!IS_DEMO` (Step 7).
 
 ## Step 6: Workspace rendering of real parser output
