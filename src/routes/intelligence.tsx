@@ -52,7 +52,7 @@ export const Route = createFileRoute("/intelligence")({
     ],
   }),
   pendingComponent: WorkspaceSkeleton,
-  errorComponent: ({ error }) => {
+  errorComponent: function WorkspaceError({ error }) {
     const router = useRouter();
     return (
       <div className="p-8">

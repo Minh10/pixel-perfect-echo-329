@@ -9,7 +9,7 @@ export function DemoBadge({ className }: { className?: string }) {
     <span
       title="Values shown are fictional demo data, not verified financial results."
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-sm bg-demo px-2 py-0.5 text-[10px] font-semibold text-demo-foreground",
+        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm bg-demo px-2 py-0.5 text-[10px] font-semibold text-demo-foreground",
         className,
       )}
     >
