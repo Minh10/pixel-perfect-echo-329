@@ -30,7 +30,13 @@ ENV FINAUDIT_DOCLING_ARTIFACTS_PATH=/opt/docling-models
 RUN mkdir -p "$FINAUDIT_DOCLING_ARTIFACTS_PATH" && if [ "$DOCLING_PRELOAD_MODELS" = "true" ]; then \
       docling-tools models download layout tableformer picture_classifier -o "$FINAUDIT_DOCLING_ARTIFACTS_PATH"; fi
 
+# Default local embedding model (all-MiniLM-L6-v2 ONNX, checksum-pinned) for dense retrieval.
+ARG PRELOAD_EMBEDDER=true
+ENV FINAUDIT_EMBEDDER_MODEL_PATH=/opt/models/all-MiniLM-L6-v2
+RUN if [ "$PRELOAD_EMBEDDER" = "true" ]; then python -m app.retrieval.fetch_models --dest "$FINAUDIT_EMBEDDER_MODEL_PATH"; fi
+
 COPY tests ./tests
+COPY eval ./eval
 
 RUN useradd --create-home --uid 1000 finaudit && mkdir -p /data && chown finaudit /data
 USER finaudit

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "FINAUDIT AI API",
-    "description": "Financial PDF ingestion, layout-aware parsing and evidence provenance. No LLM auditing: all outputs are parser outputs with provenance.",
+    "description": "Financial PDF ingestion, layout-aware parsing, evidence provenance, layout-aware retrieval and evidence-grounded QA. Answers are validated against cited evidence; this is not financial auditing.",
     "version": "0.1.0"
   },
   "paths": {
@@ -721,10 +721,427 @@
           }
         }
       }
+    },
+    "/api/v1/documents/{doc_id}/index": {
+      "post": {
+        "tags": [
+          "indexing"
+        ],
+        "summary": "Reindex Document",
+        "description": "Queue (re-)indexing.  Deterministic: chunk ids are stable and previous chunks/vectors are replaced.",
+        "operationId": "reindex_document_api_v1_documents__doc_id__index_post",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "indexing"
+        ],
+        "summary": "Document Index Status",
+        "operationId": "document_index_status_api_v1_documents__doc_id__index_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIndexStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/index/status": {
+      "get": {
+        "tags": [
+          "indexing"
+        ],
+        "summary": "Index Status",
+        "description": "Configuration and health of the retrieval/QA stack.  Never returns secrets.",
+        "operationId": "index_status_api_v1_index_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Index Status Api V1 Index Status Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/retrieve": {
+      "post": {
+        "tags": [
+          "retrieval"
+        ],
+        "summary": "Retrieve",
+        "operationId": "retrieve_api_v1_retrieve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/citations/{chunk_id}": {
+      "get": {
+        "tags": [
+          "retrieval"
+        ],
+        "summary": "Citation",
+        "description": "Full detail for a cited evidence chunk: text, section, exact page/block/bbox regions, image URLs.",
+        "operationId": "citation_api_v1_citations__chunk_id__get",
+        "parameters": [
+          {
+            "name": "chunk_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chunk Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChunkRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa": {
+      "post": {
+        "tags": [
+          "qa"
+        ],
+        "summary": "Qa",
+        "operationId": "qa_api_v1_qa_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QARequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QAResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No LLM provider configured or reachable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/figures/{block_id}/interpretation": {
+      "get": {
+        "tags": [
+          "visual"
+        ],
+        "summary": "Get Chart Interpretation",
+        "operationId": "get_chart_interpretation_api_v1_documents__doc_id__figures__block_id__interpretation_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Block Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChartInterpretation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/figures/{block_id}/interpret": {
+      "post": {
+        "tags": [
+          "visual"
+        ],
+        "summary": "Interpret Figure",
+        "description": "Read a chart with the configured vision-language model.  All values are visual estimates and are\ncross-checked against the document's table evidence.",
+        "operationId": "interpret_figure_api_v1_documents__doc_id__figures__block_id__interpret_post",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Block Id"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Refresh"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChartInterpretation"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No vision-capable LLM provider configured"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Abstention": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "no_evidence",
+              "insufficient_evidence",
+              "validation_failed",
+              "model_refused"
+            ],
+            "title": "Reason"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason",
+          "detail"
+        ],
+        "title": "Abstention"
+      },
+      "AnswerValue": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Exact decimal result from the deterministic calculator or a quoted operand"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "valueKind": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "calculated",
+              "visual_estimate"
+            ],
+            "title": "Valuekind"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "operand or calculation id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "unit",
+          "valueKind",
+          "source"
+        ],
+        "title": "AnswerValue"
+      },
       "ApiError": {
         "properties": {
           "code": {
@@ -850,6 +1267,481 @@
           "file"
         ],
         "title": "Body_upload_document_api_v1_documents_post"
+      },
+      "Calculation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "op": {
+            "type": "string",
+            "title": "Op"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "inputs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "result": {
+            "type": "string",
+            "title": "Result"
+          },
+          "scale": {
+            "type": "string",
+            "title": "Scale"
+          },
+          "valueKind": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "visual_estimate"
+            ],
+            "title": "Valuekind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "op",
+          "description",
+          "inputs",
+          "result",
+          "scale",
+          "valueKind"
+        ],
+        "title": "Calculation"
+      },
+      "ChartInterpretation": {
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "blockId": {
+            "type": "string",
+            "title": "Blockid"
+          },
+          "chartType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charttype"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/ChartPoint"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "tableChecks": {
+            "items": {
+              "$ref": "#/components/schemas/TableCheck"
+            },
+            "type": "array",
+            "title": "Tablechecks"
+          },
+          "cropUrl": {
+            "type": "string",
+            "title": "Cropurl"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "caveat": {
+            "type": "string",
+            "title": "Caveat",
+            "default": "Values are visual estimates read from the chart image by a vision-language model, not reported figures."
+          }
+        },
+        "type": "object",
+        "required": [
+          "documentId",
+          "blockId",
+          "chartType",
+          "title",
+          "points",
+          "tableChecks",
+          "cropUrl",
+          "provider",
+          "model",
+          "createdAt"
+        ],
+        "title": "ChartInterpretation"
+      },
+      "ChartPoint": {
+        "properties": {
+          "series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Value as read from the image (string, verbatim number)"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "valueKind": {
+            "type": "string",
+            "const": "visual_estimate",
+            "title": "Valuekind",
+            "default": "visual_estimate"
+          },
+          "printedOnChart": {
+            "type": "boolean",
+            "title": "Printedonchart",
+            "description": "True if the number is printed as a data label; still not authoritative"
+          }
+        },
+        "type": "object",
+        "required": [
+          "series",
+          "label",
+          "value",
+          "unit",
+          "printedOnChart"
+        ],
+        "title": "ChartPoint"
+      },
+      "ChunkRef": {
+        "properties": {
+          "chunkId": {
+            "type": "string",
+            "title": "Chunkid"
+          },
+          "chunkSet": {
+            "type": "string",
+            "enum": [
+              "layout",
+              "flat"
+            ],
+            "title": "Chunkset"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "text",
+              "table",
+              "figure",
+              "window"
+            ],
+            "title": "Kind"
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "documentTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documenttitle"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "pages": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Pages"
+          },
+          "sectionPath": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sectionpath"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/CitedRegion"
+            },
+            "type": "array",
+            "title": "Regions"
+          },
+          "table": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table",
+            "description": "caption, title, units, columns, rowRange for table chunks"
+          },
+          "figure": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Figure",
+            "description": "caption, classification, imageUrl for figure chunks"
+          },
+          "pageImageUrl": {
+            "type": "string",
+            "title": "Pageimageurl"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "title": "Sourcesha256"
+          },
+          "parser": {
+            "type": "string",
+            "title": "Parser"
+          },
+          "parserVersion": {
+            "type": "string",
+            "title": "Parserversion"
+          },
+          "indexVersion": {
+            "type": "string",
+            "title": "Indexversion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chunkId",
+          "chunkSet",
+          "kind",
+          "documentId",
+          "pages",
+          "sectionPath",
+          "content",
+          "regions",
+          "pageImageUrl",
+          "sourceSha256",
+          "parser",
+          "parserVersion",
+          "indexVersion"
+        ],
+        "title": "ChunkRef",
+        "description": "A retrievable evidence chunk with exact source locations."
+      },
+      "Citation": {
+        "properties": {
+          "evidenceId": {
+            "type": "string",
+            "title": "Evidenceid",
+            "description": "Label used in this answer, e.g. 'E2'"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          },
+          "evidenceKind": {
+            "type": "string",
+            "enum": [
+              "text",
+              "table",
+              "figure",
+              "window"
+            ],
+            "title": "Evidencekind"
+          },
+          "chunk": {
+            "$ref": "#/components/schemas/ChunkRef"
+          }
+        },
+        "type": "object",
+        "required": [
+          "evidenceId",
+          "quote",
+          "evidenceKind",
+          "chunk"
+        ],
+        "title": "Citation"
+      },
+      "CitedRegion": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "blockId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockid"
+          },
+          "bbox": {
+            "$ref": "#/components/schemas/BBox"
+          },
+          "bboxNormalized": {
+            "$ref": "#/components/schemas/NormalizedBBox"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "workspaceEvidenceId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspaceevidenceid",
+            "description": "Matching Evidence.id in GET /documents/{id}/evidence ('ev-{blockId}'), if any"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "bbox",
+          "bboxNormalized"
+        ],
+        "title": "CitedRegion"
+      },
+      "DocumentIndexStatus": {
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "indexed": {
+            "type": "boolean",
+            "title": "Indexed"
+          },
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/IndexRun"
+            },
+            "type": "array",
+            "title": "Runs"
+          },
+          "latestJob": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latestjob"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documentId",
+          "indexed",
+          "runs"
+        ],
+        "title": "DocumentIndexStatus"
       },
       "DocumentPage": {
         "properties": {
@@ -1287,6 +2179,98 @@
         ],
         "title": "Health"
       },
+      "IndexRun": {
+        "properties": {
+          "chunkSet": {
+            "type": "string",
+            "enum": [
+              "layout",
+              "flat"
+            ],
+            "title": "Chunkset"
+          },
+          "indexVersion": {
+            "type": "string",
+            "title": "Indexversion"
+          },
+          "embedderId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedderid"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "chunkCount": {
+            "type": "integer",
+            "title": "Chunkcount"
+          },
+          "vectorCount": {
+            "type": "integer",
+            "title": "Vectorcount"
+          },
+          "denseStatus": {
+            "type": "string",
+            "title": "Densestatus"
+          },
+          "denseError": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Denseerror"
+          },
+          "parseJobId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parsejobid"
+          },
+          "seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chunkSet",
+          "indexVersion",
+          "embedderId",
+          "status",
+          "chunkCount",
+          "vectorCount",
+          "denseStatus",
+          "updatedAt"
+        ],
+        "title": "IndexRun"
+      },
       "Job": {
         "properties": {
           "id": {
@@ -1296,6 +2280,15 @@
           "documentId": {
             "type": "string",
             "title": "Documentid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "parse",
+              "index"
+            ],
+            "title": "Kind",
+            "default": "parse"
           },
           "state": {
             "type": "string",
@@ -1315,6 +2308,7 @@
               "parsing",
               "assembling",
               "persisting",
+              "indexing",
               "done"
             ],
             "title": "Stage"
@@ -1438,6 +2432,64 @@
           "height"
         ],
         "title": "NormalizedBBox"
+      },
+      "Operand": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "quote": {
+            "type": "string",
+            "title": "Quote"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "evidenceId": {
+            "type": "string",
+            "title": "Evidenceid"
+          },
+          "scale": {
+            "type": "string",
+            "title": "Scale"
+          },
+          "valueKind": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "visual_estimate"
+            ],
+            "title": "Valuekind"
+          },
+          "evidenceKind": {
+            "type": "string",
+            "enum": [
+              "text",
+              "table",
+              "figure",
+              "window"
+            ],
+            "title": "Evidencekind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "value",
+          "quote",
+          "label",
+          "evidenceId",
+          "scale",
+          "valueKind",
+          "evidenceKind"
+        ],
+        "title": "Operand"
       },
       "PageBlock": {
         "properties": {
@@ -1730,6 +2782,415 @@
         "title": "Provenance",
         "description": "Where a block came from: enough to re-locate it in the original PDF bytes."
       },
+      "QARequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Question"
+          },
+          "documentIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documentids",
+            "description": "Restrict to these documents; null = route automatically"
+          },
+          "topK": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topk"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bm25",
+                  "dense",
+                  "hybrid"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "chunkSet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "layout",
+                  "flat"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunkset"
+          },
+          "includeFigures": {
+            "type": "boolean",
+            "title": "Includefigures",
+            "description": "Attach chart interpretations (visual estimates) when available",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "QARequest"
+      },
+      "QAResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "abstained"
+            ],
+            "title": "Status"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnswerValue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "operands": {
+            "items": {
+              "$ref": "#/components/schemas/Operand"
+            },
+            "type": "array",
+            "title": "Operands"
+          },
+          "calculations": {
+            "items": {
+              "$ref": "#/components/schemas/Calculation"
+            },
+            "type": "array",
+            "title": "Calculations"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "abstention": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Abstention"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "documentsConsidered": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Documentsconsidered"
+          },
+          "retrieved": {
+            "items": {
+              "$ref": "#/components/schemas/RankedEvidence"
+            },
+            "type": "array",
+            "title": "Retrieved"
+          },
+          "validation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          },
+          "timingsMs": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timingsms"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": "Answers are generated from retrieved evidence and validated deterministically; they are not audited facts."
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "question",
+          "answer",
+          "value",
+          "operands",
+          "calculations",
+          "citations",
+          "abstention",
+          "documentsConsidered",
+          "retrieved",
+          "validation",
+          "usage",
+          "timingsMs",
+          "warnings"
+        ],
+        "title": "QAResponse"
+      },
+      "RankedEvidence": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Fusion/method score used for ranking (not a probability)"
+          },
+          "methodScores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Methodscores"
+          },
+          "methodRanks": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Methodranks"
+          },
+          "rerankScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rerankscore"
+          },
+          "chunk": {
+            "$ref": "#/components/schemas/ChunkRef"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "score",
+          "methodScores",
+          "methodRanks",
+          "chunk"
+        ],
+        "title": "RankedEvidence"
+      },
+      "RetrieveRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 2,
+            "title": "Query"
+          },
+          "documentIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documentids",
+            "description": "Restrict to these documents; null = all"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "bm25",
+              "dense",
+              "hybrid"
+            ],
+            "title": "Method",
+            "default": "hybrid"
+          },
+          "chunkSet": {
+            "type": "string",
+            "enum": [
+              "layout",
+              "flat"
+            ],
+            "title": "Chunkset",
+            "default": "layout"
+          },
+          "k": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "K",
+            "default": 10
+          },
+          "rerank": {
+            "type": "boolean",
+            "title": "Rerank",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "RetrieveRequest"
+      },
+      "RetrieveResponse": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "bm25",
+              "dense",
+              "hybrid"
+            ],
+            "title": "Method"
+          },
+          "effectiveMethod": {
+            "type": "string",
+            "title": "Effectivemethod"
+          },
+          "chunkSet": {
+            "type": "string",
+            "enum": [
+              "layout",
+              "flat"
+            ],
+            "title": "Chunkset"
+          },
+          "embedderId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedderid"
+          },
+          "reranker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reranker"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "timingsMs": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timingsms"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/RankedEvidence"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "method",
+          "effectiveMethod",
+          "chunkSet",
+          "embedderId",
+          "reranker",
+          "warnings",
+          "timingsMs",
+          "results"
+        ],
+        "title": "RetrieveResponse"
+      },
       "TableCell": {
         "properties": {
           "row": {
@@ -1782,6 +3243,70 @@
           "text"
         ],
         "title": "TableCell"
+      },
+      "TableCheck": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "estimate": {
+            "type": "string",
+            "title": "Estimate"
+          },
+          "tableValue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tablevalue"
+          },
+          "tableChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tablechunkid"
+          },
+          "relativeDifference": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relativedifference"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "consistent",
+              "conflict",
+              "no_table_evidence"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "estimate",
+          "tableValue",
+          "tableChunkId",
+          "relativeDifference",
+          "status"
+        ],
+        "title": "TableCheck"
       },
       "TableData": {
         "properties": {
@@ -1868,6 +3393,79 @@
         ],
         "title": "UploadResponse"
       },
+      "Usage": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "inputTokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inputtokens"
+          },
+          "outputTokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtokens"
+          },
+          "llmCalls": {
+            "type": "integer",
+            "title": "Llmcalls"
+          },
+          "costUsd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Costusd",
+            "description": "Only when prices are configured; never estimated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "model",
+          "inputTokens",
+          "outputTokens",
+          "llmCalls"
+        ],
+        "title": "Usage"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -1907,6 +3505,33 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "ValidationReport": {
+        "properties": {
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "repaired": {
+            "type": "boolean",
+            "title": "Repaired",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "passed",
+          "checks"
+        ],
+        "title": "ValidationReport"
       }
     }
   }

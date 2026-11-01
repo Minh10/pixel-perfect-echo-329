@@ -1,14 +1,17 @@
 # FINAUDIT AI — Backend API (`services/api`)
 
-FastAPI service for **financial PDF ingestion, layout-aware parsing and evidence provenance**.
-It is independent of the Lovable/TanStack frontend in the repository root and implements the
-contract behind `src/lib/api/service.ts` (`FinAuditService`).
+FastAPI service for **financial PDF ingestion, layout-aware parsing, evidence provenance, layout-aware
+retrieval and evidence-grounded QA**. It is independent of the Lovable/TanStack frontend in the repository
+root and implements the contract behind `src/lib/api/service.ts` (`FinAuditService`).
 
-Scope of this milestone: upload → validation → background parsing (Docling, PyMuPDF) → pages, blocks,
-tables, figure regions and evidence candidates, each with page/bbox provenance.
-**Out of scope:** LLM auditing, semantic metric extraction, RAG, multi-period trends. The API never
-returns invented values. `Evidence.extracted` is always `null`, and `confidence` is only set from a
-parser-reported score.
+- **Milestone 1:** upload → validation → background parsing (Docling, PyMuPDF) → pages, blocks, tables,
+  figure regions and evidence candidates, each with page/bbox provenance.
+- **Milestone 3:** layout-aware chunking and indexing (SQLite FTS5 + Qdrant), retrieval baselines
+  B1–B4, LLM question answering with deterministic validated calculations, citations and abstention,
+  and chart interpretation as visual estimates. Design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+  Benchmark and results: [`eval/README.md`](eval/README.md).
+- **Out of scope:** financial discrepancy auditing (next phase). The API never returns invented values
+  or confidence scores; `Evidence.extracted` stays `null`.
 
 ## Architecture
 
@@ -50,6 +53,19 @@ parser-reported score.
 | GET | `/api/v1/documents/{id}/blocks/{blockId}/image` | PNG crop of a block's bbox (figures, charts, tables) |
 | GET | `/api/v1/documents/{id}/source` | Original PDF (`X-Content-SHA256`) |
 | GET | `/api/v1/documents/{id}/export/docling` | Raw DoclingDocument JSON (404 if the document was not parsed by Docling) |
+
+### Milestone 3: indexing, retrieval, QA, visual
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/v1/documents/{id}/index` | Queue deterministic (re-)indexing (202 `Job`); 409 if one is active. Indexing also runs automatically after each parse (`FINAUDIT_AUTO_INDEX`) |
+| GET | `/api/v1/documents/{id}/index` | Index runs per chunk set (version, embedder, counts, dense status) + latest index job |
+| GET | `/api/v1/index/status` | Embedder / vector store / LLM availability and chunk counts (no secrets) |
+| POST | `/api/v1/retrieve` | `{query, documentIds?, method: bm25\|dense\|hybrid, chunkSet: layout\|flat, k, rerank}` → ranked evidence with page/block/bbox citations |
+| GET | `/api/v1/citations/{chunkId}` | Full cited chunk: text, section path, regions, table units/columns, image URLs, provenance |
+| POST | `/api/v1/qa` | `{question, documentIds?, topK?}` → answer or abstention, exact value, operands, calculations, citations, usage. Returns 503 `llm_unavailable` without a provider |
+| POST | `/api/v1/documents/{id}/figures/{blockId}/interpret` | VLM chart reading (all values `visual_estimate`) + table cross-check; cached |
+| GET | `/api/v1/documents/{id}/figures/{blockId}/interpretation` | Cached chart reading |
 
 Interactive docs are at `http://localhost:8000/docs` when the server is running.
 
@@ -103,6 +119,19 @@ python -m app.worker
 Run the API and the worker in separate terminals. Without Docling weights, set
 `FINAUDIT_PARSER=pymupdf` (or `auto`) so jobs do not fail with `parser_unavailable`.
 
+### Retrieval and QA prerequisites
+
+```bash
+python -m app.retrieval.fetch_models
+```
+
+This fetches the default embedder (all-MiniLM-L6-v2 ONNX, checksum-pinned) into `./models`.
+Without it, dense and hybrid retrieval degrade to BM25 and report it.
+
+For QA, set an LLM provider in `.env` (see `.env.example`): `FINAUDIT_LLM_PROVIDER`,
+`FINAUDIT_LLM_MODEL` and the key env var. With API and worker as separate native processes, run a
+Qdrant server and set `FINAUDIT_QDRANT_URL`. Embedded Qdrant mode allows only one process.
+
 ### Tests
 
 ```bash
@@ -146,13 +175,35 @@ The main ones are `FINAUDIT_PARSER`, `FINAUDIT_DATA_DIR`, `FINAUDIT_MAX_UPLOAD_M
 - No authentication or authorisation, and no per-tenant isolation yet.
 - OCR is off by default. Scanned pages are flagged (`hasTextLayer: false` plus a document warning)
   but yield no text until `FINAUDIT_DOCLING_DO_OCR=true`, which needs OCR model weights.
-- No chart *data* extraction. Charts are figure regions with crop images, plus Docling
-  classification when enabled.
-- PyMuPDF fallback: headings come from a font-size heuristic, and tables are found from ruling lines,
-  so borderless tables are usually missed. Every block's `provenance.method` states this.
+- Chart values exist only as VLM *visual estimates* (`/figures/{id}/interpret`), never as reported
+  figures. Without a configured vision-capable LLM, charts are figure regions with crops and captions.
+- PyMuPDF fallback: headings come from a font-size / bold+body-size heuristic, and tables are found
+  from ruling lines (`find_tables`), so borderless tables are often missed. Every block's
+  `provenance.method` states this. The Milestone 3 benchmark corpus was parsed with PyMuPDF because
+  Docling's model weights were unreachable in the development environment.
 - Evidence "disclosure" candidates are selected by a documented regex rule
   (`detection.rule`). They are not verified facts.
 - Pages with non-zero `/Rotate` are rendered correctly, but bbox alignment on rotated pages has not
   been verified with fixtures.
 - Re-processing replaces the previous parse; block IDs (`p{page}-b{nnn}`) are stable only for the
   same parser and options.
+
+### Milestone 3 (retrieval / QA)
+
+- **The QA pipeline has not been evaluated end to end.** No LLM credentials were available in the
+  development environment. Its validation and calculation logic is covered by tests with a scripted
+  test double, and `eval/run_qa_eval.py` is ready to run once a provider is configured.
+- Retrieval quality is modest: Recall@10 of 0.41–0.57 when the gold document is known (see
+  `eval/results/retrieval_report.md`). Numerical and multi-page questions are the weakest. After
+  multiple-comparison correction, differences between configurations are not significant on this
+  63-query benchmark.
+- Layout-aware chunking improved evidence structure, not recall. Hybrid fusion and reranking have not
+  shown measurable gains here. The reranker is pluggable but was
+  not evaluated (no weights reachable). ColPali-style visual retrieval was investigated but not
+  implemented (see `docs/ARCHITECTURE.md`).
+- Embedded Qdrant (no `FINAUDIT_QDRANT_URL`) allows a single process only. Qdrant server mode is
+  configured in Compose but was not exercised in the development environment.
+- Document routing matches issuer names and years from document metadata. Abbreviations that aren't
+  in the metadata (e.g. "AMEX") fall back to whole-corpus retrieval, with a warning.
+- Table period recovery is conservative: periods printed above a table are used only when their count
+  matches the value columns exactly. Otherwise values stay unlabelled (the title keeps the period text).

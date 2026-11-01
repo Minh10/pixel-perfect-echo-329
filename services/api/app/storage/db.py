@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     attempts          INTEGER NOT NULL DEFAULT 0,
     max_attempts      INTEGER NOT NULL,
     requested_parser  TEXT NOT NULL,
+    kind              TEXT NOT NULL DEFAULT 'parse',
     error_code        TEXT,
     error_message     TEXT,
     worker_id         TEXT,
@@ -81,6 +82,9 @@ class Repository:
         with self._conn() as c:
             c.execute("PRAGMA journal_mode=WAL")
             c.executescript(SCHEMA)
+            cols = {r[1] for r in c.execute("PRAGMA table_info(jobs)")}
+            if "kind" not in cols:  # migration from Milestone 1 databases
+                c.execute("ALTER TABLE jobs ADD COLUMN kind TEXT NOT NULL DEFAULT 'parse'")
 
     @contextmanager
     def _conn(self) -> Iterator[sqlite3.Connection]:
@@ -141,13 +145,33 @@ class Repository:
 
     # ------------------------------------------------------------------ jobs
     @staticmethod
-    def _insert_job(c: sqlite3.Connection, job_id: str, doc_id: str, parser: str, max_attempts: int, now: datetime) -> None:
+    def _insert_job(c: sqlite3.Connection, job_id: str, doc_id: str, parser: str, max_attempts: int, now: datetime,
+                    kind: str = "parse") -> None:
         c.execute(
             """INSERT INTO jobs (id, document_id, state, stage, progress, attempts, max_attempts,
-                   requested_parser, created_at)
-               VALUES (?, ?, 'queued', 'queued', 0, 0, ?, ?, ?)""",
-            (job_id, doc_id, max_attempts, parser, _iso(now)),
+                   requested_parser, created_at, kind)
+               VALUES (?, ?, 'queued', 'queued', 0, 0, ?, ?, ?, ?)""",
+            (job_id, doc_id, max_attempts, parser, _iso(now), kind),
         )
+
+    def enqueue_index_job(self, doc_id: str, max_attempts: int) -> dict:
+        """Queue an indexing job.  Does not change document status.  Raises ValueError if one is active."""
+        job_id = new_id("job")
+        with self._conn() as c:
+            c.execute("BEGIN IMMEDIATE")
+            if c.execute("SELECT 1 FROM jobs WHERE document_id=? AND kind='index' AND state IN ('queued','running')",
+                         (doc_id,)).fetchone():
+                c.execute("ROLLBACK")
+                raise ValueError("job_already_active")
+            self._insert_job(c, job_id, doc_id, "n/a", max_attempts, utcnow(), kind="index")
+            c.execute("COMMIT")
+        return self.get_job(job_id)  # type: ignore[return-value]
+
+    def latest_job(self, doc_id: str, kind: str) -> dict | None:
+        with self._conn() as c:
+            row = c.execute("SELECT * FROM jobs WHERE document_id=? AND kind=? ORDER BY created_at DESC LIMIT 1",
+                            (doc_id, kind)).fetchone()
+        return dict(row) if row else None
 
     def enqueue_job(self, doc_id: str, requested_parser: str, max_attempts: int) -> dict:
         """Queue a re-processing job.  Raises ValueError if a job is already active."""
@@ -257,6 +281,8 @@ class Repository:
                 (now, cutoff),
             ).fetchall()
             for r in failed:
+                if r["kind"] != "parse":
+                    continue  # a lost index job does not invalidate the parsed document
                 c.execute(
                     """UPDATE documents SET status='failed', processed_at=?, error_code='worker_lost',
                            error_message='Processing worker stopped responding' WHERE id=? AND latest_job_id=?""",

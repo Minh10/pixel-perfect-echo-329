@@ -19,7 +19,14 @@ import pymupdf
 from app.processing.geometry import Box
 from app.processing.model import PageInspection, RawBlock, RawCell, RawParse, RawTable
 
-CAPTION_RE = re.compile(r"^\s*(table|figure|fig\.|chart|exhibit|graph|note)\s*[\dA-Z]", re.IGNORECASE)
+# Keyword is case-insensitive; the label must be a number, roman numeral or single capital letter
+# ("Table 1", "Figure IV", "Exhibit A") so that e.g. "Table of Contents" is not a caption.
+CAPTION_RE = re.compile(r"^\s*(?i:table|figure|fig\.|chart|exhibit|graph|note)\s+(\d+|[IVXL]+\b|[A-Z]\b)")
+ITEM_RE = re.compile(r"^\s*(PART\s+[IVX]+|ITEM\s*\d+[A-Z]?\b)", re.IGNORECASE)
+
+
+def _is_bold(span: dict) -> bool:
+    return bool(span["flags"] & 16) or "bold" in span["font"].lower()
 MIN_FIGURE_PT = 36.0
 
 
@@ -140,19 +147,36 @@ def parse_with_pymupdf(pdf_path: Path) -> RawParse:
                 bb = Box(*b["bbox"])
                 if any(bb.fraction_inside(r.bbox) > 0.5 for r in regions):
                     continue  # text belongs to a table/figure region
+                if any(bb.intersection_area(r.bbox) > 0 for r in regions):
+                    # Block straddles a region (e.g. a statement title merged with the first table rows):
+                    # keep only the lines outside the region so table text is not duplicated as prose.
+                    b = {**b, "lines": [ln for ln in b["lines"]
+                                        if not any(Box(*ln["bbox"]).fraction_inside(r.bbox) > 0.5 for r in regions)]}
+                    if not b["lines"]:
+                        continue
+                    bb = Box(*b["lines"][0]["bbox"])
+                    for ln in b["lines"][1:]:
+                        bb = bb.union(Box(*ln["bbox"]))
                 lines = [" ".join(s["text"] for s in ln["spans"]).strip() for ln in b["lines"]]
                 text = " ".join(x for x in lines if x)
                 if not text:
                     continue
-                span_size = max(s["size"] for ln in b["lines"] for s in ln["spans"])
+                spans = [s for ln in b["lines"] for s in ln["spans"] if s["text"].strip()]
+                span_size = max(s["size"] for s in spans)
+                letters = sum(ch.isalpha() for ch in text)
+                short = len(text) < 160 and len(lines) <= 3 and letters >= 0.5 * len(text.replace(" ", ""))
                 role, level = "text", None
                 if CAPTION_RE.match(text) and len(text) < 300:
                     role = "caption"
-                elif span_size >= body_size * 1.25 and len(text) < 160 and len(lines) <= 3:
+                elif span_size >= body_size * 1.25 and short:
                     if n == 1 and span_size >= max_size:
                         role = "title"
                     else:
                         role, level = "section_header", 1
+                elif (short and all(_is_bold(sp) for sp in spans) and span_size >= body_size - 0.5
+                      and not text.rstrip().endswith((".", ":", ","))):
+                    # Bold, body-sized, short line: the usual heading style in SEC filings.
+                    role, level = "section_header", 1 if ITEM_RE.match(text) else 2
                 text_blocks.append(
                     RawBlock(page=n, role=role, bbox=bb, text=text, level=level, method="pymupdf:text-layer")
                 )
@@ -163,7 +187,7 @@ def parse_with_pymupdf(pdf_path: Path) -> RawParse:
     return RawParse(
         parser="pymupdf",
         parser_version=pymupdf_version(),
-        options={"headingHeuristic": "font-size>=1.25x body", "tables": "find_tables", "ocr": False},
+        options={"headingHeuristic": "font-size>=1.25x body | bold+body-size short line", "tables": "find_tables", "ocr": False},
         page_sizes=sizes,
         blocks=blocks_by_page,
     )

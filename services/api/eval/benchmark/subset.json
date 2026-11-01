@@ -1,0 +1,9 @@
+{
+  "description": "FinanceBench documents included in the FINAUDIT retrieval/QA benchmark: every open-source FinanceBench filing with >= 3 questions, plus 3M_2018_10K so that 3M has three filings of different periods (same-company / different-period disambiguation). All FinanceBench questions on these documents are used; none are filtered by difficulty or by system performance.",
+  "selection_rule": "doc question count >= 3, plus 3M_2018_10K",
+  "financebench_documents": [
+    "3M_2018_10K", "3M_2022_10K", "3M_2023Q2_10Q", "AES_2022_10K", "AMCOR_2023_10K", "AMD_2022_10K",
+    "AMERICANEXPRESS_2022_10K", "BESTBUY_2023_10K", "BESTBUY_2024Q2_10Q", "BOEING_2022_10K",
+    "CVSHEALTH_2022_10K", "PEPSICO_2022_10K", "ULTABEAUTY_2023Q4_EARNINGS"
+  ]
+}

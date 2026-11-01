@@ -26,7 +26,7 @@ class ApiModel(BaseModel):
 DocumentStatus = Literal["processing", "ready", "failed"]  # identical to frontend DocumentStatus
 DocumentType = Literal["Annual Report", "Quarterly Report", "Prospectus", "Sustainability Report"]
 JobState = Literal["queued", "running", "succeeded", "failed"]
-JobStage = Literal["queued", "inspecting", "parsing", "assembling", "persisting", "done"]
+JobStage = Literal["queued", "inspecting", "parsing", "assembling", "persisting", "indexing", "done"]
 ParserName = Literal["docling", "pymupdf"]
 
 # Frontend BlockKind is "heading" | "paragraph" | "table" | "chart".  This milestone never emits
@@ -214,6 +214,7 @@ class FinDocument(ApiModel):
 class Job(ApiModel):
     id: str
     document_id: str
+    kind: Literal["parse", "index"] = "parse"
     state: JobState
     stage: JobStage
     progress: float = Field(ge=0, le=1)

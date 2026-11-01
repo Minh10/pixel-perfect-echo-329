@@ -13,10 +13,19 @@ dependencies = [
   "pymupdf==2.0",
   "docling==2.145.0",
   "docling-core==2.105.0",
+  # Milestone 3: retrieval + QA
+  "qdrant-client==1.20.0",
+  "onnxruntime==1.31.1",
+  "tokenizers==0.23.3",
+  "numpy==2.5.4",
+  "anthropic==2.3.0",
 ]
 
 [project.optional-dependencies]
+# Static embeddings with weights bundled in the wheel (FINAUDIT_EMBEDDER=wordllama); used as a dense ablation.
+wordllama = ["wordllama==0.4.0.post1"]
 dev = [
+  "wordllama==0.4.0.post1",
   "pytest==9.2.0",
   "httpx==0.28.1",
   # Only used by tests/fixtures/generate_fixtures.py to build synthetic fixture PDFs.

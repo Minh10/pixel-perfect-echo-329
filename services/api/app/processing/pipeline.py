@@ -60,6 +60,9 @@ def run_job(job: dict, repo: Repository, files: FileStore, s: Settings) -> None:
     if doc is None:
         repo.fail_job(job_id, "document_deleted", "Document was deleted before processing", retry=False)
         return
+    if job.get("kind") == "index":
+        run_index_job(job, doc, repo, files, s)
+        return
     pdf = files.source_path(doc_id)
     started = time.monotonic()
     try:
@@ -83,6 +86,11 @@ def run_job(job: dict, repo: Repository, files: FileStore, s: Settings) -> None:
             files.write_atomic(files.parse_path(doc_id), result.model_dump_json())
         repo.mark_document_ready(doc_id, result.parser.model_dump(), result.warnings)
         repo.finish_job(job_id)
+        if s.auto_index:
+            try:
+                repo.enqueue_index_job(doc_id, s.job_max_attempts)
+            except ValueError:
+                pass  # an index job is already queued
         log.info("job %s succeeded: %s pages, %s evidence, parser=%s, %.1fs", job_id, len(result.pages),
                  len(result.evidence), raw.parser, time.monotonic() - started)
     except ParserUnavailable as exc:
@@ -99,3 +107,23 @@ def _fail(repo: Repository, job_id: str, doc_id: str, code: str, message: str, *
     if state == "failed":
         repo.mark_document_failed(doc_id, code, message)
     log.warning("job %s %s: %s %s", job_id, state, code, message)
+
+
+def run_index_job(job: dict, doc: dict, repo: Repository, files: FileStore, s: Settings) -> None:
+    from app.indexing.service import IndexError_, index_document
+    from app.indexing.store import ChunkStore
+
+    job_id = job["id"]
+    if doc["status"] != "ready":
+        repo.fail_job(job_id, "document_not_ready", f"Document status is {doc['status']}", retry=False)
+        return
+    try:
+        with _Heartbeat(repo, job_id, s.job_heartbeat_interval_s):
+            repo.update_job_progress(job_id, "indexing", 0.2)
+            index_document(doc, files, ChunkStore(s.db_path), s)
+        repo.finish_job(job_id)
+    except IndexError_ as exc:
+        repo.fail_job(job_id, "index_failed", str(exc), retry=False)
+    except Exception as exc:
+        log.exception("index job %s crashed", job_id)
+        repo.fail_job(job_id, "internal_error", f"{type(exc).__name__}: {exc}", retry=True)
