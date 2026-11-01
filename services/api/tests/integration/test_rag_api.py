@@ -76,9 +76,10 @@ def test_qa_end_to_end_with_scripted_llm(env, monkeypatch) -> None:
                 "status": "answered", "insufficiency_reason": None,
                 "answer": "Operating profit was 703 (GBP m) in 2025.",
                 "citations": [{"evidence_id": e, "quote": "Operating profit: 2025 = 703"}],
-                "operands": [{"id": "a", "evidence_id": e, "quote": "703", "label": "Operating profit 2025",
+                "operands": [{"id": "a", "evidence_id": e, "quote": "703", "row_label": "Operating profit", "period": "2025",
+                              "metric": "operating profit", "currency": "GBP",
                               "scale": "millions", "value_kind": "reported"}],
-                "calculations": [], "final": {"ref": "a", "unit": "GBP millions"}}]
+                "calculations": [], "final": {"ref": "a", "unit": "GBP millions", "metric": "operating profit"}}]
             return super().generate_json(system, parts, schema, schema_name)
 
     monkeypatch.setattr(rag_routes, "get_llm", lambda cfg: Planner([]))

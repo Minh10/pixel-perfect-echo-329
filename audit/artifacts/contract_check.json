@@ -1,0 +1,26 @@
+[
+ {
+  "kind": "OPTIONAL",
+  "ts": "PageBlock",
+  "backend": "PageBlock",
+  "detail": "chart"
+ },
+ {
+  "kind": "ENUM",
+  "ts": "JobStage",
+  "backend": "Job.stage",
+  "detail": "backend-only values ['indexing']"
+ },
+ {
+  "kind": "ENUM_TS_ONLY",
+  "ts": "BlockKind",
+  "backend": "PageBlock.kind",
+  "detail": "frontend-only values ['chart']"
+ },
+ {
+  "kind": "ENUM_TS_ONLY",
+  "ts": "EvidenceCategory",
+  "backend": "Evidence.category",
+  "detail": "frontend-only values ['chart', 'metric']"
+ }
+]

@@ -9,7 +9,8 @@ import httpx
 import pytest
 
 from app.config import Settings
-from app.indexing.chunker import DocMeta, chunk_layout
+from app.financial.pipeline import normalize_document
+from app.indexing.chunker import CHUNKER_VERSION, DocMeta, chunk_layout
 from app.indexing.store import ChunkStore
 from app.processing.assemble import assemble
 from app.processing.pymupdf_parser import inspect_pages, parse_with_pymupdf
@@ -79,7 +80,9 @@ def qa_env(tmp_path: Path):
     meta = DocMeta("doc_syn", "Synthetic AR", "Fictional Example Holdings plc", "2025", "Annual Report", "0" * 64,
                    "pymupdf", "2.0", "job_x")
     store = ChunkStore(s.db_path)
-    store.replace_document_chunks("doc_syn", "layout", "layout-v1", chunk_layout(parse, meta),
+    norms = normalize_document("doc_syn", "Fictional Example Holdings plc", "0" * 64, parse, FIX)
+    store.replace_document_facts("doc_syn", [f for n in norms.values() for f in n.facts])
+    store.replace_document_chunks("doc_syn", "layout", CHUNKER_VERSION, chunk_layout(parse, meta, norms),
                                   {"source_sha256": "0" * 64, "parser": "pymupdf", "parser_version": "2.0",
                                    "parse_job_id": "job_x"})
     docs = [dict(repo.get_document("doc_syn"), status="ready")]
@@ -93,13 +96,15 @@ def good_plan(e: str) -> dict:
     return {"status": "answered", "insufficiency_reason": None,
             "answer": "Operating profit rose from 591 to 703 (GBP m), an increase of 18.95%.",
             "citations": [{"evidence_id": e, "quote": "Operating profit: 2025 = 703; 2024 = 591"}],
-            "operands": [{"id": "op24", "evidence_id": e, "quote": "591", "label": "Operating profit 2024",
+            "operands": [{"id": "op24", "evidence_id": e, "quote": "591", "row_label": "Operating profit",
+                          "period": "2024", "metric": "operating profit", "currency": None,
                           "scale": "millions", "value_kind": "reported"},
-                         {"id": "op25", "evidence_id": e, "quote": "703", "label": "Operating profit 2025",
+                         {"id": "op25", "evidence_id": e, "quote": "703", "row_label": "Operating profit",
+                          "period": "2025", "metric": "operating profit", "currency": None,
                           "scale": "millions", "value_kind": "reported"}],
             "calculations": [{"id": "g", "op": "percent_change", "args": ["op24", "op25"], "periods": None,
                               "description": "growth 2024->2025"}],
-            "final": {"ref": "g", "unit": "percent"}}
+            "final": {"ref": "g", "unit": "percent", "metric": "operating profit growth"}}
 
 
 class LabelAware(ScriptedLLM):
@@ -135,6 +140,9 @@ def test_grounded_answer_with_deterministic_calculation(qa_env) -> None:
     assert r.status == "answered", r.validation
     assert r.value.value_kind == "calculated" and Decimal(r.value.value).quantize(Decimal("0.0001")) == Decimal("18.9509")
     assert [o.value for o in r.operands] == ["591", "703"] and r.operands[0].evidence_kind == "table"
+    # operands are bound to stored FinancialFacts of the cited table (geometric column/period binding)
+    assert all(o.binding == "fact" and o.fact_id for o in r.operands), r.operands
+    assert [o.period for o in r.operands] == ["2024", "2025"]
     c = r.citations[0]
     assert c.chunk.pages == [2] and c.chunk.regions[0].block_id == "p2-b003"
     assert c.chunk.regions[0].workspace_evidence_id == "ev-p2-b003"
@@ -192,13 +200,14 @@ def _relabel(qa_env, mutate, question=Q):
 
 
 def test_pipeline_rejects_wrong_metric_year_unit_scope_and_unsupported_math(qa_env) -> None:
-    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Revenue 2025"))
-    assert r.status == "abstained" and "operand_label_on_same_row" in r.abstention.detail
-    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Operating profit 2024"))
+    # M3.5: check names follow the evidence-binding validator (operand_cell_located = value not in the quoted row)
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].update(row_label="Revenue", metric="revenue"))
+    assert r.status == "abstained" and "operand_cell_located" in r.abstention.detail
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("period", "2024"))
     assert r.status == "abstained" and "operand_period_matches" in r.abstention.detail
     r, _ = _relabel(qa_env, lambda p: [o.__setitem__("scale", "thousands") for o in p["operands"]])
     assert r.status == "abstained" and "operand_units_match" in r.abstention.detail
-    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Segment operating profit 2025"))
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("metric", "segment operating profit"))
     assert r.status == "abstained" and "operand_scope_matches" in r.abstention.detail
     r, _ = _relabel(qa_env, lambda p: p["calculations"][0].__setitem__("op", "npv"))
     assert r.status == "abstained" and "calculations_valid" in r.abstention.detail
@@ -232,18 +241,18 @@ def test_correct_metric_and_year_are_accepted() -> None:
 
 def test_correct_number_wrong_metric_is_rejected() -> None:
     checks = _assoc(label="Revenue 2025", question="What was revenue in 2025?")
-    assert _failed(checks, "operand_label_on_same_row")
+    assert _failed(checks, "operand_cell_located")
 
 
 def test_correct_metric_wrong_fiscal_year_is_rejected() -> None:
     assert _failed(_assoc(label="Operating profit 2024"), "operand_period_matches")
-    assert _failed(_assoc(question="What was operating profit in 2030?"), "operand_period_matches")
+    assert _failed(_assoc(question="What was operating profit in 2030?"), "operand_period_in_question")
 
 
 def test_different_units_or_currencies_are_rejected() -> None:
     assert _failed(_assoc(scale="thousands"), "operand_units_match")
     assert _failed(_assoc(label="Operating profit 2025 USD"), "operand_currency_matches")
-    assert _failed(_assoc(question="What was operating profit in 2025 in USD?"), "operand_currency_matches")
+    assert _failed(_assoc(question="What was operating profit in 2025 in USD?"), "question_currency_supported")
 
 
 def test_different_reporting_scope_is_rejected() -> None:
@@ -253,8 +262,12 @@ def test_different_reporting_scope_is_rejected() -> None:
 
 
 def test_wrong_row_or_column_and_ambiguous_values_are_rejected() -> None:
-    assert _failed(_assoc(label="Revenue 2025", quote="703"), "operand_label_on_same_row")
-    duplicated = TABLE + "Other income: 2025 = 703; 2024 = 10\n"
+    assert _failed(_assoc(label="Revenue 2025", quote="703"), "operand_cell_located")
+    # M3.5: the quoted row label now disambiguates a value that also appears in another row ...
+    other_row = TABLE + "Other income: 2025 = 703; 2024 = 10\n"
+    assert all(c["ok"] for c in _assoc(text=other_row))
+    # ... and a value/row pair that matches more than one cell is ambiguous -> rejected
+    duplicated = TABLE + "Operating profit: 2025 = 703; 2024 = 12\n"
     checks = _assoc(text=duplicated)
     assert _failed(checks, "operand_cell_located")
     assert "more than one" in checks[0]["detail"]
@@ -265,7 +278,7 @@ def test_missing_evidence_is_not_verified() -> None:
     assert _failed(checks, "operand_cell_located")
     prose_miss = operand_association_checks(kind="text", label="Revenue 2025", quote="703", scale="millions",
                                             text=PROSE, question="What was revenue in 2025?")
-    assert _failed(prose_miss, "operand_label_on_same_row")
+    assert _failed(prose_miss, "operand_row_label_quoted")
     prose_ok = operand_association_checks(kind="text", label="Operating profit 2025", quote="703", scale="millions",
                                           text=PROSE, question=Q_OP)
     assert all(c["ok"] for c in prose_ok), prose_ok
@@ -281,9 +294,11 @@ def test_headers_away_from_the_value_still_verify() -> None:
     ])
     checks = _assoc(text=text)
     assert all(c["ok"] for c in checks), checks
+    # M3.5 (AUD-02): a year that appears only in the table TITLE does not identify the value's column, so the
+    # PR #2 expectation that this verifies is reversed -- the period is unverifiable and the operand is rejected.
     single = "\n".join(["[Table] Operating profit 2025", "Units: GBP millions.", "[Operating profit]", "703"])
     checks = _assoc(text=single)
-    assert all(c["ok"] for c in checks), checks
+    assert _failed(checks, "operand_period_matches"), checks
 
 
 def test_model_abstention_and_refusal(qa_env) -> None:

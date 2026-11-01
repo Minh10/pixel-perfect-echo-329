@@ -34,9 +34,19 @@ def doc_meta(doc: dict, parse: ParseResult) -> DocMeta:
                    parser_version=parse.parser.version, parse_job_id=parse.job_id)
 
 
-def build_chunks(doc: dict, parse: ParseResult, files: FileStore, chunk_set: str) -> list[Chunk]:
+def build_normalizations(doc: dict, parse: ParseResult, files: FileStore) -> dict:
+    from app.financial.pipeline import normalize_document
+
+    return normalize_document(doc["id"], doc["issuer"], doc["sha256"], parse, files.source_path(doc["id"]))
+
+
+def build_chunks(doc: dict, parse: ParseResult, files: FileStore, chunk_set: str,
+                 normalizations: dict | None = None) -> list[Chunk]:
     meta = doc_meta(doc, parse)
-    return chunk_layout(parse, meta) if chunk_set == "layout" else chunk_flat(files.source_path(doc["id"]), meta)
+    if chunk_set == "layout":
+        norms = normalizations if normalizations is not None else build_normalizations(doc, parse, files)
+        return chunk_layout(parse, meta, norms)
+    return chunk_flat(files.source_path(doc["id"]), meta)
 
 
 def index_document(doc: dict, files: FileStore, store: ChunkStore, s: Settings,
@@ -53,9 +63,11 @@ def index_document(doc: dict, files: FileStore, store: ChunkStore, s: Settings,
     except EmbedderUnavailable as exc:
         embedder, emb_error = None, str(exc)
     report: dict[str, dict] = {}
+    norms = build_normalizations(doc, parse, files)
+    store.replace_document_facts(doc["id"], [f for n in norms.values() for f in n.facts])
     for cs in chunk_sets:
         t0 = time.monotonic()
-        chunks = build_chunks(doc, parse, files, cs)
+        chunks = build_chunks(doc, parse, files, cs, norms)
         version = VERSIONS[cs]
         store.replace_document_chunks(doc["id"], cs, version, chunks, prov)
         n_vec, dense_status, dense_error = 0, "unavailable", emb_error

@@ -1,0 +1,54 @@
+cases=26 correct-associations=11 corrupted=15
+FALSE ACCEPTS 1/15: ['V11']
+FALSE REJECTS 8/11: ['V02', 'V03', 'V09', 'V12', 'V14', 'V16', 'V24', 'V25']
+V01 truth=ACCEPT engine=ACCEPT correct       exact row label
+V02 truth=ACCEPT engine=REJECT FALSE_REJECT  paraphrased label (how an analyst/LLM would say it)
+      x operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified
+V03 truth=ACCEPT engine=REJECT FALSE_REJECT  currency in label; 3M reports in USD but the chunk states only '(Millions)'
+      x operand_currency_matches: label currency ['usd'] is not stated in the evidence
+V04 truth=REJECT engine=REJECT correct       2018 value labelled 2017
+      x operand_period_matches: label years ['2017'] do not match column ['2018']
+V05 truth=REJECT engine=REJECT correct       true 2017 value, but the question asks 2018
+      x operand_period_matches: source years ['2017'] are outside the years asked ['2018']
+V06 truth=REJECT engine=REJECT correct       value of another row
+      x operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified
+V07 truth=REJECT engine=REJECT correct       millions stated as thousands
+      x operand_units_match: operand scale thousands does not match evidence scale millions
+V08 truth=REJECT engine=REJECT correct       wrong currency
+      x operand_currency_matches: label currency ['eur'] is not stated in the evidence
+V09 truth=ACCEPT engine=REJECT FALSE_REJECT  balance sheet without column labels or units line
+      x operand_units_match: operand scale millions is not stated in the evidence; not verified
+V10 truth=REJECT engine=REJECT correct       2021 value labelled 2022
+      x operand_units_match: operand scale millions is not stated in the evidence; not verified
+V11 truth=REJECT engine=ACCEPT FALSE_ACCEPT  same as V10 with scale 'units' to isolate the period check
+V12 truth=ACCEPT engine=REJECT FALSE_REJECT  years only in the table title
+      x operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']
+V13 truth=REJECT engine=REJECT correct       2021 value labelled 2022
+      x operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']
+V14 truth=ACCEPT engine=REJECT FALSE_REJECT  loss row, parenthesised
+      x operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']
+V15 truth=REJECT engine=REJECT correct       loss from operations labelled net loss
+      x operand_label_on_same_row: label/source token overlap 0.20; metric association was not verified
+      x operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']
+V16 truth=ACCEPT engine=REJECT FALSE_REJECT  segment row, proper period columns, no units line in chunk
+      x operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified
+      x operand_units_match: operand scale millions is not stated in the evidence; not verified
+V17 truth=REJECT engine=REJECT correct       cumulative 'Plan to Date through 12/31/2022' value labelled FY2022 (scale 'units' isolates the period check)
+      x operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified
+V18 truth=REJECT engine=REJECT correct       2021 value labelled 2022
+      x operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified
+      x operand_period_matches: label years ['2022'] do not match column ['2021']
+V19 truth=ACCEPT engine=ACCEPT correct       synthetic fixture (GBP m)
+V20 truth=REJECT engine=REJECT correct       gross profit value labelled operating profit
+      x operand_label_on_same_row: label ['operating profit'] vs source ['gross profit']
+V21 truth=REJECT engine=REJECT correct       2024 value labelled 2025
+      x operand_period_matches: label years ['2025'] do not match column ['2024']
+V22 truth=ACCEPT engine=ACCEPT correct       narrative statement
+V23 truth=REJECT engine=REJECT correct       operating profit figure labelled revenue (same sentence)
+      x operand_label_on_same_row: label ['revenue'] vs source ['operating profit']
+V24 truth=ACCEPT engine=REJECT FALSE_REJECT  real narrative with two years in one sentence
+      x operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']
+V25 truth=ACCEPT engine=REJECT FALSE_REJECT  the 2017 clause of the same sentence
+      x operand_period_matches: label years ['2017'] are ambiguous across header years ['2017', '2018']
+V26 truth=REJECT engine=REJECT correct       2017 decrease labelled 2018 increase
+      x operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']

@@ -1,0 +1,14 @@
+PASS  upload with CRLF/quote filename accepted safely: stored filename='evil%22%0D%0AX-Injected: 1.pdf'
+PASS  no header injection via filename: content-disposition="attachment; filename*=utf-8''evil%2522%250D%250AX-Injected%3A%201.pdf"
+PASS  traversal/out-of-range rejected /documents/..%2F..%2Fetc/source: status=404
+PASS  traversal/out-of-range rejected /documents/doc_x%2F..%2F..%2Fpasswd: status=404
+PASS  traversal/out-of-range rejected /documents/doc_5438614e760a46d8a27ad938d32c34e5/: status=404
+PASS  traversal/out-of-range rejected /documents/doc_5438614e760a46d8a27ad938d32c34e5/: status=404
+PASS  traversal/out-of-range rejected /documents/doc_5438614e760a46d8a27ad938d32c34e5/: status=404
+PASS  dpi clamped: status=200 bytes=95271
+PASS  CORS refuses unknown origin: status=400 acao=None
+PASS  configured key never echoed: checked index/status, health, qa error, openapi
+PASS  oversized question rejected: status=422
+PASS  retrieve k bounded: status=422
+PASS  qa method enum enforced: status=422
+13/13 probes passed

@@ -1,0 +1,36 @@
+2026-11-01 14:39:07,445 INFO httpx2 HTTP Request: POST http://testserver/api/v1/documents "HTTP/1.1 202 Accepted"
+2026-11-01 14:39:07,471 INFO finaudit.worker claimed job job_8e3836155f0340bbb80963e4160e3c85 for document doc_6678eae41c6c49269ae807a3f7d1de2c (attempt 1)
+2026-11-01 14:39:08,528 INFO finaudit.pipeline job job_8e3836155f0340bbb80963e4160e3c85 succeeded: 3 pages, 4 evidence, parser=pymupdf, 1.1s
+2026-11-01 14:39:08,530 INFO finaudit.worker claimed job job_2ccd47e5138c4dbc82087ef18af61504 for document doc_6678eae41c6c49269ae807a3f7d1de2c (attempt 1)
+2026-11-01 14:39:08,546 INFO finaudit.indexing indexed doc_6678eae41c6c49269ae807a3f7d1de2c/layout: 5 chunks, 0 vectors (unavailable) in 0.0s
+2026-11-01 14:39:08,579 INFO finaudit.indexing indexed doc_6678eae41c6c49269ae807a3f7d1de2c/flat: 3 chunks, 0 vectors (unavailable) in 0.0s
+PASS  upload with CRLF/quote filename accepted safely: stored filename='evil%22%0D%0AX-Injected: 1.pdf'
+2026-11-01 14:39:08,588 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_6678eae41c6c49269ae807a3f7d1de2c/source "HTTP/1.1 200 OK"
+PASS  no header injection via filename: content-disposition="attachment; filename*=utf-8''evil%2522%250D%250AX-Injected%3A%201.pdf"
+2026-11-01 14:39:08,602 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/..%2F..%2Fetc/source "HTTP/1.1 404 Not Found"
+PASS  traversal/out-of-range rejected /documents/..%2F..%2Fetc/source: status=404
+2026-11-01 14:39:08,609 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_x%2F..%2F..%2Fpasswd "HTTP/1.1 404 Not Found"
+PASS  traversal/out-of-range rejected /documents/doc_x%2F..%2F..%2Fpasswd: status=404
+2026-11-01 14:39:08,612 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_6678eae41c6c49269ae807a3f7d1de2c/blocks/..%2F..%2Fsource.pdf/image "HTTP/1.1 404 Not Found"
+PASS  traversal/out-of-range rejected /documents/doc_6678eae41c6c49269ae807a3f7d1de2c/: status=404
+2026-11-01 14:39:08,627 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_6678eae41c6c49269ae807a3f7d1de2c/pages/0/image "HTTP/1.1 404 Not Found"
+PASS  traversal/out-of-range rejected /documents/doc_6678eae41c6c49269ae807a3f7d1de2c/: status=404
+2026-11-01 14:39:08,637 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_6678eae41c6c49269ae807a3f7d1de2c/pages/999999/image "HTTP/1.1 404 Not Found"
+PASS  traversal/out-of-range rejected /documents/doc_6678eae41c6c49269ae807a3f7d1de2c/: status=404
+2026-11-01 14:39:08,814 INFO httpx2 HTTP Request: GET http://testserver/api/v1/documents/doc_6678eae41c6c49269ae807a3f7d1de2c/pages/1/image?dpi=100000 "HTTP/1.1 200 OK"
+PASS  dpi clamped: status=200 bytes=95271
+2026-11-01 14:39:08,816 INFO httpx2 HTTP Request: OPTIONS http://testserver/api/v1/documents "HTTP/1.1 400 Bad Request"
+PASS  CORS refuses unknown origin: status=400 acao=None
+2026-11-01 14:39:09,532 INFO httpx2 HTTP Request: GET http://testserver/api/v1/index/status "HTTP/1.1 200 OK"
+2026-11-01 14:39:09,544 INFO httpx2 HTTP Request: GET http://testserver/api/v1/health "HTTP/1.1 200 OK"
+2026-11-01 14:39:09,552 INFO httpx2 HTTP Request: POST http://testserver/api/v1/qa "HTTP/1.1 503 Service Unavailable"
+2026-11-01 14:39:09,690 INFO httpx2 HTTP Request: GET http://testserver/openapi.json "HTTP/1.1 200 OK"
+PASS  configured key never echoed: checked index/status, health, qa error, openapi
+2026-11-01 14:39:09,696 INFO httpx2 HTTP Request: POST http://testserver/api/v1/qa "HTTP/1.1 422 Unprocessable Content"
+PASS  oversized question rejected: status=422
+2026-11-01 14:39:09,702 INFO httpx2 HTTP Request: POST http://testserver/api/v1/retrieve "HTTP/1.1 422 Unprocessable Content"
+PASS  retrieve k bounded: status=422
+2026-11-01 14:39:09,707 INFO httpx2 HTTP Request: POST http://testserver/api/v1/qa "HTTP/1.1 422 Unprocessable Content"
+PASS  qa method enum enforced: status=422
+
+13/13 probes passed

@@ -93,7 +93,8 @@ them, so they are downloaded into `eval/data/`, which is git-ignored.
 
 Full tables, CIs and per-tag results are in `results/retrieval_report.md`; per-query rankings are in
 `results/raw/` (git-ignored). Setup:
-- Corpus: 14 documents, 10,081 layout chunks and 8,029 flat chunks. Parsed with PyMuPDF (Docling
+- Corpus: 14 documents, 10,050 layout chunks (layout-v2; layout-v3 from Milestone 3.5 has 10,606 — see
+  `audit/milestone-3.5/retrieval_layout_v3/`) and 8,029 flat chunks. Parsed with PyMuPDF (Docling
   models unreachable).
 - Embedder: all-MiniLM-L6-v2 ONNX. WordLlama was run as an ablation.
 - Hardware: one shared 4-vCPU container, embedded Qdrant.

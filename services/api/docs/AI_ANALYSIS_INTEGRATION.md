@@ -139,3 +139,17 @@ citation list component. Label each item with its `rank`, never as an answer.
    - The page shows the abstention state.
 3. Run `npm run test` and `npm run build`. Unset `VITE_FINAUDIT_API_URL` and confirm the page is the
    original `PendingModule`.
+
+## 8. Milestone 3.5 changes (evidence binding)
+
+All changes are **additive**; existing fields keep their meaning.
+
+| Where | Change | UI guidance |
+|---|---|---|
+| `QAOperand` | new optional `rowLabel`, `period`, `metric`, `currency`, `factId`, `periodType`, `binding` (`fact` / `table_text` / `statement` / `figure`) | `analysis.tsx` shows "Source row … · period … (type)". `label` is now `"<metric> (<period>)"`. Never show a period the backend did not return |
+| `Job` | `stage` may be `indexing`; new `kind` (`parse` / `index`) | Display as text; no new state handling needed |
+| `GET /api/v1/documents/{id}/facts?page=&tableId=` | returns `FinancialFact[]` (see `docs/FINANCIAL_EVIDENCE_SCHEMA.md`) | Optional. If shown, render `period.periodType: "unknown"`, `scale: "unknown"`, `currency: null` as **"not stated"**, never as a guess. Use `bbox` + `page` for highlighting exactly like evidence regions |
+| Abstention details | new check names (`operand_cell_located`, `operand_period_matches`, `operand_period_in_question`, `operand_metric_supported`, `operand_units_match`, `operand_currency_matches`, `question_currency_supported`, `operand_scope_matches`, `operands_scope_consistent`, `operands_currency_consistent`, `calculation_spec_valid`, `final_metric_matches_question`, `answer_no_injected_content`, `answer_claims_supported`) | `abstention.detail` stays free text; do not parse it |
+
+The QA endpoint still returns 503 until a provider is configured server-side. No answer, value or verification
+status may be simulated in the UI; demo-sourced values stay labelled DEMO.

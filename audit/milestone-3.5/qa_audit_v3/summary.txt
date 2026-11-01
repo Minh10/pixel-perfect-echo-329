@@ -1,0 +1,38 @@
+37 items · gold verified 37/37 · LLM: NOT RUN — no LLM provider configured (FINAUDIT_LLM_PROVIDER=none)
+F01  PASS dense 0/1  hybrid 0/1  val (1,577)@p60:ACCEPT                                           | retrieval_miss@8
+F02  PASS dense 0/1  hybrid 0/1  val 4,835@p56:ACCEPT                                             | retrieval_miss@8
+F03  PASS dense 1/1  hybrid 1/1  val $66,608@p24:ACCEPT                                           | none detected before the LLM stage
+F04  PASS dense 1/1  hybrid 1/1  val ($4,935)@p24:ACCEPT                                          | none detected before the LLM stage
+F05  PASS dense 1/1  hybrid 1/1  val 8,978@p64:ACCEPT                                             | none detected before the LLM stage
+F06  PASS dense 1/1  hybrid 0/1  val 3,771@p56:ACCEPT                                             | none detected before the LLM stage
+F07  PASS dense 0/1  hybrid 0/1  val 23,601@p54:ACCEPT                                            | retrieval_miss@8
+F08  PASS dense 1/1  hybrid 1/1  val 86,392@p62:ACCEPT                                            | none detected before the LLM stage
+N01  PASS dense 1/1  hybrid 1/1  val $62,286@p24:ACCEPT                                           | none detected before the LLM stage
+N02  PASS dense 1/1  hybrid 0/1  val 15,019@p56:ACCEPT | 6,369@p56:ACCEPT                         | none detected before the LLM stage
+N03  PASS dense 1/2  hybrid 1/2  val 6,439@p49:REJECT | (1,577)@p60:ACCEPT                        | retrieval_partial@8; validator_rejects_gold(operand_cell_located)
+N04  PASS dense 1/1  hybrid 1/1  val 1,020@p56:ACCEPT | 4,126@p56:ACCEPT | 6,369@p56:ACCEPT       | none detected before the LLM stage
+N05  PASS dense 1/1  hybrid 1/1  val ($3,547)@p24:ACCEPT                                          | none detected before the LLM stage
+N06  PASS dense 1/1  hybrid 1/1  val 7,679@p64:ACCEPT                                             | none detected before the LLM stage
+C01  PASS dense 1/1  hybrid 1/1  val 46@p79:ACCEPT                                                | none detected before the LLM stage
+C02  PASS dense 1/1  hybrid 1/1  val 343@p79:REJECT                                               | validator_rejects_gold(operand_period_matches)
+C03  PASS dense 1/1  hybrid 1/1  val 411@p79:REJECT                                               | validator_rejects_gold(operand_cell_located)
+C04  PASS dense 0/1  hybrid 1/1  val (0.6)@p24:ACCEPT                                             | retrieval_miss@8
+C05  PASS dense 0/1  hybrid 0/1  val (1,828)@p60:ACCEPT                                           | retrieval_miss@8
+M01  PASS dense 0/2  hybrid 0/2  val 32,765@p56:ACCEPT | (1,577)@p60:ACCEPT                       | retrieval_miss@8
+M02  PASS dense 2/2  hybrid 2/2  val 11,512@p62:ACCEPT | 2,763@p64:ACCEPT | (5,207)@p64:ACCEPT    | none detected before the LLM stage
+M03  PASS dense 1/2  hybrid 2/2  val 86,392@p62:ACCEPT | (5,207)@p64:ACCEPT                       | retrieval_partial@8
+X01  PASS dense 1/2  hybrid 1/2  val $66,608@p24:ACCEPT | 23,601@p54:ACCEPT                       | retrieval_partial@8
+X02  PASS dense 0/2  hybrid 1/2  val (1,577)@p60:ACCEPT | (1,749)@p39:ACCEPT                      | retrieval_miss@8
+X03  PASS dense 0/2  hybrid 0/2  val $14,614@p57:ACCEPT | 4,835@p56:ACCEPT                        | retrieval_miss@8
+U01  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+U02  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+U03  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+U04  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+U05  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+A01  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage
+A02  PASS dense 0/1  hybrid 0/1  val 3,771@p56:ACCEPT                                             | retrieval_miss@8
+A03  PASS dense 0/1  hybrid 0/1  val 2,535@p56:ACCEPT                                             | retrieval_miss@8
+A04  PASS dense 0/1  hybrid 0/1  val ($3,547)@p24:ACCEPT                                          | retrieval_miss@8
+A05  PASS dense 1/1  hybrid 1/1  val 109@p79:ACCEPT                                               | none detected before the LLM stage
+A06  PASS dense 0/1  hybrid 0/1  val 46,298@p40:ACCEPT                                            | retrieval_miss@8
+A07  PASS dense n/a  hybrid n/a  val n/a                                                          | none detected before the LLM stage

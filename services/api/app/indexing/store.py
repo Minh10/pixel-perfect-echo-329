@@ -49,6 +49,17 @@ CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
 CREATE TRIGGER IF NOT EXISTS chunks_fts_delete AFTER DELETE ON chunks BEGIN
     DELETE FROM chunks_fts WHERE chunk_id = old.chunk_id;
 END;
+CREATE TABLE IF NOT EXISTS financial_facts (
+    fact_id                TEXT PRIMARY KEY,
+    document_id            TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    normalization_version  TEXT NOT NULL,
+    table_id               TEXT NOT NULL,
+    page                   INTEGER NOT NULL,
+    row_index              INTEGER NOT NULL,
+    slot_index             INTEGER NOT NULL,
+    fact_json              TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_facts_doc_page ON financial_facts(document_id, page);
 CREATE TABLE IF NOT EXISTS index_runs (
     document_id      TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     chunk_set        TEXT NOT NULL,
@@ -137,10 +148,41 @@ class ChunkStore:
                       f"ON CONFLICT(document_id, chunk_set) DO UPDATE SET {upd}",
                       (document_id, chunk_set, *fields.values()))
 
+    def replace_document_facts(self, document_id: str, facts: list) -> None:
+        """Atomically replace a document's FinancialFacts (deterministic ids: re-normalizing never duplicates)."""
+        with self._conn() as c:
+            c.execute("BEGIN IMMEDIATE")
+            c.execute("DELETE FROM financial_facts WHERE document_id=?", (document_id,))
+            for f in facts:
+                c.execute("INSERT INTO financial_facts VALUES (?,?,?,?,?,?,?,?)",
+                          (f.fact_id, document_id, f.normalization_version, f.table_id, f.page, f.row_index,
+                           f.slot_index, f.model_dump_json()))
+            c.execute("COMMIT")
+
+    def facts(self, fact_ids: Iterable[str]) -> dict[str, dict]:
+        ids = list(dict.fromkeys(fact_ids))
+        out: dict[str, dict] = {}
+        with self._conn() as c:
+            for i in range(0, len(ids), 500):
+                part = ids[i:i + 500]
+                for r in c.execute(f"SELECT fact_id, fact_json FROM financial_facts WHERE fact_id IN ({','.join('?' * len(part))})", part):  # noqa: S608
+                    out[r[0]] = json.loads(r[1])
+        return out
+
+    def facts_for_document(self, document_id: str, page: int | None = None, table_id: str | None = None) -> list[dict]:
+        q, args = "SELECT fact_json FROM financial_facts WHERE document_id=?", [document_id]
+        if page is not None:
+            q, args = q + " AND page=?", [*args, page]
+        if table_id:
+            q, args = q + " AND table_id=?", [*args, table_id]
+        with self._conn() as c:
+            return [json.loads(r[0]) for r in c.execute(q + " ORDER BY page, table_id, row_index, slot_index", args)]
+
     def delete_document(self, document_id: str) -> None:
         with self._conn() as c:
             c.execute("DELETE FROM chunks WHERE document_id=?", (document_id,))
             c.execute("DELETE FROM index_runs WHERE document_id=?", (document_id,))
+            c.execute("DELETE FROM financial_facts WHERE document_id=?", (document_id,))
 
     # ------------------------------------------------------------------ reads
     def runs(self, document_id: str | None = None) -> list[dict]:
