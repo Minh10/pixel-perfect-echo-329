@@ -34,8 +34,9 @@ from app.financial.vocabulary import (
 
 YEAR_RE = re.compile(r"(?<![\d/])((?:19|20)\d{2})(?![\d/])")
 CUMULATIVE_ASK = re.compile(r"\b(cumulative|to[- ]date|since inception|plan[- ]to[- ]date|through)\b", re.IGNORECASE)
-YTD_ASK = re.compile(r"\b(year[- ]to[- ]date|ytd|six months|nine months|first half|first nine)\b", re.IGNORECASE)
-QUARTER_ASK = re.compile(r"\b(quarter|three months|q[1-4])\b", re.IGNORECASE)
+YTD_ASK = re.compile(r"\b(year[- ]to[- ]date|ytd|six months|nine months|first half|first nine|2[56] weeks|"
+                     r"3[89] weeks)\b", re.IGNORECASE)
+QUARTER_ASK = re.compile(r"\b(quarter|three months|q[1-4]|1[234] weeks)\b", re.IGNORECASE)
 PRIOR_ASK = re.compile(r"\b(prior|previous|preceding|last) (fiscal )?year\b|year[- ]over[- ]year|\byoy\b", re.IGNORECASE)
 CURRENCY_WORDS = {"USD": r"\b(usd|u\.s\. dollars?|us dollars?)\b|us\$", "EUR": r"\b(eur|euros?)\b|€",
                   "GBP": r"\b(gbp|sterling|pounds?)\b|£", "JPY": r"\b(jpy|yen)\b|¥"}
@@ -112,14 +113,31 @@ def _period_ok(fact_period: dict, claim_period: str | None, question: str) -> li
     return checks
 
 
-def _metric_ok(claim: OperandClaim, source_text: str) -> tuple[bool, str]:
-    mt, st = content_tokens(claim.metric), content_tokens(source_text)
-    if mt and mt <= st:
-        return True, "metric named by the source row"
-    mc, sc = canonical_metrics(claim.metric), canonical_metrics(source_text)
-    if mc and mc & sc:
-        return True, f"paraphrase via vocabulary {sorted(mc & sc)}"
-    return False, f"metric {claim.metric!r} is not supported by source {source_text[:80]!r}"
+def _metric_ok(claim: OperandClaim, source_text: str, row_text: str | None = None,
+               label_text: str | None = None) -> tuple[bool, str]:
+    """source_text: row label + group + table context; row_text: the row label + group alone."""
+    row_text = row_text if row_text is not None else source_text
+    mc, rc = canonical_metrics(claim.metric), canonical_metrics(row_text)
+    if mc and rc and not (mc & rc):
+        # the claim names a known metric and the source row is a DIFFERENT known metric (e.g. "net income" for an
+        # "Operating income" row): word overlap must not rescue it
+        return False, f"metric {claim.metric!r} ({sorted(mc)}) conflicts with source row {row_text[:60]!r} ({sorted(rc)})"
+    if mc and mc & rc:
+        return True, f"paraphrase via vocabulary {sorted(mc & rc)}"
+    mt, rt, st = content_tokens(claim.metric), content_tokens(row_text), content_tokens(source_text)
+    # the ROW must name the metric; table context (title, headings such as "Assets") may only complete a match
+    # that the row label or its group already starts -- it can never supply the metric on its own
+    lt = content_tokens(label_text) if label_text is not None else rt
+    if mt and mt <= rt:
+        return True, "metric named by the source row" + ("" if mt <= lt else " and its row group")
+    if mt and mt & lt and mt <= st:
+        return True, "metric named by the source row (completed by table context)"
+    return False, f"metric {claim.metric!r} is not named by source row {row_text[:80]!r}"
+
+
+def _claim_date(period: str | None) -> str | None:
+    p = _period_from(period, "", "column_header") if period else None
+    return p.end_date if p is not None else None
 
 
 def _scale_ok(fact_scale: str, claim_scale: str) -> tuple[bool, str]:
@@ -156,9 +174,37 @@ def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: s
     f = matched[0]
     checks = [{"check": "operand_cell_located", "ok": True,
                "detail": f"row {f['rowLabel']!r} column {f.get('columnHeader')!r} cell {f['cellText']!r}"}]
-    ok, d = _metric_ok(claim, " ".join(x for x in (f["rowLabel"], f.get("rowGroup") or "", context) if x))
+    row_text = " ".join(x for x in (f["rowLabel"], f.get("rowGroup") or "") if x)
+    ok, d = _metric_ok(claim, " ".join(x for x in (row_text, context) if x), row_text, f["rowLabel"])
     checks.append({"check": "operand_metric_supported", "ok": ok, "detail": d})
-    checks += _period_ok(f.get("period") or {}, claim.period, question)
+    per = f.get("period") or {}
+    pchecks = _period_ok(per, claim.period, question)
+    cd = _claim_date(claim.period)
+    siblings = [g for g in facts if g is not f and g.get("rowLabel") == f["rowLabel"]
+                and g.get("rowGroup") == f.get("rowGroup") and g.get("factId") != f.get("factId")
+                and (g.get("period") or {}).get("fiscalYear") == per.get("fiscalYear") and per.get("fiscalYear")]
+    if pchecks and pchecks[0]["ok"]:
+        if cd and per.get("endDate") and cd != per["endDate"]:
+            pchecks[0] = {"check": "operand_period_matches", "ok": False,
+                          "detail": f"claimed date {cd} vs column date {per['endDate']} ({per.get('label')!r})"}
+        elif siblings and not (cd and per.get("endDate") == cd):
+            # columns of different period types are told apart by the period-type check (e.g. FY2022 vs
+            # "Plan to Date through 12/31/2022"); only columns of the SAME type are ambiguous by year alone
+            same_type = [g for g in siblings if (g.get("period") or {}).get("periodType") == per.get("periodType")]
+            if same_type:
+                pchecks[0] = {"check": "operand_period_matches", "ok": False,
+                              "detail": f"year {per.get('fiscalYear')} labels {len(same_type) + 1} columns of this row "
+                                        "and the claim does not say which (state the full column date)"}
+    if pchecks and pchecks[0]["ok"] and per.get("periodType", "unknown") == "unknown":
+        # the table reports sub-annual periods somewhere ("13 Weeks Ended", "Six Months Ended") but this column's
+        # own period length was not aligned: a quarter cannot be told from a year -> unverifiable
+        headers = " ".join({(g.get("period") or {}).get("label") or "" for g in facts} | {context})
+        if SUB_ANNUAL.search(headers) or any((g.get("period") or {}).get("periodType") in ("quarterly", "ytd")
+                                             for g in facts):
+            pchecks[0] = {"check": "operand_period_matches", "ok": False,
+                          "detail": f"table reports sub-annual periods and column {per.get('label')!r} has no aligned "
+                                    "period length; quarter vs year cannot be verified"}
+    checks += pchecks
     ok, d = _scale_ok(f.get("scale", "unknown"), claim.scale)
     checks.append({"check": "operand_units_match", "ok": ok, "detail": d})
     if not f.get("isPercent"):
@@ -181,6 +227,17 @@ def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: s
 
 
 # --------------------------------------------------------------------------- narrative binding
+FORWARD = re.compile(r"\b(expect(?:s|ed)?|will|anticipat\w*|plan(?:s|ned)? to|outlook|forecast\w*|guidance|"
+                     r"intend\w*|project(?:s|ed)? to)\b", re.IGNORECASE)
+RELATIVE = re.compile(r"\b(prior|previous|preceding|last|following|next) (fiscal )?(year|quarter|period)\b",
+                      re.IGNORECASE)
+SUB_ANNUAL = re.compile(r"\b(three|six|nine) months|\bquarter|\b1[234] weeks|\b2[56] weeks|\b3[89] weeks",
+                        re.IGNORECASE)
+COMPARISON = re.compile(r"\b(compared (to|with)|versus|vs\.?|from)\b[^,;]*", re.IGNORECASE)
+RESPECTIVELY = re.compile(r"\brespectively\b", re.IGNORECASE)
+YEAR_PAIR = re.compile(r"\b(?:19|20)\d{2} and (?:fiscal )?(?:19|20)\d{2}\b")
+PERIOD_EXPR = re.compile(r"\b(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+                         r"\s+\d{1,2},\s+(?:19|20)\d{2}|(?<![\d,$])(?:19|20)\d{2}(?![\d,])")
 _CLAUSE_SPLIT = re.compile(r",?\s+(?:and|while|whereas|but)\s+|;\s+", re.IGNORECASE)
 
 
@@ -192,8 +249,12 @@ def bind_text(claim: OperandClaim, text: str, question: str) -> tuple[list[dict]
     target = nums[0]
     found = []
     for sent in re.split(r"(?<=[.!?])\s+(?=[A-Z(])", text):
-        parts = _CLAUSE_SPLIT.split(sent)
-        clauses = parts if sum(bool(re.search(r"\d", c)) for c in parts) > 1 else [sent]
+        if RESPECTIVELY.search(sent):
+            clauses = [sent]  # "X and Y as of D1 and D2, respectively": positional binding below, never split
+        else:
+            protected = YEAR_PAIR.sub(lambda m: m.group(0).replace(" and ", " _and_ "), sent)
+            parts = [x.replace(" _and_ ", " and ") for x in _CLAUSE_SPLIT.split(protected)]
+            clauses = parts if sum(bool(re.search(r"\d", c)) for c in parts) > 1 else [sent]
         for cl in clauses:
             toks = [t for t in scan_numeric_tokens(cl) if t.kind == "value" and abs(t.value) == abs(target)]
             if toks:
@@ -212,15 +273,35 @@ def bind_text(claim: OperandClaim, text: str, question: str) -> tuple[list[dict]
     checks.append({"check": "operand_metric_supported", "ok": ok, "detail": d})
     # the time expression nearest the value: its comma-delimited segment, then its clause, then the sentence;
     # each level is used only if it names exactly one year (otherwise abstain -- never pick one of several)
-    seg = next((x for x in re.split(r",\s+", clause) if tok.text.strip() in x), clause)
     years: set[int] = set()
-    for scope_text in (seg, clause, sent):
-        ys = {int(t.value) for t in scan_numeric_tokens(scope_text) if t.kind == "year"}
-        if ys:
-            years = ys if len(ys) == 1 else set()
-            break
+    label = clause[:80]
+    if RESPECTIVELY.search(sent):
+        # "$379 million and $269 million as of January 28, 2023, and January 29, 2022, respectively": the i-th
+        # amount belongs to the i-th period, only if the counts match exactly
+        vals = [t for t in scan_numeric_tokens(sent) if t.kind == "value"]
+        pers = [m.group(0) for m in PERIOD_EXPR.finditer(sent)]
+        idx = next((i for i, t in enumerate(vals) if t.start == tok.start), None) if len(vals) == len(pers) else None
+        if idx is not None:
+            years, label = _years(pers[idx]), pers[idx]
+    else:
+        seg = next((x for x in re.split(r",\s+", clause) if tok.text.strip() in x), clause)
+        # the value's comma segment, then its clause; the whole sentence only when it was not split into
+        # clauses (a year in a different clause -- e.g. an outlook -- must not date this value)
+        # (a year in an outlook clause -- "are expected to increase in 2023" -- never dates this value, and a value
+        # whose own clause says "prior year" has only a relative period)
+        if clause != sent:
+            factual = [c for c in _CLAUSE_SPLIT.split(sent) if not FORWARD.search(c)]
+            sent_scope = " ".join(factual)
+        else:
+            sent_scope = sent
+        if not RELATIVE.search(COMPARISON.sub(" ", clause)):
+            for scope_text in (seg, clause, sent_scope):
+                ys = {int(t.value) for t in scan_numeric_tokens(scope_text) if t.kind == "year"}
+                if ys:
+                    years = ys if len(ys) == 1 else set()
+                    break
     period = {"fiscalYear": next(iter(years)) if len(years) == 1 else None, "endDate": None,
-              "periodType": "unknown", "label": clause[:80]}
+              "periodType": "unknown", "label": label}
     checks += _period_ok(period, claim.period, question)
     after = clause[clause.find(tok.text) + len(tok.text):][:16].lower()
     if tok.percent:

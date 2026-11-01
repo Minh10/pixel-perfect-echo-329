@@ -35,9 +35,11 @@ DATE_RE = re.compile(rf"\b({MONTHS})\s+(\d{{1,2}}),?\s+((?:19|20)\d{{2}})\b", re
 NUMDATE_RE = re.compile(r"\b(\d{1,2})/(\d{1,2})/((?:19|20)\d{2})\b")
 YEAR_RE = re.compile(r"(?<![\d/])((?:19|20)\d{2})(?![\d/])")
 CUMULATIVE_RE = re.compile(r"\b(to[- ]date|through|cumulative|inception|since)\b", re.IGNORECASE)
-QUARTER_RE = re.compile(r"\b(three months|quarter|q[1-4])\b", re.IGNORECASE)
-YTD_RE = re.compile(r"\b(six months|nine months|year[- ]to[- ]date|ytd)\b", re.IGNORECASE)
-ANNUAL_RE = re.compile(r"\b(years? ended|fiscal years? ended|twelve months|full[- ]year|for the years?)\b", re.IGNORECASE)
+QUARTER_RE = re.compile(r"\b(three months|quarter|q[1-4]|1[234] weeks)\b", re.IGNORECASE)
+YTD_RE = re.compile(r"\b(six months|nine months|year[- ]to[- ]date|ytd|2[56] weeks|3[89] weeks|40 weeks)\b", re.IGNORECASE)
+ANNUAL_RE = re.compile(r"\b(years? ended|fiscal years? ended|twelve months|full[- ]year|for the years?|5[23] weeks)\b",
+                       re.IGNORECASE)
+FLOW_RE = re.compile(r"\bstatements? of (income|operations|earnings|cash flows?|comprehensive)", re.IGNORECASE)
 POINT_RE = re.compile(r"\b(balance sheets?|financial position|as of|at december|at year[- ]end)\b", re.IGNORECASE)
 YEAR_ONLY = re.compile(r"(?:FY\s?)?(?:19|20)\d{2}")
 UNIT_RE = re.compile(r"\b(in\s+)?(thousands|millions|billions|000s|'000|mn|bn)\b", re.IGNORECASE)
@@ -151,7 +153,9 @@ def _period_from(header: str | None, context: str, source: str) -> PeriodInfo:
         ptype = "quarterly"
     elif ANNUAL_RE.search(context):
         ptype = "annual"
-    elif end_date and (POINT_RE.search(context) or "ended" not in (header + " " + context).lower()):
+    elif end_date and POINT_RE.search(context) and not FLOW_RE.search(context):
+        # a date is a balance date only when the table says so; in an income or cash-flow statement it ends a
+        # period whose length must come from the header (else unknown)
         ptype = "point_in_time"
     else:
         ptype = "unknown"
@@ -265,10 +269,23 @@ def normalize_table(block: PageBlock, page_number: int, page_words: Sequence[Wor
     for rw in header_rows:
         if rw.label:
             stub_context.append(rw.label)
+        spanning: dict[int, tuple[float, object]] = {}
         for it in rw.items:
+            if PERIOD_WORDS.search(it.text) and not re.search(r"\d", it.text):
+                # a group header such as "Three Months Ended" spans several value columns: it applies to every
+                # column it overlaps; a column overlapped by two group headers takes the nearer one
+                cx = (it.l + it.r) / 2
+                for k, sl in enumerate(slots):
+                    if it.l < sl["x1"] + 4 and it.r > sl["x0"] - 4:
+                        d = abs(cx - (sl["x0"] + sl["x1"]) / 2)
+                        if k not in spanning or d < spanning[k][0]:
+                            spanning[k] = (d, it)
+                continue
             k = slot_of(it.l, it.r)
             if k is not None:
                 slots[k]["header"].append((it.t, it.l, it.text, "column_header"))
+        for k, (_, it) in spanning.items():
+            slots[k]["header"].append((it.t, 0.0, it.text, "column_header"))
     # (b) page words printed above the table, over each value column
     if page_words and slots:
         top = block.bbox.t
@@ -276,12 +293,22 @@ def normalize_table(block: PageBlock, page_number: int, page_words: Sequence[Wor
         above = [w for w in page_words if w[3] <= top + 2 and w[1] >= top - band and w[2] >= block.bbox.l - 5]
         for line in reversed(_lines(above)):  # closest line first; stop at the first paragraph-like line
             span = line[-1][2] - line[0][0]
-            if len(line) >= 8 and span > 0.6 * width:
-                break
             stub = [w for w in line if (w[0] + w[2]) / 2 < slots[0]["x0"] - 15]
+            over_words = [w for w in line if w not in stub]
+            # "For the years ended June 30, 2023 2022 2021" spans the table but is a header: every word over the
+            # value columns carries a digit and sits on a column.  A paragraph has prose over the columns.
+            header_like = bool(over_words) and all(any(ch.isdigit() for ch in w[4]) and slot_of(w[0], w[2]) is not None
+                                                   for w in over_words)
+            if len(line) >= 8 and span > 0.6 * width and not header_like:
+                break
             stub_context.extend(w[4] for w in stub)
             over = [w for w in line if w not in stub]
             if not over:
+                continue
+            digit_slots = {slot_of(w[0], w[2]) for w in over if any(ch.isdigit() for ch in w[4])} - {None}
+            if (any(ch.isdigit() for w in over for ch in w[4]) and not YEAR_RE.search(" ".join(w[4] for w in over))
+                    and len(digit_slots) < 2):
+                stub_context.append(" ".join(w[4] for w in over))  # "December 31," spanning the columns: context
                 continue
             if any(ch.isdigit() for w in over for ch in w[4]):
                 for w in over:  # years / dates: bind word by word to the column below it

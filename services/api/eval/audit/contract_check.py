@@ -30,11 +30,14 @@ PAIRS = {  # TS interface -> backend schema
     "DocumentPage": "DocumentPage", "EvidenceDetection": "EvidenceDetection", "Evidence": "Evidence", "Job": "Job",
     "CitedRegion": "CitedRegion", "ChunkRef": "ChunkRef", "QACitation": "Citation", "QAOperand": "Operand",
     "QACalculation": "Calculation", "QAResponse": "QAResponse", "QARequest": "QARequest",
+    "FinancialFact": "FinancialFact", "FactPeriod": "PeriodInfo",
 }
 ENUMS = {  # TS type alias -> (schema, property)
     "DocumentStatus": ("FinDocument", "status"), "JobState": ("Job", "state"), "JobStage": ("Job", "stage"),
     "BlockKind": ("PageBlock", "kind"), "EvidenceCategory": ("Evidence", "category"),
-    "ValueKind": ("AnswerValue", "valueKind"),
+    "ValueKind": ("AnswerValue", "valueKind"), "JobKind": ("Job", "kind"),
+    "FactPeriodType": ("PeriodInfo", "periodType"), "FactScale": ("FinancialFact", "scale"),
+    "FactScope": ("FinancialFact", "scope"), "FactValueStatus": ("FinancialFact", "valueStatus"),
 }
 
 

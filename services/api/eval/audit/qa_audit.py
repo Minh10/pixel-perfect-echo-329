@@ -6,8 +6,10 @@ Stages per question:
   1. gold verification — executed check that each gold label and value occur together (value within 12 lines
      after the label) in the PDF page's raw text layer, or that 'absent' terms really are absent;
   2. document routing + retrieval (QA default: dense over layout chunks, k=8; plus hybrid for comparison);
-  3. validator upper bound — the gold operand, labelled with the verbatim source row label and its true period,
-     is passed to the PR #2 association validator (if even this is rejected the pipeline cannot answer);
+  3. validator upper bound — the gold operand, claimed with the verbatim source row label, the period of the
+     column it sits in (or the question's single year) and the gold scale, is bound by the M3.5 evidence
+     validator (app/qa/evidence_binding.py) against the stored FinancialFacts / statement text of the chunk
+     (if even this is rejected the pipeline cannot answer).  The PR #2 baseline (1/30) used the PR #2 validator;
   4. LLM answer — only if a provider is configured; otherwise recorded as NOT RUN with the exact blocker.
 Answer accuracy, numerical accuracy, citation precision/recall, abstention quality, LLM latency and token cost
 are filled ONLY from a real LLM run; they are never estimated.
@@ -30,7 +32,7 @@ from app.indexing.store import ChunkStore
 from app.indexing.vectors import close_clients
 from app.qa.evidence import route_documents
 from app.qa.llm import LLMUnavailable, get_llm
-from app.qa.pipeline import _table_cells, operand_association_checks
+from app.qa.evidence_binding import OperandClaim, bind_table, bind_text
 from app.retrieval.search import Retriever
 from app.storage.db import Repository
 
@@ -81,31 +83,41 @@ def is_amount(ev: dict) -> bool:
 
 
 def best_case_validation(store: ChunkStore, it: dict, ev: dict) -> tuple[str, str]:
-    """Return (verdict, detail) for the gold operand with the truest label we can give."""
+    """Return (verdict, detail) for the gold operand with the truest claim we can give."""
     target = parse_number(ev["value"])
     chunks = [c for c in store.chunks_for(ev["doc"], "layout") if ev["page"] in c["pages"] and c["kind"] in ("table", "text")
               and any(n == target for n in numbers_in(c["content"]))]
     if not chunks:
         return "NO_CHUNK", f"no layout chunk on p{ev['page']} contains {ev['value']}"
-    ch = next((c for c in chunks if c["kind"] == "table"), chunks[0])
-    period = ""
-    if ch["kind"] == "table":
-        for row, col, val in _table_cells(ch["content"]):
-            if any(n == target for n in numbers_in(val)) and YEAR.search(col or ""):
-                period = YEAR.search(col).group(0)
-                break
-    if not period:
-        qy = YEAR.findall(it["question"])
-        period = qy[-1] if len(qy) == 1 else ""
-    scale = "percent" if it.get("gold_unit") == "percent" and "%" in ev["value"] else (
-        "units" if it.get("gold_unit") == "ratio" and False else "millions")
+    scale = "percent" if (it.get("gold_unit") == "percent" or "%" in ev["value"]) else "millions"
     if ev["value"].strip("()").replace(".", "").isdigit() and "." in ev["value"]:
         scale = "percent"  # e.g. effective tax rate "(0.6)"
-    label = f"{ev['label']} {period}".strip()
-    checks = operand_association_checks(kind=ch["kind"], label=label, quote=ev["value"], scale=scale,
-                                        text=ch["content"], question=it["question"], units=ch["meta"].get("units"))
-    failed = [f"{c['check']}: {c['detail']}" for c in checks if not c["ok"]]
-    return ("ACCEPT" if not failed else "REJECT"), "; ".join(failed) or f"label={label!r} scale={scale}"
+    qy = YEAR.findall(it["question"])
+    q_period = qy[-1] if len(set(qy)) == 1 else None
+    last = ("REJECT", "no candidate chunk")
+    for ch in sorted(chunks, key=lambda c: c["kind"] != "table"):
+        meta = ch.get("meta") or {}
+        if ch["kind"] == "table":
+            facts = list(store.facts(meta.get("factIds") or []).values())
+            rl = norm(ev["label"])
+            own = [f for f in facts if f.get("value") is not None and abs(float(f["value"])) == abs(float(target))
+                   and rl in norm(f["rowLabel"] + " " + (f.get("rowGroup") or ""))]
+            per = (own[0].get("period") or {}) if len(own) == 1 else {}
+            period = per.get("label") if (per.get("fiscalYear") or per.get("endDate")) else q_period
+            claim = OperandClaim(id="gold", quote=ev["value"], row_label=ev["label"], period=period,
+                                 metric=ev["label"], scale=scale)
+            checks = bind_table(claim, facts, it["question"],
+                                context=" ".join(x for x in (meta.get("title"), meta.get("context")) if x))[0] \
+                if facts else [{"check": "operand_facts_available", "ok": False, "detail": "no facts for chunk"}]
+        else:
+            claim = OperandClaim(id="gold", quote=ev["value"], row_label=ev["label"], period=q_period,
+                                 metric=ev["label"], scale=scale)
+            checks = bind_text(claim, ch["content"], it["question"])[0]
+        failed = [f"{c['check']}: {c['detail']}" for c in checks if not c["ok"]]
+        if not failed:
+            return "ACCEPT", f"{ch['kind']} claim period={claim.period!r} scale={scale}"
+        last = ("REJECT", "; ".join(failed))
+    return last
 
 
 def main() -> None:

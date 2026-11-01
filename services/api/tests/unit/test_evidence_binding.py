@@ -150,3 +150,66 @@ def test_final_operand_must_match_the_question_metric() -> None:
     assert failed(calculation_checks(q, "r", "revenue", [], {"r": {"revenue"}}, {"r": {2022}}),
                   "final_metric_matches_question")
     assert not failed(calculation_checks(q, "n", "net income", [], {"n": {"net_income"}}, {"n": {2022}}))
+
+
+# --------------------------------------------------------------------------- regressions found by the real-filing benchmark
+def test_known_metric_conflict_is_not_rescued_by_word_overlap() -> None:  # D34
+    facts = [fact("Operating income", "1,264", "1264", year=2022)]
+    checks, _ = bind_table(claim("1,264", "Operating income", "2022", "net income"), facts, "What was net income in 2022?")
+    assert failed(checks, "operand_metric_supported")
+
+
+def test_table_context_or_row_group_cannot_supply_the_metric() -> None:  # K17, H34
+    facts = [fact("Customer deposits", "110,239", "110239", year=2022)]
+    checks, _ = bind_table(claim("110,239", "Customer deposits", "2022", "total assets"), facts,
+                           "What were total assets in 2022?", context="Assets Liabilities and Shareholders' Equity")
+    assert failed(checks, "operand_metric_supported")
+    rd = [fact("Research, development and related expenses", "1,862", "1862", year=2022, group="Operating expenses")]
+    checks, _ = bind_table(claim("1,862", "Research, development and related expenses", "2022", "operating income"),
+                           rd, "What was operating income in 2022?", context="Consolidated Statement of Income")
+    assert failed(checks, "operand_metric_supported")
+
+
+def test_same_year_columns_need_the_full_date() -> None:  # K38/K40 pattern
+    bs = [fact("Merchandise inventories", "5,651", "5651", year=2023, end="2023-07-29", ptype="point_in_time",
+               label="July 29, 2023"),
+          fact("Merchandise inventories", "5,140", "5140", year=2023, end="2023-01-28", ptype="point_in_time",
+               label="January 28, 2023")]
+    q = "What were inventories as of July 29, 2023?"
+    assert not failed(bind_table(claim("5,651", "Merchandise inventories", "July 29, 2023", "inventories"), bs, q)[0])
+    assert failed(bind_table(claim("5,140", "Merchandise inventories", "July 29, 2023", "inventories"), bs, q)[0],
+                  "operand_period_matches")
+    # a bare year cannot pick between two columns of the same year
+    assert failed(bind_table(claim("5,651", "Merchandise inventories", "2023", "inventories"), bs, q)[0],
+                  "operand_period_matches")
+
+
+def test_weeks_headers_are_typed() -> None:  # L12
+    from app.financial.facts import _period_from
+
+    assert _period_from("13 Weeks Ended January 28, 2023", "", "column_header").period_type == "quarterly"
+    assert _period_from("26 Weeks Ended July 29, 2023", "", "column_header").period_type == "ytd"
+    assert _period_from("52 Weeks Ended January 28, 2023", "", "column_header").period_type == "annual"
+
+
+def test_respectively_binds_values_to_periods_positionally() -> None:  # H52/H53
+    text = ("Restricted cash was $379 million and $269 million as of January 28, 2023, and January 29, 2022, "
+            "respectively.")
+    q = "What was restricted cash as of January 28, 2023?"
+    assert not failed(bind_text(claim("$379", "Restricted cash", "2023", "restricted cash"), text, q)[0])
+    assert failed(bind_text(claim("$269", "Restricted cash", "2023", "restricted cash"), text, q)[0],
+                  "operand_period_matches")
+
+
+def test_outlook_and_relative_clauses_do_not_date_a_value() -> None:  # H56, H57, L28
+    s = ("Provisions for credit losses increased versus the prior year, reflecting a reserve build of $617 million "
+         "compared with a reserve release of $2.5 billion in the prior year, and are expected to increase in 2023.")
+    assert failed(bind_text(claim("$617", "reserve build", "2023", "reserve build"), s, "What in 2023?")[0],
+                  "operand_period_matches")
+    agg = "We received total gross insurance settlements of $46 million in fiscal years 2023 and 2022."
+    assert failed(bind_text(claim("$46", "insurance settlements", "2023", "insurance settlements"), agg,
+                            "What in fiscal 2023?")[0], "operand_period_matches")
+    cmp_ = ("In 2022, cash flows provided by operating activities decreased $1,863 million compared to the same "
+            "period last year, with this decrease primarily due to lower net income.")
+    assert not failed(bind_text(claim("$1,863", "cash flows provided by operating activities decreased", "2022",
+                                      "decrease in operating cash flow"), cmp_, "By how much in 2022?")[0])
