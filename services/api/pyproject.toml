@@ -1,0 +1,39 @@
+[project]
+name = "finaudit-api"
+version = "0.1.0"
+description = "FINAUDIT AI backend: financial PDF ingestion, layout-aware parsing and evidence provenance."
+requires-python = ">=3.11"
+# Versions pinned to the set that was installed and tested together.
+dependencies = [
+  "fastapi==0.162.0",
+  "uvicorn[standard]==0.54.0",
+  "pydantic==2.14.2",
+  "pydantic-settings==2.16.2",
+  "python-multipart==0.0.33",
+  "pymupdf==2.0",
+  "docling==2.145.0",
+  "docling-core==2.105.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.2.0",
+  "httpx==0.28.1",
+  # Only used by tests/fixtures/generate_fixtures.py to build synthetic fixture PDFs.
+  "reportlab==5.1.0",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "integration: end-to-end tests through the HTTP API and worker",
+  "docling_models: requires Docling model weights to be available locally",
+]
+filterwarnings = ["ignore::DeprecationWarning"]
