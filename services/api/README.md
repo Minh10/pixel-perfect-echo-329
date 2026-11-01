@@ -129,8 +129,16 @@ This fetches the default embedder (all-MiniLM-L6-v2 ONNX, checksum-pinned) into 
 Without it, dense and hybrid retrieval degrade to BM25 and report it.
 
 For QA, set an LLM provider in `.env` (see `.env.example`): `FINAUDIT_LLM_PROVIDER`,
-`FINAUDIT_LLM_MODEL` and the key env var. With API and worker as separate native processes, run a
-Qdrant server and set `FINAUDIT_QDRANT_URL`. Embedded Qdrant mode allows only one process.
+`FINAUDIT_LLM_MODEL` and the key env var named by `FINAUDIT_LLM_API_KEY_ENV`
+(default `FINAUDIT_LLM_API_KEY`). Put the key only in `services/api/.env` or the process environment.
+Do not commit it and do not send it from the browser. With `FINAUDIT_LLM_PROVIDER=none`, `POST /api/v1/qa`
+returns HTTP 503 `llm_unavailable` and the UI must not invent an answer.
+
+With API and worker as separate native processes, run a Qdrant server and set `FINAUDIT_QDRANT_URL`.
+Embedded Qdrant mode allows only one process, so dense retrieval from the API fails while the worker
+holds `data/qdrant`. This environment has no Docker, so server mode was not started. The pinned
+embedder checksum is in `app/retrieval/fetch_models.py` (`SHA256` of the Chroma ONNX archive).
+Python 3.11 uses `numpy==2.4.6`; `numpy==2.5.x` requires Python 3.12.
 
 ### Tests
 

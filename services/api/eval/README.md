@@ -40,6 +40,13 @@ What each step does:
 6. **`run_qa_eval.py`** runs end-to-end QA. It needs an LLM provider (`FINAUDIT_LLM_*`) and writes
    `results/qa_results.json`.
 
+## Synthetic smoke set
+
+`eval/smoke/milestone3_smoke.jsonl` is 30 manually reviewable questions about
+`tests/fixtures/annual_report_excerpt.pdf` only. It is not FinanceBench and it has no scores until
+a configured LLM provider answers each item. With `FINAUDIT_LLM_PROVIDER=none`, the API returns
+503 `llm_unavailable` and no accuracy, citation, latency, or cost metric is computed.
+
 FinanceBench data and PDFs are **not** redistributed here. The repository publishes no licence for
 them, so they are downloaded into `eval/data/`, which is git-ignored.
 
