@@ -43,8 +43,9 @@ def verify(case: dict, corpus: Path) -> list[str]:
     years = re.findall(r"(?:19|20)\d{2}", per)
     if not years or not all(y in t for y in years):
         problems.append(f"period year(s) {per!r} not on page")
-    if re.search(MONTHS, per, re.IGNORECASE) and norm(re.sub(r"\s*,\s*", " ", per)) not in norm(t.replace(",", " ")):
-        problems.append(f"period date {per!r} not printed on page")
+    md = re.search(rf"({MONTHS})\s+\d{{1,2}}", per, re.IGNORECASE)
+    if md and norm(md.group(0)) not in norm(t.replace(",", " ")):  # month + day printed (the year may be on the
+        problems.append(f"period date {per!r} not printed on page")  # next header line, e.g. Ulta, 3M 10-Q)
     if case["kind"] == "text":
         sentence = next((s for s in re.split(r"(?<=[.;])\s+", t) if squash(cl["quote"]) in squash(s)), None)
         if sentence is None:
