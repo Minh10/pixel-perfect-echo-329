@@ -1,4 +1,13 @@
-import { LayoutGrid, FileText, ScanSearch, MessageSquareText, ShieldCheck, TrendingUp, Gauge, type LucideIcon } from "lucide-react";
+import {
+  LayoutGrid,
+  FileText,
+  ScanSearch,
+  MessageSquareText,
+  ShieldCheck,
+  TrendingUp,
+  Gauge,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface NavItem {
   title: string;

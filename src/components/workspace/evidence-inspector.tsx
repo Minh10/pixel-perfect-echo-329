@@ -25,7 +25,14 @@ interface Props {
   onSelect: (id: string | null) => void;
 }
 
-export function EvidenceInspector({ evidence, pages, selected, filter, onFilter, onSelect }: Props) {
+export function EvidenceInspector({
+  evidence,
+  pages,
+  selected,
+  filter,
+  onFilter,
+  onSelect,
+}: Props) {
   const filtered = filter === "all" ? evidence : evidence.filter((e) => e.category === filter);
   const related = selected ? evidence.filter((e) => selected.related.includes(e.id)) : [];
   const selectedBlock = selected
@@ -82,7 +89,9 @@ export function EvidenceInspector({ evidence, pages, selected, filter, onFilter,
           )}
           <div className="mt-4 flex items-center justify-between gap-3">
             {selected.confidence == null ? (
-              <p className="text-[11px] text-muted-foreground">Confidence: not reported by parser</p>
+              <p className="text-[11px] text-muted-foreground">
+                Confidence: not reported by parser
+              </p>
             ) : (
               <ConfidenceBar value={selected.confidence} />
             )}

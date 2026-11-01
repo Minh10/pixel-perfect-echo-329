@@ -1,4 +1,4 @@
-import type { DocumentPage, Evidence, PageBlock } from "@/lib/api/types";
+import type { DocumentPage, Evidence, NormalizedBBox, PageBlock } from "@/lib/api/types";
 import { API_URL, apiAsset } from "@/lib/api/http-service";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface Props {
   zoom: number;
   onSelect: (id: string) => void;
   documentTitle: string;
+  focus?: NormalizedBBox[];
 }
 
 /** Renders a page as a paper sheet. Replace with a real PDF renderer (e.g. pdf.js) + bbox overlay later. */
@@ -24,6 +25,7 @@ export function DocumentPageView({
   zoom,
   onSelect,
   documentTitle,
+  focus,
 }: Props) {
   const byBlock = new Map(
     evidence.filter((e) => e.page === page.number).map((e) => [e.blockId, e]),
@@ -38,7 +40,8 @@ export function DocumentPageView({
 
   if (live && page.imageUrl && page.width && page.height) {
     const extracted = page.blocks.filter(
-      (block) => (block.kind === "table" && block.table) || (block.kind === "figure" && block.figure),
+      (block) =>
+        (block.kind === "table" && block.table) || (block.kind === "figure" && block.figure),
     );
     return (
       <div className="mx-auto w-full space-y-6" style={{ maxWidth: 720 * zoom }}>
@@ -67,7 +70,8 @@ export function DocumentPageView({
                 title={ev.label}
                 className={cn(
                   "absolute rounded-[2px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  showHighlights && "border border-evidence/80 bg-evidence-soft/35 hover:bg-evidence-soft/70",
+                  showHighlights &&
+                    "border border-evidence/80 bg-evidence-soft/35 hover:bg-evidence-soft/70",
                   !showHighlights && "hover:bg-evidence-soft/40",
                   selected && "z-10 border-evidence bg-evidence-soft/60 ring-2 ring-evidence",
                 )}
@@ -80,6 +84,19 @@ export function DocumentPageView({
               />
             );
           })}
+          {focus?.map((box, index) => (
+            <div
+              key={`cite-${index}`}
+              className="pointer-events-none absolute z-20 rounded-[2px] ring-2 ring-primary"
+              style={{
+                left: `${box.x * 100}%`,
+                top: `${box.y * 100}%`,
+                width: `${box.width * 100}%`,
+                height: `${box.height * 100}%`,
+              }}
+              aria-hidden
+            />
+          ))}
         </article>
         <p className="text-center font-mono text-[10px] text-muted-foreground">
           {page.number} / {totalPages}
@@ -87,7 +104,10 @@ export function DocumentPageView({
           {page.hasTextLayer === false ? " · no text layer" : ""}
         </p>
         {extracted.length > 0 && (
-          <section className="space-y-4 rounded-md border bg-card p-4" aria-label="Extracted regions">
+          <section
+            className="space-y-4 rounded-md border bg-card p-4"
+            aria-label="Extracted regions"
+          >
             <h2 className="text-sm font-semibold">Extracted on this page</h2>
             {extracted.map((block) => {
               const ev = byBlock.get(block.id);
@@ -212,7 +232,9 @@ export function BlockContent({ block }: { block: PageBlock }) {
           className="max-w-full"
         />
         {block.figure.caption && (
-          <figcaption className="mt-2 text-xs text-muted-foreground">{block.figure.caption}</figcaption>
+          <figcaption className="mt-2 text-xs text-muted-foreground">
+            {block.figure.caption}
+          </figcaption>
         )}
       </figure>
     );

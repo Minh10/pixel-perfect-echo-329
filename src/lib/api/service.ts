@@ -4,7 +4,17 @@
 import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";
 import { API_URL, httpService } from "./http-service";
-import type { DocumentPage, Evidence, FinDocument, Job, TrendPoint, UploadMeta } from "./types";
+import type {
+  ChunkRef,
+  DocumentPage,
+  Evidence,
+  FinDocument,
+  Job,
+  QARequest,
+  QAResponse,
+  TrendPoint,
+  UploadMeta,
+} from "./types";
 
 export interface FinAuditService {
   listDocuments(): Promise<FinDocument[]>;
@@ -18,9 +28,11 @@ export interface FinAuditService {
     onProgress?: (fraction: number) => void,
   ): Promise<{ document: FinDocument; job: Job }>;
   getJob?(jobId: string): Promise<Job>;
+  ask?(body: QARequest): Promise<QAResponse>;
+  getCitation?(chunkId: string): Promise<ChunkRef>;
 }
 
-const delay = <T,>(value: T, ms = 350) => new Promise<T>((r) => setTimeout(() => r(value), ms));
+const delay = <T>(value: T, ms = 350) => new Promise<T>((r) => setTimeout(() => r(value), ms));
 
 export const demoService: FinAuditService = {
   listDocuments: () => delay(DEMO_DOCUMENTS),

@@ -86,7 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "FINAUDIT AI" },
       { name: "description", content: "Multimodal financial document intelligence and auditing." },
       { property: "og:title", content: "FINAUDIT AI" },
-      { property: "og:description", content: "Multimodal financial document intelligence and auditing." },
+      {
+        property: "og:description",
+        content: "Multimodal financial document intelligence and auditing.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -38,7 +38,8 @@ export const Route = createFileRoute("/")({
   errorComponent: function OverviewError({ error }) {
     const router = useRouter();
     const unavailable =
-      error instanceof ApiError && (error.code === "backend_unavailable" || error.code === "timeout");
+      error instanceof ApiError &&
+      (error.code === "backend_unavailable" || error.code === "timeout");
     return (
       <div className="p-8">
         <ErrorState

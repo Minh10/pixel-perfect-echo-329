@@ -5,10 +5,7 @@
 export type DocumentStatus = "processing" | "ready" | "failed";
 
 export type DocumentType =
-  | "Annual Report"
-  | "Quarterly Report"
-  | "Prospectus"
-  | "Sustainability Report";
+  "Annual Report" | "Quarterly Report" | "Prospectus" | "Sustainability Report";
 
 export interface ApiErrorBody {
   code: string;
@@ -199,4 +196,102 @@ export interface TrendPoint {
   revenue: number;
   operatingIncome: number;
   netIncome: number;
+}
+
+export interface CitedRegion {
+  page: number;
+  blockId: string | null;
+  role: string | null;
+  bbox: BBox;
+  bboxNormalized: NormalizedBBox;
+  workspaceEvidenceId: string | null;
+}
+
+export interface ChunkRef {
+  chunkId: string;
+  chunkSet: "layout" | "flat";
+  kind: "text" | "table" | "figure" | "window";
+  documentId: string;
+  documentTitle: string | null;
+  company: string | null;
+  period: string | null;
+  pages: number[];
+  sectionPath: string[];
+  content: string;
+  regions: CitedRegion[];
+  table: {
+    caption: string | null;
+    title: string | null;
+    units: string | null;
+    columns: string[];
+  } | null;
+  figure: { caption: string | null; imageUrl: string | null } | null;
+  pageImageUrl: string;
+  sourceSha256: string;
+  parser: string;
+  parserVersion: string;
+  indexVersion: string;
+}
+
+export interface QACitation {
+  evidenceId: string;
+  quote: string | null;
+  evidenceKind: ChunkRef["kind"];
+  chunk: ChunkRef;
+}
+
+export interface QAOperand {
+  id: string;
+  value: string;
+  quote: string;
+  label: string;
+  evidenceId: string;
+  scale: string;
+  valueKind: "reported" | "visual_estimate";
+  evidenceKind: ChunkRef["kind"];
+}
+
+export interface QACalculation {
+  id: string;
+  op: string;
+  description: string;
+  inputs: { ref: string; value: string }[];
+  result: string;
+  scale: string;
+  valueKind: "reported" | "visual_estimate";
+}
+
+export type ValueKind = "reported" | "calculated" | "visual_estimate";
+
+export interface QAResponse {
+  status: "answered" | "abstained";
+  question: string;
+  answer: string | null;
+  value: { value: string; unit: string | null; valueKind: ValueKind; source: string } | null;
+  operands: QAOperand[];
+  calculations: QACalculation[];
+  citations: QACitation[];
+  abstention: {
+    reason: "no_evidence" | "insufficient_evidence" | "validation_failed" | "model_refused";
+    detail: string;
+  } | null;
+  documentsConsidered: { documentId: string; issuer?: string; period?: string; title?: string }[];
+  retrieved: { rank: number; score: number; chunk: ChunkRef }[];
+  usage: {
+    provider: string | null;
+    model: string | null;
+    inputTokens: number | null;
+    outputTokens: number | null;
+    llmCalls: number;
+    costUsd: number | null;
+  };
+  timingsMs: Record<string, number>;
+  warnings: string[];
+  note: string;
+}
+
+export interface QARequest {
+  question: string;
+  documentIds?: string[] | null;
+  topK?: number;
 }

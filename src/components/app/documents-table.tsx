@@ -93,7 +93,9 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
               <TableCell className="hidden text-sm text-muted-foreground xl:table-cell">
                 {display(d.type)}
               </TableCell>
-              <TableCell className="hidden text-sm tabular sm:table-cell">{display(d.period)}</TableCell>
+              <TableCell className="hidden text-sm tabular sm:table-cell">
+                {display(d.period)}
+              </TableCell>
               <TableCell className="hidden text-right text-sm tabular md:table-cell">
                 {d.pages}
               </TableCell>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,22 +17,28 @@ import { Switch } from "@/components/ui/switch";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
-import { ApiError, sourceDocumentUrl } from "@/lib/api/http-service";
+import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
 import {
   DEFAULT_DOCUMENT_ID,
   IS_DEMO,
+  api,
   documentQuery,
   documentsQuery,
   evidenceQuery,
   pagesQuery,
 } from "@/lib/api/service";
-import type { EvidenceCategory } from "@/lib/api/types";
+import type { ChunkRef, EvidenceCategory } from "@/lib/api/types";
 import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
 import { EmptyState, ErrorState, WorkspaceSkeleton } from "@/components/app/states";
 
-const search = z.object({ doc: z.string().optional(), page: z.number().int().min(1).optional() });
+const search = z.object({
+  doc: z.string().optional(),
+  page: z.number().int().min(1).optional(),
+  ev: z.string().optional(),
+  chunk: z.string().optional(),
+});
 
 export const Route = createFileRoute("/intelligence")({
   validateSearch: search,
@@ -69,7 +75,8 @@ export const Route = createFileRoute("/intelligence")({
   errorComponent: function WorkspaceError({ error }) {
     const router = useRouter();
     const unavailable =
-      error instanceof ApiError && (error.code === "backend_unavailable" || error.code === "timeout");
+      error instanceof ApiError &&
+      (error.code === "backend_unavailable" || error.code === "timeout");
     return (
       <div className="p-8">
         <ErrorState
@@ -112,7 +119,7 @@ function Workspace() {
 }
 
 function WorkspaceReady({ docId }: { docId: string }) {
-  const { page: pageParam } = Route.useSearch();
+  const { page: pageParam, ev: evParam, chunk: chunkParam } = Route.useSearch();
   const queryClient = useQueryClient();
   const navigate = Route.useNavigate();
   const { data: doc } = useSuspenseQuery(documentQuery(docId));
@@ -137,8 +144,29 @@ function WorkspaceReady({ docId }: { docId: string }) {
     previousStatus.current = doc.status;
   }, [doc.status, docId, queryClient]);
 
+  const citationQuery = useQuery({
+    queryKey: ["citation", chunkParam],
+    queryFn: () => api.getCitation!(chunkParam!),
+    enabled: Boolean(chunkParam && api.getCitation),
+  });
+  const citation = citationQuery.data ?? null;
+
+  useEffect(() => {
+    if (!evParam) return;
+    const ev = evidence.find((item) => item.id === evParam);
+    if (!ev) return;
+    setSelectedId(ev.id);
+    if (ev.page !== (pageParam ?? 1)) {
+      void navigate({ search: (s) => ({ ...s, page: ev.page }), replace: true });
+    }
+  }, [evParam, evidence, pageParam, navigate]);
+
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
+  const focus =
+    citation?.regions
+      .filter((region) => region.page === current)
+      .map((region) => region.bboxNormalized) ?? [];
   const selected = useMemo(
     () => evidence.find((e) => e.id === selectedId) ?? null,
     [evidence, selectedId],
@@ -315,7 +343,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
         </div>
       </div>
       {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
-        <p className="border-b bg-warning-soft px-4 py-2 text-xs text-warning">{doc.warnings.join(" ")}</p>
+        <p className="border-b bg-warning-soft px-4 py-2 text-xs text-warning">
+          {doc.warnings.join(" ")}
+        </p>
       )}
 
       <div className="hidden min-h-0 flex-1 lg:block">
@@ -347,6 +377,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
                   zoom={zoom}
                   onSelect={select}
                   documentTitle={doc.title}
+                  focus={focus}
                 />
               )}
             </main>
@@ -356,6 +387,11 @@ function WorkspaceReady({ docId }: { docId: string }) {
               <ResizableHandle withHandle aria-label="Resize evidence inspector" />
               <ResizablePanel id="inspector" defaultSize="29%" minSize="280px" maxSize="40%">
                 <aside className="h-full overflow-y-auto bg-card">
+                  <CitedExcerpt
+                    citation={citation}
+                    error={citationQuery.error}
+                    pending={citationQuery.isFetching}
+                  />
                   <EvidenceInspector
                     evidence={evidence}
                     pages={pages}
@@ -387,11 +423,17 @@ function WorkspaceReady({ docId }: { docId: string }) {
               zoom={zoom}
               onSelect={select}
               documentTitle={doc.title}
+              focus={focus}
             />
           )}
         </main>
         {showInspector && (
           <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
+            <CitedExcerpt
+              citation={citation}
+              error={citationQuery.error}
+              pending={citationQuery.isFetching}
+            />
             <EvidenceInspector
               evidence={evidence}
               pages={pages}
@@ -404,5 +446,65 @@ function WorkspaceReady({ docId }: { docId: string }) {
         )}
       </div>
     </div>
+  );
+}
+
+function CitedExcerpt({
+  citation,
+  error,
+  pending,
+}: {
+  citation: ChunkRef | null;
+  error: unknown;
+  pending: boolean;
+}) {
+  if (!citation && !error && !pending) return null;
+  const region = citation?.regions[0];
+  return (
+    <section className="space-y-2 border-b px-4 py-3" aria-label="Cited evidence">
+      <p className="eyebrow">Cited evidence</p>
+      {pending && !citation && (
+        <p className="text-xs text-muted-foreground">Loading the cited excerpt…</p>
+      )}
+      {error instanceof Error && <p className="text-xs text-destructive">{error.message}</p>}
+      {citation && (
+        <>
+          <p className="text-xs text-muted-foreground">
+            {[
+              citation.documentTitle,
+              citation.pages[0] ? `p. ${citation.pages[0]}` : null,
+              citation.sectionPath.join(" › "),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          <p className="whitespace-pre-wrap text-xs leading-relaxed">{citation.content}</p>
+          {citation.table?.units && (
+            <p className="font-mono text-[11px] text-muted-foreground">
+              Units: {citation.table.units}
+            </p>
+          )}
+          {citation.figure?.imageUrl && (
+            <img
+              src={apiAsset(citation.figure.imageUrl)}
+              alt={citation.figure.caption ?? "Cited figure"}
+              className="max-h-40 max-w-full"
+            />
+          )}
+          <dl className="space-y-1 font-mono text-[11px] text-muted-foreground">
+            <div>
+              {citation.parser} {citation.parserVersion} · index {citation.indexVersion}
+            </div>
+            <div>sha256 {citation.sourceSha256}</div>
+            {region && (
+              <div>
+                p. {region.page} · bbox {region.bbox.l.toFixed(1)}, {region.bbox.t.toFixed(1)},{" "}
+                {region.bbox.r.toFixed(1)}, {region.bbox.b.toFixed(1)} pt
+              </div>
+            )}
+          </dl>
+        </>
+      )}
+    </section>
   );
 }

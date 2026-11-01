@@ -16,7 +16,7 @@ from app.processing.pymupdf_parser import inspect_pages, parse_with_pymupdf
 from app.qa import calculator as calc
 from app.qa.evidence import route_documents
 from app.qa.llm import AnthropicProvider, LLMRefusal, LLMUnavailable, OpenAICompatibleProvider, cost_usd
-from app.qa.pipeline import PLAN_SCHEMA, QAPipeline
+from app.qa.pipeline import PLAN_SCHEMA, QAPipeline, operand_association_checks
 from app.qa.schemas import QARequest
 from app.retrieval.search import Retriever
 from app.storage.db import Repository
@@ -180,6 +180,110 @@ def test_invalid_plans_are_rejected(qa_env, mutate) -> None:
 
     r, _ = run(qa_env, [b, b])
     assert r.status == "abstained" and r.abstention.reason == "validation_failed"
+
+
+def _relabel(qa_env, mutate, question=Q):
+    def b(e):
+        p = good_plan(e)
+        mutate(p)
+        return p
+
+    return run(qa_env, [b, b], question=question)
+
+
+def test_pipeline_rejects_wrong_metric_year_unit_scope_and_unsupported_math(qa_env) -> None:
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Revenue 2025"))
+    assert r.status == "abstained" and "operand_label_on_same_row" in r.abstention.detail
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Operating profit 2024"))
+    assert r.status == "abstained" and "operand_period_matches" in r.abstention.detail
+    r, _ = _relabel(qa_env, lambda p: [o.__setitem__("scale", "thousands") for o in p["operands"]])
+    assert r.status == "abstained" and "operand_units_match" in r.abstention.detail
+    r, _ = _relabel(qa_env, lambda p: p["operands"][1].__setitem__("label", "Segment operating profit 2025"))
+    assert r.status == "abstained" and "operand_scope_matches" in r.abstention.detail
+    r, _ = _relabel(qa_env, lambda p: p["calculations"][0].__setitem__("op", "npv"))
+    assert r.status == "abstained" and "calculations_valid" in r.abstention.detail
+
+
+TABLE = """[Table] Table 1: Summary income statement (GBP m), synthetic data
+Units: GBP millions.
+Columns: 2025 | 2024 | Change
+Revenue: 2025 = 4,812; 2024 = 4,281; Change = +12.4%
+Operating profit: 2025 = 703; 2024 = 591; Change = +18.9%
+"""
+PROSE = ("Group revenue increased 12.4% to GBP 4,812 million in 2025, while operating profit rose to "
+         "GBP 703 million.")
+Q_OP = "What was Fictional Example Holdings' operating profit in 2025?"
+
+
+def _assoc(**kwargs):
+    base = dict(kind="table", label="Operating profit 2025", quote="703", scale="millions", text=TABLE, question=Q_OP)
+    base.update(kwargs)
+    return operand_association_checks(**base)
+
+
+def _failed(checks, name):
+    return [c for c in checks if c["check"] == name and not c["ok"]]
+
+
+def test_correct_metric_and_year_are_accepted() -> None:
+    checks = _assoc()
+    assert all(c["ok"] for c in checks), checks
+
+
+def test_correct_number_wrong_metric_is_rejected() -> None:
+    checks = _assoc(label="Revenue 2025", question="What was revenue in 2025?")
+    assert _failed(checks, "operand_label_on_same_row")
+
+
+def test_correct_metric_wrong_fiscal_year_is_rejected() -> None:
+    assert _failed(_assoc(label="Operating profit 2024"), "operand_period_matches")
+    assert _failed(_assoc(question="What was operating profit in 2030?"), "operand_period_matches")
+
+
+def test_different_units_or_currencies_are_rejected() -> None:
+    assert _failed(_assoc(scale="thousands"), "operand_units_match")
+    assert _failed(_assoc(label="Operating profit 2025 USD"), "operand_currency_matches")
+    assert _failed(_assoc(question="What was operating profit in 2025 in USD?"), "operand_currency_matches")
+
+
+def test_different_reporting_scope_is_rejected() -> None:
+    assert _failed(_assoc(label="Segment operating profit 2025"), "operand_scope_matches")
+    grouped = _assoc(label="Group operating profit 2025", text="[Table] Group income statement\n" + TABLE)
+    assert all(c["ok"] for c in grouped), grouped
+
+
+def test_wrong_row_or_column_and_ambiguous_values_are_rejected() -> None:
+    assert _failed(_assoc(label="Revenue 2025", quote="703"), "operand_label_on_same_row")
+    duplicated = TABLE + "Other income: 2025 = 703; 2024 = 10\n"
+    checks = _assoc(text=duplicated)
+    assert _failed(checks, "operand_cell_located")
+    assert "more than one" in checks[0]["detail"]
+
+
+def test_missing_evidence_is_not_verified() -> None:
+    checks = _assoc(quote="2025")
+    assert _failed(checks, "operand_cell_located")
+    prose_miss = operand_association_checks(kind="text", label="Revenue 2025", quote="703", scale="millions",
+                                            text=PROSE, question="What was revenue in 2025?")
+    assert _failed(prose_miss, "operand_label_on_same_row")
+    prose_ok = operand_association_checks(kind="text", label="Operating profit 2025", quote="703", scale="millions",
+                                          text=PROSE, question=Q_OP)
+    assert all(c["ok"] for c in prose_ok), prose_ok
+
+
+def test_headers_away_from_the_value_still_verify() -> None:
+    text = "\n".join([
+        "[Table] Summary income statement",
+        "Units: GBP millions.",
+        "Columns: 2025 | 2024",
+        "[Operating profit]",
+        "703; 591",
+    ])
+    checks = _assoc(text=text)
+    assert all(c["ok"] for c in checks), checks
+    single = "\n".join(["[Table] Operating profit 2025", "Units: GBP millions.", "[Operating profit]", "703"])
+    checks = _assoc(text=single)
+    assert all(c["ok"] for c in checks), checks
 
 
 def test_model_abstention_and_refusal(qa_env) -> None:

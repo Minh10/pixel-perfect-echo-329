@@ -1,8 +1,11 @@
 import type {
+  ChunkRef,
   DocumentPage,
   Evidence,
   FinDocument,
   Job,
+  QARequest,
+  QAResponse,
   TrendPoint,
   UploadMeta,
 } from "./types";
@@ -15,6 +18,7 @@ export const API_URL = (import.meta.env["VITE_FINAUDIT_API_URL"] as string | und
 const V1 = `${API_URL}/api/v1`;
 const JSON_TIMEOUT_MS = 20_000;
 const UPLOAD_TIMEOUT_MS = 120_000;
+const QA_TIMEOUT_MS = 120_000;
 
 export class ApiError extends Error {
   constructor(
@@ -104,8 +108,11 @@ export const httpService = {
         if (event.lengthComputable && event.total > 0) onProgress?.(event.loaded / event.total);
       };
       xhr.onload = () => {
-        let body: { document?: FinDocument; job?: Job; error?: { code?: string; message?: string } } | null =
-          null;
+        let body: {
+          document?: FinDocument;
+          job?: Job;
+          error?: { code?: string; message?: string };
+        } | null = null;
         try {
           body = xhr.responseText ? JSON.parse(xhr.responseText) : null;
         } catch {
@@ -133,12 +140,26 @@ export const httpService = {
           ),
         );
       xhr.ontimeout = () =>
-        reject(new ApiError(0, "timeout", "The upload timed out before the service accepted the PDF."));
+        reject(
+          new ApiError(0, "timeout", "The upload timed out before the service accepted the PDF."),
+        );
       xhr.send(fd);
     });
   },
   getJob: (jobId: string) => req<Job>(`/jobs/${encodeURIComponent(jobId)}`),
-  deleteDocument: (id: string) => req<void>(`/documents/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  ask: (body: QARequest) =>
+    req<QAResponse>(
+      "/qa",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      QA_TIMEOUT_MS,
+    ),
+  getCitation: (chunkId: string) => req<ChunkRef>(`/citations/${encodeURIComponent(chunkId)}`),
+  deleteDocument: (id: string) =>
+    req<void>(`/documents/${encodeURIComponent(id)}`, { method: "DELETE" }),
   reprocessDocument: (id: string) =>
     req<Job>(`/documents/${encodeURIComponent(id)}/reprocess`, { method: "POST" }),
 };

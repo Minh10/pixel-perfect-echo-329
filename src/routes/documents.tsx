@@ -42,7 +42,8 @@ export const Route = createFileRoute("/documents")({
   errorComponent: function DocumentsError({ error }) {
     const router = useRouter();
     const unavailable =
-      error instanceof ApiError && (error.code === "backend_unavailable" || error.code === "timeout");
+      error instanceof ApiError &&
+      (error.code === "backend_unavailable" || error.code === "timeout");
     return (
       <div className="p-8">
         <ErrorState
@@ -191,11 +192,15 @@ function Documents() {
       )}
       {uploadProgress !== null && (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Uploading PDF · {Math.round(uploadProgress * 100)}%</p>
+          <p className="text-xs text-muted-foreground">
+            Uploading PDF · {Math.round(uploadProgress * 100)}%
+          </p>
           <Progress value={uploadProgress * 100} />
         </div>
       )}
-      {activeJob && <JobProgress jobId={activeJob.id} fileName={activeJob.fileName} onSettled={onSettled} />}
+      {activeJob && (
+        <JobProgress jobId={activeJob.id} fileName={activeJob.fileName} onSettled={onSettled} />
+      )}
       <div className="relative max-w-sm">
         <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -262,7 +267,8 @@ function JobProgress({
   }, [data]);
 
   useEffect(() => {
-    if (error) toast.error(error instanceof Error ? error.message : "Could not read processing status.");
+    if (error)
+      toast.error(error instanceof Error ? error.message : "Could not read processing status.");
   }, [error]);
 
   return (
