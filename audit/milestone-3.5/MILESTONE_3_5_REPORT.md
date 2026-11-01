@@ -40,7 +40,7 @@ The application is **not production-secure**; see §8.
 | AUD-05 | Every operand had to carry the question's metric, so derived metrics always failed | **Fixed.** Inputs are validated individually; derived metrics are checked by calculation specs (`DERIVED` in `vocabulary.py`); `final_metric_matches_question` applies only to a non-derived final value | `test_b5_*` passes; D37 accepted; `test_derived_metric_*` |
 | AUD-06 | Chunker missed header-row units and periods; `(7.0; %)` mis-merge | **Fixed** for the audited tables (AMD p56: Dec 31 2022 / Dec 25 2021, millions). Chunker `layout-v3` serialises `column = value` with explicit period tags | `test_b6_*` passes; `FINANCIAL_EVIDENCE_SCHEMA.md` |
 | AUD-07 | No real-filing validator tests | **Fixed.** 192 benchmark cases from 12 real filings plus 1 synthetic, replayed offline in CI from frozen evidence | `tests/unit/test_grounding_benchmark.py` |
-| AUD-08 | No CI | Workflow from the audit kept. It must be observed green on the PR (§9) | `.github/workflows/ci.yml` |
+| AUD-08 | No CI | **Fixed and observed.** GitHub Actions is green on the PR head: backend (tests on the pinned set, OpenAPI drift, strict contract check), frontend (tsc, lint, test, build), dependency audit (informational) | `.github/workflows/ci.yml`, run `41318022758` |
 | AUD-09 | Frontend has only routing tests | **Not addressed** (out of scope). The UI change is small and type-checked | — |
 | AUD-10 | TS `JobStage` lacks `indexing` | **Fixed.** Contract check: 1 error → 0 | `contract_check.txt` |
 | AUD-11 | `numpy==2.4.6` pinned; tests ran on 2.5.4 | **Not changed.** CI installs from `pyproject.toml`, so CI runs the pinned set | — |
@@ -196,8 +196,10 @@ heuristic: a fluent unsupported claim reusing evidence vocabulary can pass.
   spend LLM tokens per request once configured. Mitigation is only the localhost binding.
 - **Frontend dependencies:** `bun audit` reports **28 advisories (1 critical, 14 high, 12 moderate, 1 low)**,
   identical to the audit. `bun.lock` was not changed (`frontend_bun_audit.txt`).
-- **Backend dependencies:** no new dependencies were added. The audit's PyPI lookup found 0 known
-  vulnerabilities; it was not re-run (OSV unreachable).
+- **Backend dependencies:** no new dependencies were added. `pip-audit --no-deps` over the 137 resolved
+  third-party pins reports **no known vulnerabilities**: locally, and in CI run `41318022758` (Python 3.12). The
+  CI step previously failed before auditing anything, because the requirement list included the local package;
+  that is fixed.
 - Runtime security probes: **13/13 pass** (`security_probe.txt`).
 - S-5 (exception text in job errors), S-6 / AUD-13 (in-memory upload validation), S-7 (in-process PDF parsing)
   and S-8 (Qdrant without an API key) are unchanged.
