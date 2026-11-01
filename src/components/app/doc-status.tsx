@@ -10,7 +10,12 @@ const MAP: Record<DocumentStatus, { label: string; cls: string }> = {
 export function DocStatus({ status }: { status: DocumentStatus }) {
   const m = MAP[status];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs font-medium", m.cls)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs font-medium",
+        m.cls,
+      )}
+    >
       <span className="size-1.5 rounded-full bg-current" />
       {m.label}
     </span>

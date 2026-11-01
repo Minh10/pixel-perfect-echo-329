@@ -18,9 +18,15 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Overview — FINAUDIT AI" },
-      { name: "description", content: "Workspace overview of financial documents, evidence and audit readiness." },
+      {
+        name: "description",
+        content: "Workspace overview of financial documents, evidence and audit readiness.",
+      },
       { property: "og:title", content: "Overview — FINAUDIT AI" },
-      { property: "og:description", content: "Workspace overview of financial documents, evidence and audit readiness." },
+      {
+        property: "og:description",
+        content: "Workspace overview of financial documents, evidence and audit readiness.",
+      },
     ],
   }),
   pendingComponent: PageSkeleton,
@@ -36,14 +42,35 @@ function Overview() {
       <PageHeader
         title="Overview"
         description="Your financial report library, processing status and source evidence — in one workspace."
-        actions={<><Button asChild variant="ghost"><Link to="/documents">View Documents</Link></Button><Button asChild className="h-10"><Link to="/intelligence">Open Document Workspace <ArrowRight /></Link></Button></>}
+        actions={
+          <>
+            <Button asChild variant="ghost">
+              <Link to="/documents">View Documents</Link>
+            </Button>
+            <Button asChild className="h-10">
+              <Link to="/intelligence">
+                Open Document Workspace <ArrowRight />
+              </Link>
+            </Button>
+          </>
+        }
       />
       <OverviewMetrics documents={docs} evidence={evidence} />
       <OverviewPanels documents={docs} />
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <div><h2 className="text-base font-semibold">Recent Documents</h2><p className="mt-1 text-sm text-muted-foreground">Financial reports in your library</p></div>
-          <div className="flex items-center gap-3"><DemoBadge /><Button asChild variant="link" size="sm"><Link to="/documents">View all <ArrowRight /></Link></Button></div>
+          <div>
+            <h2 className="text-base font-semibold">Recent Documents</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Financial reports in your library</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <DemoBadge />
+            <Button asChild variant="link" size="sm">
+              <Link to="/documents">
+                View all <ArrowRight />
+              </Link>
+            </Button>
+          </div>
         </div>
         <DocumentsTable documents={docs} />
       </section>

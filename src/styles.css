@@ -101,7 +101,7 @@
   --evidence-soft: oklch(0.951 0.025 255);
   --warning: oklch(0.49 0.105 70);
   --warning-soft: oklch(0.966 0.04 85);
-  --success: oklch(0.45 0.10 155);
+  --success: oklch(0.45 0.1 155);
   --success-soft: oklch(0.956 0.023 155);
   --paper: oklch(1 0 0);
   --canvas: oklch(0.944 0.005 265);
@@ -120,7 +120,8 @@
   --sidebar-accent-foreground: var(--primary-deep);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--primary);
-  --shadow-page: 0 1px 3px oklch(0.263 0.013 255 / 0.09), 0 12px 32px -10px oklch(0.263 0.013 255 / 0.15);
+  --shadow-page:
+    0 1px 3px oklch(0.263 0.013 255 / 0.09), 0 12px 32px -10px oklch(0.263 0.013 255 / 0.15);
 }
 
 @layer base {
@@ -160,11 +161,15 @@
   max-width: 1600px;
   margin-inline: auto;
   padding: 24px 20px;
-  @media (min-width: 768px) { padding: 32px; }
+  @media (min-width: 768px) {
+    padding: 32px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

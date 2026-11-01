@@ -1,7 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { NAV_ITEMS } from "./nav";
 
@@ -33,7 +41,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {NAV_ITEMS.filter((i) => i.group === group).map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton className="h-10 border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:font-semibold" asChild isActive={isActive(item.to)} tooltip={item.title}>
+                    <SidebarMenuButton
+                      className="h-10 border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:font-semibold"
+                      asChild
+                      isActive={isActive(item.to)}
+                      tooltip={item.title}
+                    >
                       <Link to={item.to}>
                         <item.icon />
                         <span>{item.title}</span>

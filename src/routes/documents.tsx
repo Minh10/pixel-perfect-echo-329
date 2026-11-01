@@ -15,9 +15,15 @@ export const Route = createFileRoute("/documents")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Documents — FINAUDIT AI" },
-      { name: "description", content: "Library of uploaded financial reports and their processing status." },
+      {
+        name: "description",
+        content: "Library of uploaded financial reports and their processing status.",
+      },
       { property: "og:title", content: "Documents — FINAUDIT AI" },
-      { property: "og:description", content: "Library of uploaded financial reports and their processing status." },
+      {
+        property: "og:description",
+        content: "Library of uploaded financial reports and their processing status.",
+      },
     ],
   }),
   pendingComponent: PageSkeleton,
@@ -27,7 +33,9 @@ export const Route = createFileRoute("/documents")({
 function Documents() {
   const { data } = useSuspenseQuery(documentsQuery());
   const [q, setQ] = useState("");
-  const filtered = data.filter((d) => `${d.title} ${d.issuer} ${d.period}`.toLowerCase().includes(q.toLowerCase()));
+  const filtered = data.filter((d) =>
+    `${d.title} ${d.issuer} ${d.period}`.toLowerCase().includes(q.toLowerCase()),
+  );
 
   return (
     <div className="page-layout space-y-6">
@@ -35,16 +43,34 @@ function Documents() {
         eyebrow="Library"
         title="Documents"
         description="Annual reports, interims and prospectuses available for analysis."
-        actions={<Button disabled title="Upload requires the backend API"><Upload /> Upload report</Button>}
+        actions={
+          <Button disabled title="Upload requires the backend API">
+            <Upload /> Upload report
+          </Button>
+        }
       />
       <div className="relative max-w-sm">
         <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by title, issuer or period" className="pl-8" />
+        <Input
+          aria-label="Filter documents"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Filter by title, issuer or period"
+          className="pl-8"
+        />
       </div>
       {filtered.length ? (
         <DocumentsTable documents={filtered} />
       ) : (
-        <EmptyState title="No matching documents" description="Try a different issuer name or reporting period." action={<Button variant="outline" size="sm" onClick={() => setQ("")}>Clear filter</Button>} />
+        <EmptyState
+          title="No matching documents"
+          description="Try a different issuer name or reporting period."
+          action={
+            <Button variant="outline" size="sm" onClick={() => setQ("")}>
+              Clear filter
+            </Button>
+          }
+        />
       )}
     </div>
   );
