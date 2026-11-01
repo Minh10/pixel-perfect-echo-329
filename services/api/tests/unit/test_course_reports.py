@@ -15,6 +15,13 @@ def _text(name: str) -> str:
         doc.close()
 
 
+def test_chart_check_fixture_prints_a_mismatch_and_says_synthetic() -> None:
+    text = _text("synthetic_chart_check.pdf")
+    assert "SYNTHETIC TEST FIXTURE" in text
+    assert "not a real company" in text
+    assert "150" in text and "240" in text and "158" in text and "21" in text
+
+
 def test_course_reports_are_distinct_and_labelled_synthetic() -> None:
     earlier = _text("synthetic_ar_2024.pdf")
     later = _text("synthetic_ar_2025.pdf")

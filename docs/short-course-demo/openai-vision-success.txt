@@ -1,0 +1,26 @@
+OpenAI vision results, 2 November 2026. The API key is not recorded.
+
+Configuration verified on the running API process
+- FINAUDIT_LLM_PROVIDER=openai
+- FINAUDIT_LLM_MODEL=gpt-4.1-mini
+- FINAUDIT_LLM_BASE_URL=https://api.openai.com/v1
+- FINAUDIT_LLM_API_KEY present in the process environment (length 164, value not recorded)
+- GET /api/v1/index/status llm.available=true
+
+One schema vision request, existing unlabelled chart crop
+- HTTP 200
+- Served model: gpt-4.1-mini-2025-04-14
+- Parsed JSON:
+{"is_chart":true,"chart_type":"bar chart","title":"Revenue by segment (GBP m) - synthetic","summary":"Revenue by segment in GBP million for North, South, East, and West regions.","x_axis":"Segment","y_axis":"Revenue (GBP m)","points":[{"series":null,"label":"North","value":"cannot be read","unit":"GBP m","period":"2025","printed_on_chart":false},{"series":null,"label":"South","value":"cannot be read","unit":"GBP m","period":"2025","printed_on_chart":false},{"series":null,"label":"East","value":"cannot be read","unit":"GBP m","period":"2025","printed_on_chart":false},{"series":null,"label":"West","value":"cannot be read","unit":"GBP m","period":"2025","printed_on_chart":false}]}
+
+Application interpret of the same unlabelled figure (Acceptance upload, block p3-b002)
+- HTTP 200, provider openai, model gpt-4.1-mini-2025-04-14
+- Summary: North is the largest segment, followed by South, East, and West.
+- Points, all printed_on_chart false, period 2025: North 50; South approximately 35; East approximately 12; West approximately 3
+- No segment fact shares those labels, so the page shows INSUFFICIENT_EVIDENCE
+
+Application interpret of synthetic_chart_check.pdf figure p2-b002
+- HTTP 200, provider openai, model gpt-4.1-mini-2025-04-14
+- Summary: The chart shows segment revenue in GBP millions for four regions: North has 240, South has 158, East has 90, and West has 21.
+- Printed points, period 2025, unit GBP millions: North 240, South 158, East 90, West 21
+- Computed checks against parsed facts: North 240 consistent with fact 240; South 158 consistent with 158; East 90 conflict with 150, absolute difference 60; West 21 consistent with 21

@@ -1,19 +1,19 @@
 # Five-minute demonstration
 
-Branch: `demo/short-course-final`.
+Branch: `final-demo` (rollback checkpoint: `demo/short-course-final` at `3bfc04b`).
 
-Use documents that are already **Ready**. A fresh Docling parse of the 3-page fixture took 103 seconds on this machine, so do not start an upload during the five minutes. The upload path was checked separately on 1 November 2026 and is described at the end.
+Use documents that are already **Ready**. Do not upload during the five minutes unless the library is empty. All figures below were verified on 2 November 2026 with provider **openai**, model **gpt-4.1-mini**, and parsed table facts from Docling.
 
-Screenshots from that check are in `docs/short-course-demo/`. If the live app fails, open those files instead of improvising results.
+Screenshots are in `docs/short-course-demo/`. If the live app fails, open those files instead of improvising results.
 
 ## Start, before the room
 
-Three terminals. Keep the API on loopback.
+Three terminals. Keep the API on loopback. The vision key must be in `services/api/.env` as `FINAUDIT_LLM_API_KEY` (gitignored). Plain `uvicorn` does not load that key into the process; use the helper below.
 
 ```powershell
-# Terminal 1 — API
+# Terminal 1 — API (loads gitignored .env, binds 127.0.0.1 only)
 cd services\api
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe scripts\start_api.py
 ```
 
 ```powershell
@@ -30,68 +30,64 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:8080. The sidebar footer must say **Live · Document service**. Health: http://127.0.0.1:8000/api/v1/health.
+Open http://localhost:8080. The sidebar footer must say **Live · Document service**.
 
-Test PDF, already in the repo: `services/api/tests/fixtures/annual_report_excerpt.pdf`. It is a synthetic 3-page report for Fictional Example Holdings plc and contains no real company data.
+Checks: http://127.0.0.1:8000/api/v1/health returns 200. http://127.0.0.1:8000/api/v1/index/status shows `llm.provider` **openai**, `llm.model` **gpt-4.1-mini**, `llm.available` **true**.
 
-If Documents is empty, upload that PDF twice with two different titles and wait until both are Ready before the demo. One report is not enough for Trends.
+**Fixture PDFs in the repo** (synthetic, not real companies):
+
+| File | Role |
+| --- | --- |
+| `services/api/tests/fixtures/synthetic_chart_check.pdf` | Printed chart numbers vs table (MATCH + POTENTIAL_DISCREPANCY) |
+| `services/api/tests/fixtures/synthetic_ar_2024.pdf` | Distinct annual report, 2023–2024 revenue |
+| `services/api/tests/fixtures/synthetic_ar_2025.pdf` | Distinct annual report, 2024–2025 revenue |
+| `services/api/tests/fixtures/annual_report_excerpt.pdf` | Unlabelled bar chart; estimates only |
+
+If the chart-check or annual-report rows are missing, upload the matching fixture once as **Annual Report** and wait until **Ready** before presenting.
 
 ## Script
 
-**0:00 — Documents.** Show the library. On this machine the checked rows are Synthetic AR, Fictional Example Holdings - Annual Report 2025 (synthetic fixture), and Acceptance upload 2026-11-01. All three are Ready, 3 pages, Annual Report. Say they were parsed by Docling, not typed in by hand. Screenshot: `docs/short-course-demo/acceptance-documents-ready.png`.
+**0:00 — Documents.** Show the library. Point at **Ready** rows, especially **Fictional Example Holdings plc — segment chart check 2025 (synthetic test fixture)** and the two **Annual Report 2024 / 2025 (synthetic test fixture)** titles. Say values come from parsed PDF tables, not hand entry.
 
-**0:40 — Chart crop, not a generated summary.** Open Consistency Audit. Select Synthetic AR or the acceptance upload.
+**0:40 — Outcome 1: chart-to-text (real VLM).** Open **Consistency Audit**. Select **Acceptance upload 2026-11-01** (or any Ready report with the page-3 segment bar chart).
 
-- The page shows the extracted page-3 crop, caption **Figure 1: Revenue by segment, 2025 (synthetic)**, and labels North, South, East, West.
-- Say the crop and caption come from the PDF parser. No model wrote them.
-- Click **Read chart with the configured model**.
-- Expected: **Visual interpretation is unavailable. No chart summary was generated.**
-- Visual check stays **INSUFFICIENT_EVIDENCE**. Say automated chart-to-table auditing is not claimed, because no vision model is configured.
-- Click **Open source page** only if time remains. It opens page 3 with the figure highlighted.
+- The crop and caption are from Docling.
+- A stored reading should already appear: summary from **gpt-4.1-mini**, points marked **estimated from the graphic** (North 50, South ~35, East ~12, West ~3 on the checked run).
+- If empty, click **Read chart with the configured model** once and wait. Do not click repeatedly on quota errors.
+- Visual check on this unlabelled chart stays **INSUFFICIENT_EVIDENCE** (no segment table with those labels).
 
-Screenshots: `acceptance-audit-crop.png`, `acceptance-interpretation-unavailable.png`.
+Screenshot: `audit-existing-chart-summary.png`.
 
-**2:00 — Retrieval and the source table.** On the same audit page, search `operating profit`.
+**1:40 — Outcome 2: MATCH and POTENTIAL_DISCREPANCY.** Select **Fictional Example Holdings plc — segment chart check 2025 (synthetic test fixture)**.
 
-- Expected method label: `bm25+dense`.
-- Rank 1 is the page-2 income-statement table. Rank 2 is the sentence that operating profit rose to GBP 703 million.
-- The figure hit says figure values are not extracted from the image. Do not read the bar heights as numbers.
-- Click rank 1. Document Intelligence opens page 2 with the table highlighted.
-- Point at the cells: 2025 revenue **4,812**, 2025 operating profit **703**, GBP millions. These are parsed table cells.
+- Chart-to-text lists printed values **240, 158, 90, 21** and model id **openai · gpt-4.1-mini-2025-04-14**.
+- Visual check: **MATCH** for North, South, West; **POTENTIAL_DISCREPANCY** for East (chart **90** vs table **150**, absolute difference **60**).
+- Click **Open source page** on the East line. Document Intelligence opens page 1 with the segment table; East cell **150**.
 
-Screenshots: `acceptance-evidence-search.png`, `acceptance-source-table.png`, `acceptance-upload-table.png`.
+Screenshots: `audit-match-and-discrepancy.png`, `audit-discrepancy-source.png`.
 
-**3:20 — Two-report comparison.** Open Trends. Tick two Ready reports. Leave the metric on **Revenue**.
+**3:00 — Outcome 3: multi-document trend.** Open **Trends**. Select only:
 
-- The heading says **Comparison, not a comprehensive trend**.
-- Expected points, GBP millions: 2024 **4281** and 2025 **4812** in each selected report, page 2.
-- The Change column, 12.4%, is left out because it is a percent.
-- Say the two local reports are copies of the same synthetic PDF, so the bars match. This is not a multi-issuer trend and not model output.
-- Click **Synthetic AR · 2025 · 4812**. Page 2 opens with the income-statement table highlighted.
+- Fictional Example Holdings plc — Annual Report **2024** (synthetic test fixture)
+- Fictional Example Holdings plc — Annual Report **2025** (synthetic test fixture)
 
-Screenshot: `acceptance-trends-comparison.png`.
+Metric **Revenue**. Heading: **Source-grounded series from parsed reports**. Expect 2023 **2900**, 2024 **3200** (once), 2025 **3550**, GBP millions. Click the **2024 · 3200** citation; the 2024 report table opens.
 
-**4:20 — Question answering stays off.** Open AI Analysis. Select one report. Ask `What was operating profit in 2025?`
+Screenshot: `distinct-reports-revenue.png` (operating profit: `distinct-reports-operating-profit.png`).
 
-- Expected: **Question answering is not configured on this server.** No answer text is produced.
-- Say the supported number is the table cell 703, already shown, not an answer from a language model.
-
-Screenshot: `analysis-qa-unavailable.png`.
-
-## What was executed on 1 November 2026
-
-- `POST /api/v1/documents` accepted `annual_report_excerpt.pdf` as **Acceptance upload 2026-11-01** (`doc_db4e313061b54d8eb9b85dd9701af9ca`).
-- The worker parsed it with Docling 2.145.0 in 103.3 seconds: 3 pages, 4 evidence regions, 18 parsed financial facts. The Documents page showed Ready, and Document Intelligence highlighted the income statement.
-- Search on that new report returned the page-2 table first and opened it from the UI.
-- Chart reading returned HTTP 503. No summary was stored.
-- Trends plotted the parsed revenue facts for the two earlier copies and opened the source table.
-- Backend tests: 384 passed, 1 deselected. Frontend: typecheck passed, 11 tests passed, production build completed.
+**4:20 — Boundaries.** Say QA is still off unless configured. Do not claim the unlabelled chart’s percent estimates as audited table facts. Redacted provider log: `openai-vision-success.txt`.
 
 ## If the live demo fails
 
-Use the screenshots above and say which step failed. Do not substitute a written summary or a discrepancy verdict.
+Use the screenshots and `REQUIREMENTS_COMPLIANCE.md`. Do not invent summaries or discrepancy verdicts.
 
-- Footer says demo instead of Live: set `VITE_FINAUDIT_API_URL=http://localhost:8000` and restart `npm run dev`.
-- A new upload stays on Processing: confirm terminal 2 is the worker. Parsing this fixture takes about two minutes after Docling has loaded.
-- The new upload's worker log recorded 0 vectors because the local vector index was already open in the API process. Search can still return the table through the hybrid endpoint. To rebuild vectors, stop the API and the worker, run the one-process reindex in `FINAL_LIMITATIONS.md`, then start the API and the worker again.
-- Trends says two reports are required: select a second Ready report. Do not show one report as a trend.
+- Footer says demo: set `VITE_FINAUDIT_API_URL=http://localhost:8000` and restart Vite.
+- **Visual interpretation is unavailable**: restart API with `scripts\start_api.py`, confirm `llm.available` in index status, confirm OpenAI billing.
+- Interpret returns 429: stop; do not hammer the API.
+- Trends needs two distinct Ready reports with the same metric and units.
+
+## Verified run (2 November 2026)
+
+- One schema vision probe on the existing chart crop: HTTP 200, model `gpt-4.1-mini-2025-04-14`.
+- Stored readings on Acceptance upload and on `doc_95e7442728764d9088643ac9c9f9b9d9` (chart-check fixture).
+- Backend `pytest -q`: 389 passed. Frontend: `tsc --noEmit` clean, Vitest 14 passed, `npm run build` succeeded.
