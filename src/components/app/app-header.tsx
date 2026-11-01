@@ -1,0 +1,36 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { NAV_ITEMS } from "./nav";
+import { DemoBadge } from "./states";
+
+export function AppHeader() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const current = NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
+
+  return (
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="h-5" />
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem className="hidden sm:block">
+            <BreadcrumbLink asChild>
+              <Link to="/">FINAUDIT</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="hidden sm:block" />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-medium">{current?.title ?? "Not found"}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="ml-auto flex items-center gap-3">
+        <DemoBadge />
+      </div>
+    </header>
+  );
+}
