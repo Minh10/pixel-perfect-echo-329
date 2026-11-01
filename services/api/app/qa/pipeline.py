@@ -26,6 +26,7 @@ from app.evaluation.metrics import numbers_in, parse_number
 from app.indexing.store import ChunkStore
 from app.qa import calculator as calc
 from app.qa.evidence import chunk_ref, ranked, route_documents
+from app.qa.grounding import claim_checks, number_checks
 from app.qa.llm import LLMError, LLMProvider, LLMRefusal, cost_usd
 from app.qa.schemas import (
     Abstention,
@@ -553,12 +554,10 @@ class QAPipeline:
                                     value_kind="visual_estimate" if r.value_kind == "visual_estimate" else "calculated")
             else:
                 check("final_ref_exists", False, f"final.ref {ref!r} is neither an operand nor a step")
-        # every number in the answer text must be grounded
+        # every number in the answer text must be grounded (fail closed on malformed numbers) and every
+        # sentence supported by the cited evidence; see app/qa/grounding.py
         if execution is not None:
             allowed: set[Decimal] = set()
-            for eid in cites:
-                allowed |= set(numbers_in(by_label[eid].text))
-            allowed |= set(numbers_in(question))
             for o in operands.values():
                 allowed |= calc.rounding_variants(o.value) | {abs(o.value)}
             for r in execution.results.values():
@@ -568,13 +567,12 @@ class QAPipeline:
                         base = v * calc.SCALES[r.scale]
                         for sc in ("thousands", "millions", "billions"):
                             allowed |= calc.rounding_variants(base / calc.SCALES[sc])
-            ungrounded = []
-            for n in numbers_in(plan.get("answer", "")):
-                if n in allowed or abs(n) in allowed or any(abs(n - a) < Decimal("0.0000001") for a in allowed):
-                    continue
-                ungrounded.append(str(n))
-            check("answer_numbers_grounded", not ungrounded,
-                  f"numbers not found in cited evidence or calculations: {', '.join(ungrounded[:6])}" if ungrounded else "")
+            cited_texts = [by_label[eid].text for eid in cites]
+            answer_text = plan.get("answer", "")
+            for c in number_checks(answer_text, question, cited_texts, allowed):
+                check(c["check"], c["ok"], c["detail"])
+            for c in claim_checks(answer_text, question, cited_texts, self.s.qa_claim_support_min):
+                check(c["check"], c["ok"], c["detail"])
         passed = all(c["ok"] for c in checks)
         citations = [Citation(evidence_id=eid, quote=q, evidence_kind=by_label[eid].row["kind"],
                               chunk=chunk_ref(by_label[eid].row, self.titles)) for eid, q in cites.items()]

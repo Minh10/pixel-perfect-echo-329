@@ -1,5 +1,8 @@
 """Reproductions of correctness defects found in the independent audit (AI_VALIDATION_REPORT.md).
 
+Milestone 3.5: a marker is removed only once its test genuinely passes (B1, B2 fixed by app/financial/numbers.py
+and app/qa/grounding.py).
+
 Each test asserts the CORRECT behaviour and is marked xfail(strict=True): it documents a confirmed bug,
 keeps CI green, and turns red (XPASS) as soon as the bug is fixed, so the marker must then be removed.
 Chunk texts are copied verbatim from the real filings' layout chunks (see eval/audit/validation_audit.py).
@@ -38,19 +41,16 @@ def _ok(checks: list[dict], name: str) -> bool:
 
 
 # --------------------------------------------------------------------------- AUDIT-B1 (number parsing)
-@pytest.mark.xfail(strict=True, reason="AUDIT-B1: parenthesised negative percentages are not parsed")
 @pytest.mark.parametrize(("text", "value"), [("(0.6)%", "-0.6"), ("(5.3)%", "-5.3"), ("$(3,547)", "-3547")])
 def test_b1_parse_negative_percent_and_dollar_prefixed_parentheses(text: str, value: str) -> None:
     assert parse_number(text) == Decimal(value)
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT-B1: numbers_in silently drops (5.3)% style values")
 def test_b1_numbers_in_keeps_negative_percentages() -> None:
     assert numbers_in("Operating margins: (5.3)%; (4.7)%") == [Decimal("-5.3"), Decimal("-4.7")]
 
 
 # --------------------------------------------------------------------------- AUDIT-B2 (grounding bypass)
-@pytest.mark.xfail(strict=True, reason="AUDIT-B2: an ungrounded '(9.9)%' in the answer text passes the grounding check")
 def test_b2_fabricated_negative_percentage_is_not_grounded(qa_env) -> None:  # noqa: F811
     import re
 

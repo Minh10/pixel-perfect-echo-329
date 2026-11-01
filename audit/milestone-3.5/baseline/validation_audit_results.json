@@ -1,0 +1,706 @@
+[
+ {
+  "id": "V01",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2018",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "exact row label",
+  "engine": "ACCEPT",
+  "outcome": "correct",
+  "failed_checks": [],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V02",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Capital expenditure 2018",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "paraphrased label (how an analyst/LLM would say it)",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V03",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2018 (USD millions)",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "currency in label; 3M reports in USD but the chunk states only '(Millions)'",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_currency_matches: label currency ['usd'] is not stated in the evidence"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": false,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V04",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2017",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "2018 value labelled 2017",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_period_matches: label years ['2017'] do not match column ['2018']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V05",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2017",
+  "quote": "(1,373)",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "period vs question",
+  "note": "true 2017 value, but the question asks 2018",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_period_matches: source years ['2017'] are outside the years asked ['2018']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V06",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Proceeds from sale of PP&E and other assets 2018",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "metric",
+  "note": "value of another row",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V07",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2018",
+  "quote": "(1,577)",
+  "scale": "thousands",
+  "truth": "REJECT",
+  "corrupted_dimension": "scale",
+  "note": "millions stated as thousands",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_units_match: operand scale thousands does not match evidence scale millions"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": false,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V08",
+  "document": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "label": "Purchases of property, plant and equipment (PP&E) 2018 (EUR)",
+  "quote": "(1,577)",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "currency",
+  "note": "wrong currency",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_currency_matches: label currency ['eur'] is not stated in the evidence"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": false,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V09",
+  "document": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "label": "Cash and cash equivalents 2022",
+  "quote": "$4,835",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "balance sheet without column labels or units line",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": false,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V10",
+  "document": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "label": "Cash and cash equivalents 2022",
+  "quote": "$2,535",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "2021 value labelled 2022",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": false,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V11",
+  "document": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "label": "Cash and cash equivalents 2022",
+  "quote": "$2,535",
+  "scale": "units",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "same as V10 with scale 'units' to isolate the period check",
+  "engine": "ACCEPT",
+  "outcome": "FALSE_ACCEPT",
+  "failed_checks": [],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V12",
+  "document": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "chunk_id": "chk_614247ca895dbe64f86ac191",
+  "question": "What were Boeing's revenues in 2022?",
+  "label": "Revenues 2022",
+  "quote": "$66,608",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "years only in the table title",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V13",
+  "document": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "chunk_id": "chk_614247ca895dbe64f86ac191",
+  "question": "What were Boeing's revenues in 2022?",
+  "label": "Revenues 2022",
+  "quote": "$62,286",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "2021 value labelled 2022",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V14",
+  "document": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "chunk_id": "chk_614247ca895dbe64f86ac191",
+  "question": "What was Boeing's net loss in 2022?",
+  "label": "Net loss attributable to Boeing Shareholders 2022",
+  "quote": "($4,935)",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "loss row, parenthesised",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V15",
+  "document": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "chunk_id": "chk_614247ca895dbe64f86ac191",
+  "question": "What was Boeing's net loss in 2022?",
+  "label": "Net loss attributable to Boeing Shareholders 2022",
+  "quote": "($3,547)",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "metric",
+  "note": "loss from operations labelled net loss",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.20; metric association was not verified",
+   "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V16",
+  "document": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "chunk_id": "chk_1d9e2d279488337c46420bf5",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "label": "FLNA restructuring charges 2022",
+  "quote": "$46",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "segment row, proper period columns, no units line in chunk",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified",
+   "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": true,
+   "operand_units_match": false,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V17",
+  "document": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "chunk_id": "chk_1d9e2d279488337c46420bf5",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "label": "FLNA restructuring charges 2022",
+  "quote": "$210",
+  "scale": "units",
+  "truth": "REJECT",
+  "corrupted_dimension": "period/column",
+  "note": "cumulative 'Plan to Date through 12/31/2022' value labelled FY2022 (scale 'units' isolates the period check)",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V18",
+  "document": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "chunk_id": "chk_1d9e2d279488337c46420bf5",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "label": "FLNA restructuring charges 2022",
+  "quote": "$28",
+  "scale": "units",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "2021 value labelled 2022",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label/source token overlap 0.33; metric association was not verified",
+   "operand_period_matches: label years ['2022'] do not match column ['2021']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V19",
+  "document": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+  "question": "What was operating profit in 2025?",
+  "label": "Operating profit 2025",
+  "quote": "703",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "synthetic fixture (GBP m)",
+  "engine": "ACCEPT",
+  "outcome": "correct",
+  "failed_checks": [],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V20",
+  "document": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+  "question": "What was operating profit in 2025?",
+  "label": "Operating profit 2025",
+  "quote": "1,794",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "metric",
+  "note": "gross profit value labelled operating profit",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label ['operating profit'] vs source ['gross profit']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V21",
+  "document": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+  "question": "What was operating profit in 2025?",
+  "label": "Operating profit 2025",
+  "quote": "591",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "period",
+  "note": "2024 value labelled 2025",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_period_matches: label years ['2025'] do not match column ['2024']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V22",
+  "document": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "text",
+  "chunk_id": "chk_a07c6aa2e47a7c41cd47d543",
+  "question": "What was operating profit in 2025?",
+  "label": "Operating profit 2025",
+  "quote": "703",
+  "scale": "millions",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "narrative statement",
+  "engine": "ACCEPT",
+  "outcome": "correct",
+  "failed_checks": [],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V23",
+  "document": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "text",
+  "chunk_id": "chk_a07c6aa2e47a7c41cd47d543",
+  "question": "What was revenue in 2025?",
+  "label": "Revenue 2025",
+  "quote": "703",
+  "scale": "millions",
+  "truth": "REJECT",
+  "corrupted_dimension": "metric",
+  "note": "operating profit figure labelled revenue (same sentence)",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_label_on_same_row: label ['revenue'] vs source ['operating profit']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": false,
+   "operand_metric_matches_question": true,
+   "operand_period_matches": true,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V24",
+  "document": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+  "question": "How many positions did 3M's employment increase by in 2018?",
+  "label": "Employment increase 2018",
+  "quote": "1,980",
+  "scale": "units",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "real narrative with two years in one sentence",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V25",
+  "document": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+  "question": "How many positions did 3M's employment decrease by in 2017?",
+  "label": "Employment decrease 2017",
+  "quote": "48",
+  "scale": "units",
+  "truth": "ACCEPT",
+  "corrupted_dimension": "-",
+  "note": "the 2017 clause of the same sentence",
+  "engine": "REJECT",
+  "outcome": "FALSE_REJECT",
+  "failed_checks": [
+   "operand_period_matches: label years ['2017'] are ambiguous across header years ['2017', '2018']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ },
+ {
+  "id": "V26",
+  "document": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+  "question": "How many positions did 3M's employment increase by in 2018?",
+  "label": "Employment increase 2018",
+  "quote": "48",
+  "scale": "units",
+  "truth": "REJECT",
+  "corrupted_dimension": "period/metric",
+  "note": "2017 decrease labelled 2018 increase",
+  "engine": "REJECT",
+  "outcome": "correct",
+  "failed_checks": [
+   "operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']"
+  ],
+  "checks": {
+   "operand_cell_located": true,
+   "operand_label_on_same_row": true,
+   "operand_period_matches": false,
+   "operand_units_match": true,
+   "operand_currency_matches": true,
+   "operand_scope_matches": true
+  }
+ }
+]

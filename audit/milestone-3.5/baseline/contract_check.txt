@@ -1,0 +1,7 @@
+OPTIONAL | PageBlock | PageBlock | chart
+ENUM | JobStage | Job.stage | backend-only values ['indexing']
+ENUM_TS_ONLY | BlockKind | PageBlock.kind | frontend-only values ['chart']
+ENUM_TS_ONLY | EvidenceCategory | Evidence.category | frontend-only values ['chart', 'metric']
+
+4 findings; 1 contract errors (MISSING/ENUM/NO_TS_TYPE)
+contract exit 1

@@ -56,30 +56,19 @@ def ndcg_at_k(ranked: Sequence[set[Page]], gold: set[Page], k: int) -> float:
 
 
 # --------------------------------------------------------------------------- numbers & answers
-_NUM = re.compile(r"\(?-?\$?\s?\d[\d,]*(?:\.\d+)?\)?\s?%?")
-
-
 def parse_number(text: str) -> Decimal | None:
-    """Parse a financial number: '$1,577.00' -> 1577.00, '(370)' -> -370, '16.5%' -> 16.5, '-0.02'."""
-    t = text.strip().replace("−", "-").replace("–", "-")
-    neg = t.startswith("(") and t.endswith(")")
-    t = t.strip("()").replace("$", "").replace(",", "").replace("%", "").strip()
-    if t.startswith("+"):
-        t = t[1:]
-    try:
-        v = Decimal(t)
-    except InvalidOperation:
-        return None
-    return -v if neg else v
+    """Strict financial number parsing (see app.financial.numbers): '(0.6)%' -> -0.6, '$(3,547)' -> -3547,
+    malformed or ambiguous input -> None."""
+    from app.financial.numbers import parse_number as _parse
+
+    return _parse(text)
 
 
 def numbers_in(text: str) -> list[Decimal]:
-    out = []
-    for m in _NUM.finditer(text):
-        v = parse_number(m.group(0))
-        if v is not None:
-            out.append(v)
-    return out
+    """Parsed amounts, percentages and years in text (references such as 'Note 12' and dates excluded)."""
+    from app.financial.numbers import numbers_in as _numbers_in
+
+    return _numbers_in(text)
 
 
 def numeric_match(pred: Decimal | float | None, gold: Decimal | float, rel_tol: float = 0.01,

@@ -1,0 +1,14 @@
+tests/integration/test_api_flow.py::test_full_ingestion_flow
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+XFAIL tests/audit/test_audit_findings.py::test_b1_parse_negative_percent_and_dollar_prefixed_parentheses[(0.6)%--0.6] - AUDIT-B1: parenthesised negative percentages are not parsed
+XFAIL tests/audit/test_audit_findings.py::test_b1_parse_negative_percent_and_dollar_prefixed_parentheses[(5.3)%--5.3] - AUDIT-B1: parenthesised negative percentages are not parsed
+XFAIL tests/audit/test_audit_findings.py::test_b1_parse_negative_percent_and_dollar_prefixed_parentheses[$(3,547)--3547] - AUDIT-B1: parenthesised negative percentages are not parsed
+XFAIL tests/audit/test_audit_findings.py::test_b1_numbers_in_keeps_negative_percentages - AUDIT-B1: numbers_in silently drops (5.3)% style values
+XFAIL tests/audit/test_audit_findings.py::test_b2_fabricated_negative_percentage_is_not_grounded - AUDIT-B2: an ungrounded '(9.9)%' in the answer text passes the grounding check
+XFAIL tests/audit/test_audit_findings.py::test_b3_wrong_period_rejected_when_columns_are_unlabelled - AUDIT-B3: unlabelled period columns let the 2021 value pass as 2022
+XFAIL tests/audit/test_audit_findings.py::test_b4_cumulative_column_is_not_a_fiscal_year - AUDIT-B4: a cumulative 'Plan to Date through 12/31/2022' column is accepted as FY2022
+XFAIL tests/audit/test_audit_findings.py::test_b5_operand_of_a_derived_metric_is_not_rejected - AUDIT-B5: every operand must name the question's metric, so derived metrics always fail
+XFAIL tests/audit/test_audit_findings.py::test_b6_percent_closing_paren_cell_is_merged - AUDIT-B6: a '%)' cell is not merged, producing '(7.0; %)'
+122 passed, 1 skipped, 9 xfailed, 1 warning in 31.55s
