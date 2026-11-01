@@ -38,7 +38,7 @@ export const Route = createFileRoute("/intelligence")({
     const router = useRouter();
     return (
       <div className="p-8">
-        <ErrorState message={error.message} onRetry={() => router.invalidate()} />
+        <ErrorState message={error instanceof Error ? error.message : String(error)} onRetry={() => router.invalidate()} />
       </div>
     );
   },
