@@ -47,11 +47,23 @@ export function OverviewMetrics({
       detail: IS_DEMO ? "In the demo workspace report" : "Across ready reports",
       icon: ScanSearch,
     },
+    {
+      label: "Tables",
+      value: evidence.filter((item) => item.category === "table").length,
+      detail: "Extracted table regions",
+      icon: Layers,
+    },
+    {
+      label: "Figures",
+      value: evidence.filter((item) => item.category === "figure" || item.category === "chart").length,
+      detail: "Extracted chart regions",
+      icon: ScanSearch,
+    },
   ];
   return (
-    <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <dl className="grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2 xl:grid-cols-3">
       {stats.map((s) => (
-        <div key={s.label} className="flex min-h-44 min-w-0 flex-col rounded-md border bg-card p-5">
+        <div key={s.label} className="flex min-h-36 min-w-0 flex-col bg-card p-5">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
             <s.icon className="size-5 shrink-0 text-primary" strokeWidth={1.5} />
@@ -147,9 +159,13 @@ export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
                   {n.title}
                   <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
                     {n.to === "/audit"
-                      ? "Awaiting integration"
+                      ? IS_DEMO
+                        ? "Pending in demo mode"
+                        : "Chart readings and table checks"
                       : n.to === "/trends"
-                        ? "Demo financial series"
+                        ? IS_DEMO
+                          ? "Demo financial series"
+                          : "Parsed facts across reports"
                         : n.to === "/documents"
                           ? "Browse report library"
                           : "Inspect report evidence"}

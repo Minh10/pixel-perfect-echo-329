@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -68,12 +68,21 @@ const liveConfig = {
   value: { label: "Reported value", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
+function formatReported(value: number) {
+  return new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(value);
+}
+
 function LiveComparison() {
   const navigate = useNavigate();
   const documents = useSuspenseQuery(documentsQuery());
   const ready = documents.data.filter((doc) => doc.status === "ready");
   const [selected, setSelected] = useState<string[]>([]);
   const [metric, setMetric] = useState("Revenue");
+  const [query, setQuery] = useState("");
+  const visible = useMemo(
+    () => ready.filter((doc) => doc.title.toLowerCase().includes(query.trim().toLowerCase())),
+    [ready, query],
+  );
   const factQueries = useQueries({
     queries: selected.map((id) => ({
       queryKey: ["facts", id],
@@ -112,42 +121,62 @@ function LiveComparison() {
         title="Trends"
         description="Compare one reported metric across processed reports. Values come only from parsed table facts."
       />
-      <fieldset className="space-y-2">
-        <legend className="text-xs text-muted-foreground">
-          Choose at least two processed reports.
-        </legend>
-        {ready.map((doc) => (
-          <label key={doc.id} className="flex items-center gap-2 text-sm">
+      <div className="grid gap-6 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+        <section className="space-y-3">
+          <label className="block text-sm">
+            <span className="text-xs text-muted-foreground">Find a report</span>
             <input
-              type="checkbox"
-              checked={selected.includes(doc.id)}
-              onChange={() =>
-                setSelected((current) =>
-                  current.includes(doc.id)
-                    ? current.filter((id) => id !== doc.id)
-                    : [...current, doc.id],
-                )
-              }
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="mt-1 h-9 w-full rounded-md border bg-card px-3"
+              placeholder="Search titles"
             />
-            {doc.title}
           </label>
-        ))}
-      </fieldset>
-      <label className="block max-w-md text-sm">
-        <span className="text-xs text-muted-foreground">Shared metric</span>
-        <select
-          className="mt-1 h-9 w-full rounded-md border bg-transparent px-3"
-          value={activeMetric}
-          onChange={(event) => setMetric(event.target.value)}
-        >
-          {labels.length === 0 && <option value="">Select reports to load metrics</option>}
-          {labels.map((label) => (
-            <option key={label} value={label}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
+          <fieldset className="max-h-72 space-y-1 overflow-auto pr-1">
+            <legend className="mb-2 text-xs text-muted-foreground">Processed reports</legend>
+            {visible.map((doc) => (
+              <label key={doc.id} className="flex items-start gap-2 rounded-sm px-1 py-1.5 text-sm hover:bg-muted/60">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={selected.includes(doc.id)}
+                  onChange={() =>
+                    setSelected((current) =>
+                      current.includes(doc.id)
+                        ? current.filter((id) => id !== doc.id)
+                        : [...current, doc.id],
+                    )
+                  }
+                />
+                <span>
+                  <span className="block leading-snug">{doc.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {[doc.issuer, doc.period].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+              </label>
+            ))}
+            {visible.length === 0 && (
+              <p className="text-sm text-muted-foreground">No report title matches that search.</p>
+            )}
+          </fieldset>
+        </section>
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {(labels.length ? labels : ["Revenue", "Operating profit"]).map((label) => (
+              <button
+                key={label}
+                type="button"
+                disabled={!labels.includes(label)}
+                className={`rounded-sm border px-3 py-1.5 text-sm ${
+                  activeMetric === label ? "border-foreground bg-foreground text-background" : "bg-card"
+                } disabled:opacity-40`}
+                onClick={() => setMetric(label)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
       {selected.length < 2 && (
         <EmptyState
           title="Two reports are required"
@@ -178,14 +207,26 @@ function LiveComparison() {
             <BarChart data={chartData}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="axis" tickLine={false} axisLine={false} interval={0} />
-              <YAxis tickLine={false} axisLine={false} width={48} />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                width={56}
+                tickFormatter={(value) => formatReported(Number(value))}
+              />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="value" fill="var(--color-value)" radius={1} />
             </BarChart>
           </ChartContainer>
-          <ul className="space-y-2 text-sm">
+          <ul className="divide-y text-sm">
             {comparison.points.map((point) => (
-              <li key={point.factId}>
+              <li key={point.factId} className="flex items-center justify-between gap-3 py-2">
+                <span>
+                  <span className="font-mono tabular">{point.periodLabel}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    · {formatReported(point.value)} {point.currency ?? ""} {point.scale}
+                  </span>
+                </span>
                 <Button
                   type="button"
                   variant="outline"
@@ -201,14 +242,15 @@ function LiveComparison() {
                     })
                   }
                 >
-                  {point.documentTitle} · {point.periodLabel} · {point.displayValue}{" "}
-                  {point.currency ?? ""} {point.scale} · p. {point.page}
+                  {point.documentTitle} · p. {point.page}
                 </Button>
               </li>
             ))}
           </ul>
         </section>
       )}
+        </div>
+      </div>
     </div>
   );
 }

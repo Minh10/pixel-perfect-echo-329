@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueries, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/http-service";
-import { documentsQuery, evidenceQuery, DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
+import { api, documentsQuery, evidenceQuery, DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
 import type { Evidence } from "@/lib/api/types";
 import { DemoBadge, ErrorState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
@@ -91,6 +91,15 @@ function Overview() {
         }
       />
       <OverviewMetrics documents={docs} evidence={evidence} />
+      {!IS_DEMO && api.getFigureInterpretation && (
+        <StoredAnalyses
+          figures={evidenceIds.flatMap((documentId, index) =>
+            (evidenceResults[index]?.data ?? [])
+              .filter((item) => item.category === "figure")
+              .map((item) => ({ documentId, blockId: item.blockId })),
+          )}
+        />
+      )}
       <OverviewPanels documents={docs} />
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -110,5 +119,40 @@ function Overview() {
         <DocumentsTable documents={docs} />
       </section>
     </div>
+  );
+}
+
+function StoredAnalyses({ figures }: { figures: { documentId: string; blockId: string }[] }) {
+  const readings = useQueries({
+    queries: figures.map((figure) => ({
+      queryKey: ["interpretation", figure.documentId, figure.blockId],
+      queryFn: () => api.getFigureInterpretation!(figure.documentId, figure.blockId),
+      retry: false,
+    })),
+  });
+  const pending = readings.some((query) => query.isPending);
+  const stored = readings.flatMap((query) => (query.data ? [query.data] : []));
+  const discrepancies = stored.reduce(
+    (count, reading) =>
+      count + reading.tableChecks.filter((check) => check.status === "conflict").length,
+    0,
+  );
+  return (
+    <section className="grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2">
+      <div className="bg-card p-5">
+        <p className="text-xs text-muted-foreground">Stored chart readings</p>
+        <p className="mt-2 font-serif text-3xl tabular">{pending ? "…" : stored.length}</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Figures with a saved model reading. Unread figures are not counted.
+        </p>
+      </div>
+      <div className="bg-card p-5">
+        <p className="text-xs text-muted-foreground">Potential discrepancies</p>
+        <p className="mt-2 font-serif text-3xl tabular">{pending ? "…" : discrepancies}</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Stored chart points that differ from one aligned reported fact. Not a verified finding.
+        </p>
+      </div>
+    </section>
   );
 }

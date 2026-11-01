@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
+import { Minus, Plus, ShieldCheck } from "lucide-react";
 import { PendingModule } from "@/components/app/pending-module";
+import { ReviewStatus } from "@/components/app/review-status";
 import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError, apiAsset } from "@/lib/api/http-service";
 import { visualDiscrepancy } from "@/lib/fact-comparison";
 import { IS_DEMO, api, documentsQuery, evidenceQuery, pagesQuery } from "@/lib/api/service";
-import type { ChartInterpretation, Evidence, PageBlock } from "@/lib/api/types";
+import type { ChartInterpretation, Evidence, PageBlock, TableCheck } from "@/lib/api/types";
 
 export const Route = createFileRoute("/audit")({
   head: () => ({
@@ -71,6 +72,8 @@ function AuditWorkspace() {
     retry: false,
   });
   const queryClient = useQueryClient();
+  const [zoom, setZoom] = useState(1);
+  const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
   const interpret = useMutation({
     mutationFn: () => api.interpretFigure!(selectedId, figure!.blockId),
     onSuccess: (data) => {
@@ -78,30 +81,61 @@ function AuditWorkspace() {
     },
   });
 
+  const reading = interpret.data ?? (interpretation.data as ChartInterpretation | undefined);
+  const document = ready.find((item) => item.id === selectedId);
+  const rows = (reading?.tableChecks ?? []).map((check) => ({
+    check,
+    result: visualDiscrepancy(check, facts.data ?? []),
+  }));
+  const counts = {
+    compared: rows.length,
+    matched: rows.filter((row) => row.result.status === "MATCH").length,
+    discrepancy: rows.filter((row) => row.result.status === "POTENTIAL_DISCREPANCY").length,
+    insufficient: rows.filter((row) => row.result.status === "INSUFFICIENT_EVIDENCE").length,
+  };
+
   return (
-    <div className="page-layout space-y-6">
+    <div className="page-layout space-y-8">
       <PageHeader
-        eyebrow="Analysis"
+        eyebrow="Visual analysis"
         title="Consistency Audit"
-        description="Inspect an extracted chart crop. A written summary is shown only when a vision model actually reads the image."
+        description="Compare a chart reading with the reported table facts from the same document."
       />
-      <label className="block max-w-md text-sm">
-        <span className="text-xs text-muted-foreground">Processed report</span>
-        <select
-          className="mt-1 h-9 w-full rounded-md border bg-transparent px-3"
-          value={selectedId}
-          onChange={(event) => {
-            setDocumentId(event.target.value);
-            setBlockId("");
-          }}
-        >
-          {ready.map((doc) => (
-            <option key={doc.id} value={doc.id}>
-              {doc.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="grid gap-6 border-b pb-6 lg:grid-cols-[minmax(0,1.4fr)_auto] lg:items-end">
+        <label className="block max-w-xl text-sm">
+          <span className="text-xs text-muted-foreground">Processed report</span>
+          <select
+            className="mt-1 h-10 w-full rounded-md border bg-card px-3"
+            value={selectedId}
+            onChange={(event) => {
+              setDocumentId(event.target.value);
+              setBlockId("");
+              setSelectedCheck(null);
+            }}
+          >
+            {ready.map((doc) => (
+              <option key={doc.id} value={doc.id}>
+                {doc.title}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {[document?.issuer, document?.period, document?.type].filter(Boolean).join(" · ") ||
+              "Issuer and period are taken from the processed report."}
+          </p>
+        </label>
+        <p className="text-xs text-muted-foreground">
+          {reading
+            ? `Model ${reading.provider} · ${reading.model}`
+            : "No stored chart reading for this figure."}
+        </p>
+      </div>
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">
+        <Kpi label="Compared values" value={reading ? counts.compared : "—"} />
+        <Kpi label="Matches" value={reading ? counts.matched : "—"} />
+        <Kpi label="Potential discrepancies" value={reading ? counts.discrepancy : "—"} />
+        <Kpi label="Insufficient evidence" value={reading ? counts.insufficient : "—"} />
+      </dl>
       {figures.length === 0 && !evidence.isLoading && (
         <EmptyState
           title="No figure crop"
@@ -109,54 +143,74 @@ function AuditWorkspace() {
         />
       )}
       {figure && (
-        <section className="grid gap-4 lg:grid-cols-2">
-          <article className="rounded-md border bg-card p-4">
-            <p className="eyebrow mb-3">Extracted crop</p>
-            {crop?.figure?.imageUrl ? (
-              <img
-                src={apiAsset(crop.figure.imageUrl)}
-                alt={crop.figure.caption ?? figure.label}
-                className="max-h-80 max-w-full"
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                The parser did not provide a crop image.
-              </p>
-            )}
+        <section className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+          <article className="min-w-0">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="eyebrow">Source figure</p>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  aria-label="Zoom out"
+                  onClick={() => setZoom((value) => Math.max(0.8, +(value - 0.1).toFixed(1)))}
+                >
+                  <Minus className="size-4" />
+                </Button>
+                <span className="w-10 text-center font-mono text-xs tabular">{Math.round(zoom * 100)}%</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  aria-label="Zoom in"
+                  onClick={() => setZoom((value) => Math.min(1.8, +(value + 0.1).toFixed(1)))}
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="overflow-auto rounded-md border bg-paper p-4">
+              {crop?.figure?.imageUrl ? (
+                <img
+                  src={apiAsset(crop.figure.imageUrl)}
+                  alt={crop.figure.caption ?? figure.label}
+                  style={{ width: `${zoom * 100}%`, maxWidth: "none" }}
+                  className="mx-auto"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">The parser did not provide a crop image.</p>
+              )}
+            </div>
             <p className="mt-3 text-sm">{crop?.figure?.caption ?? figure.excerpt}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Page {figure.page}</p>
-            <SourceLink documentId={selectedId} page={figure.page} evidenceId={figure.id} />
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">Page {figure.page}</p>
+              <SourceLink documentId={selectedId} page={figure.page} evidenceId={figure.id} label="Open chart page" />
+            </div>
           </article>
-          <article className="space-y-3 rounded-md border bg-card p-4">
-            <p className="eyebrow">Chart-to-text</p>
-            <Button
-              type="button"
-              disabled={!figure || interpret.isPending || !api.interpretFigure}
-              onClick={() => interpret.mutate()}
-            >
-              {interpret.isPending ? "Reading chart…" : "Read chart with the configured model"}
-            </Button>
-            <ChartSummary
-              reading={interpret.data ?? interpretation.data}
-              unavailable={
-                interpret.error ??
-                (interpretation.error instanceof ApiError && interpretation.error.status === 404
-                  ? null
-                  : interpretation.error)
-              }
-              caption={crop?.figure?.caption ?? figure.excerpt}
-            />
-          </article>
+          <ChartSummary
+            reading={reading}
+            pending={interpret.isPending}
+            canRead={Boolean(figure && api.interpretFigure)}
+            onRead={() => interpret.mutate()}
+            unavailable={
+              interpret.error ??
+              (interpretation.error instanceof ApiError && interpretation.error.status === 404
+                ? null
+                : interpretation.error)
+            }
+            caption={crop?.figure?.caption ?? figure.excerpt}
+          />
         </section>
       )}
-      <section className="space-y-3 rounded-md border bg-card p-4">
-        <p className="eyebrow">Visual check</p>
-        <DiscrepancyList
-          documentId={selectedId}
-          reading={interpret.data ?? (interpretation.data as ChartInterpretation | undefined)}
-          facts={facts.data ?? []}
-        />
-      </section>
+      <ComparisonTable
+        documentId={selectedId}
+        rows={rows}
+        selectedKey={selectedCheck}
+        onSelect={setSelectedCheck}
+        hasReading={Boolean(reading)}
+      />
       <EvidenceSearch documentIds={selectedId ? [selectedId] : []} />
     </div>
   );
@@ -170,102 +224,195 @@ function figureBlock(pages: { blocks: PageBlock[] }[], evidence: Evidence): Page
   return null;
 }
 
-function ChartSummary({
-  reading,
-  unavailable,
-  caption,
-}: {
-  reading: ChartInterpretation | undefined;
-  unavailable: unknown;
-  caption: string;
-}) {
-  const missingModel =
-    unavailable instanceof ApiError &&
-    (unavailable.status === 503 || unavailable.code === "llm_unavailable");
-  if (missingModel || (!reading && unavailable instanceof ApiError)) {
-    return (
-      <ErrorState
-        title="Visual interpretation is unavailable"
-        message="No chart summary was generated. The crop and any printed caption are the only evidence shown."
-      />
-    );
-  }
-  if (!reading) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No model reading is stored. Caption from the PDF: {caption || "none"}.
-      </p>
-    );
-  }
+function Kpi({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="space-y-2 text-sm">
-      {reading.summary && <p>{reading.summary}</p>}
-      <p>
-        {reading.title || reading.chartType || "Chart reading"}{" "}
-        <span className="text-xs text-primary">Visual estimate from chart, approximate</span>
-      </p>
-      <ul className="space-y-1">
-        {reading.points.map((point) => (
-          <li key={`${point.label}-${point.value}`}>
-            {point.label}
-            {point.series ? ` (${point.series})` : ""}: {point.value}
-            {point.unit ? ` ${point.unit}` : ""}
-            {point.printedOnChart ? " · printed label" : " · estimated from the graphic"}
-          </li>
-        ))}
-      </ul>
-      <p className="text-xs text-muted-foreground">{reading.caveat}</p>
-      <p className="text-xs text-muted-foreground">
-        {reading.provider} · {reading.model}
-      </p>
+    <div className="bg-card px-4 py-4">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-2 font-serif text-3xl tabular">{value}</dd>
     </div>
   );
 }
 
-function DiscrepancyList({
-  documentId,
+function ChartSummary({
   reading,
-  facts,
+  unavailable,
+  caption,
+  pending,
+  canRead,
+  onRead,
+}: {
+  reading: ChartInterpretation | undefined;
+  unavailable: unknown;
+  caption: string;
+  pending: boolean;
+  canRead: boolean;
+  onRead: () => void;
+}) {
+  const missingModel =
+    unavailable instanceof ApiError &&
+    (unavailable.status === 503 || unavailable.code === "llm_unavailable");
+  return (
+    <article className="min-w-0 space-y-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="eyebrow">Chart-to-text</p>
+          <h2 className="mt-1 font-serif text-2xl">
+            {reading?.title || reading?.chartType || "No stored reading"}
+          </h2>
+        </div>
+        <Button type="button" variant={reading ? "outline" : "default"} disabled={!canRead || pending} onClick={onRead}>
+          {pending ? "Reading…" : reading ? "Re-analyse" : "Read chart"}
+        </Button>
+      </div>
+      {missingModel || (!reading && unavailable instanceof ApiError) ? (
+        <ErrorState
+          title="Visual interpretation is unavailable"
+          message="No chart summary was generated. The crop and any printed caption are the only evidence shown."
+        />
+      ) : null}
+      {!reading && !unavailable ? (
+        <p className="text-sm text-muted-foreground">
+          No model reading is stored. Caption from the PDF: {caption || "none"}.
+        </p>
+      ) : null}
+      {reading ? (
+        <>
+          {reading.summary && <p className="max-w-prose text-[15px] leading-7">{reading.summary}</p>}
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs text-muted-foreground">
+              <tr className="border-b">
+                <th className="px-2 py-2 font-medium">Point</th>
+                <th className="px-2 py-2 text-right font-medium">Value</th>
+                <th className="px-2 py-2 font-medium">Basis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reading.points.map((point) => (
+                <tr key={`${point.label}-${point.value}`} className="border-b">
+                  <td className="px-2 py-2">
+                    {point.label}
+                    {point.series ? ` · ${point.series}` : ""}
+                    {point.period ? <span className="text-muted-foreground"> · {point.period}</span> : null}
+                  </td>
+                  <td className="px-2 py-2 text-right font-mono tabular">
+                    {point.value}
+                    {point.unit ? ` ${point.unit}` : ""}
+                  </td>
+                  <td className="px-2 py-2 text-xs text-muted-foreground">
+                    {point.printedOnChart ? "Printed on the chart" : "Estimated from the graphic"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="text-xs leading-5 text-muted-foreground">{reading.caveat}</p>
+          <p className="text-xs text-muted-foreground">
+            {reading.provider} · {reading.model}
+          </p>
+        </>
+      ) : null}
+    </article>
+  );
+}
+
+function ComparisonTable({
+  documentId,
+  rows,
+  selectedKey,
+  onSelect,
+  hasReading,
 }: {
   documentId: string;
-  reading: ChartInterpretation | undefined;
-  facts: Parameters<typeof visualDiscrepancy>[1];
+  rows: { check: TableCheck; result: ReturnType<typeof visualDiscrepancy> }[];
+  selectedKey: string | null;
+  onSelect: (key: string) => void;
+  hasReading: boolean;
 }) {
-  if (!reading) {
+  if (!hasReading) {
     return (
       <p className="text-sm">
-        <strong>INSUFFICIENT_EVIDENCE.</strong> Automated chart-to-table auditing is not available
-        until a vision model reads this crop.
+        <ReviewStatus status="INSUFFICIENT_EVIDENCE" /> Automated chart-to-table comparison is not
+        available until a vision model reads this crop.
       </p>
     );
   }
-  if (reading.tableChecks.length === 0) {
+  if (rows.length === 0) {
     return (
       <p className="text-sm">
-        <strong>INSUFFICIENT_EVIDENCE.</strong> The reading did not include a table comparison.
+        <ReviewStatus status="INSUFFICIENT_EVIDENCE" /> The reading did not include a table comparison.
       </p>
     );
   }
   return (
-    <ul className="space-y-3">
-      {reading.tableChecks.map((check) => {
-        const result = visualDiscrepancy(check, facts);
-        return (
-          <li key={`${check.label}-${check.estimate}`} className="text-sm">
-            <strong>{result.status}.</strong> {check.label}: {result.detail}
-            {result.page != null && (
-              <span className="mt-1 block">
-                <SourceLink
-                  documentId={documentId}
-                  page={result.page}
-                  evidenceId={result.evidenceId}
-                />
-              </span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <section className="space-y-3">
+      <div>
+        <h2 className="font-serif text-2xl">Chart versus reported table</h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+          A potential discrepancy means the chart point and one aligned reported fact differ. It is not a
+          verified finding of financial fraud.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[760px] text-sm">
+          <thead className="text-left text-xs text-muted-foreground">
+            <tr className="border-b">
+              <th className="px-2 py-2 font-medium">Metric</th>
+              <th className="px-2 py-2 font-medium">Period</th>
+              <th className="px-2 py-2 text-right font-medium">Chart</th>
+              <th className="px-2 py-2 text-right font-medium">Reported</th>
+              <th className="px-2 py-2 text-right font-medium">Absolute</th>
+              <th className="px-2 py-2 text-right font-medium">Relative</th>
+              <th className="px-2 py-2 font-medium">Review</th>
+              <th className="px-2 py-2 font-medium">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ check, result }) => {
+              const key = `${check.label}-${check.estimate}`;
+              const tone =
+                result.status === "POTENTIAL_DISCREPANCY"
+                  ? "bg-warning-soft/70"
+                  : selectedKey === key
+                    ? "bg-muted/60"
+                    : "";
+              return (
+                <tr
+                  key={key}
+                  className={`cursor-pointer border-b ${tone}`}
+                  onClick={() => onSelect(key)}
+                >
+                  <td className="px-2 py-3">{check.label}</td>
+                  <td className="px-2 py-3">{check.period ?? "—"}</td>
+                  <td className="px-2 py-3 text-right font-mono tabular">{check.estimate}</td>
+                  <td className="px-2 py-3 text-right font-mono tabular">{check.tableValue ?? "—"}</td>
+                  <td className="px-2 py-3 text-right font-mono tabular">{check.absoluteDifference ?? "—"}</td>
+                  <td className="px-2 py-3 text-right font-mono tabular">
+                    {check.relativeDifference == null
+                      ? "—"
+                      : `${(check.relativeDifference * 100).toFixed(1)}%`}
+                  </td>
+                  <td className="px-2 py-3">
+                    <ReviewStatus status={result.status} />
+                  </td>
+                  <td className="px-2 py-3">
+                    {result.page != null ? (
+                      <SourceLink
+                        documentId={documentId}
+                        page={result.page}
+                        evidenceId={result.evidenceId}
+                        label="Table"
+                      />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -343,10 +490,12 @@ function SourceLink({
   documentId,
   page,
   evidenceId,
+  label = "Open source page",
 }: {
   documentId: string;
   page: number;
   evidenceId: string | null;
+  label?: string;
 }) {
   const navigate = useNavigate();
   return (
@@ -365,7 +514,7 @@ function SourceLink({
         })
       }
     >
-      Open source page
+      {label}
     </Button>
   );
 }
