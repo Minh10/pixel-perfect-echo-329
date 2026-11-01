@@ -1,0 +1,1913 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FINAUDIT AI API",
+    "description": "Financial PDF ingestion, layout-aware parsing and evidence provenance. No LLM auditing: all outputs are parser outputs with provenance.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Upload Document",
+        "description": "Validate and store a PDF, then queue it for background processing (202 Accepted).\n\nMetadata fields are optional and stored exactly as supplied; nothing is inferred.  When no\ntitle is given we use the PDF's embedded title metadata, else the file name.",
+        "operationId": "upload_document_api_v1_documents_post",
+        "parameters": [
+          {
+            "name": "parser",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(docling|pymupdf|auto)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Parser"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_document_api_v1_documents_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "List Documents",
+        "operationId": "list_documents_api_v1_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinDocument"
+                  },
+                  "title": "Response List Documents Api V1 Documents Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Get Document",
+        "operationId": "get_document_api_v1_documents__doc_id__get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinDocument"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Delete Document",
+        "operationId": "delete_document_api_v1_documents__doc_id__delete",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/reprocess": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Reprocess Document",
+        "operationId": "reprocess_document_api_v1_documents__doc_id__reprocess_post",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "parser",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(docling|pymupdf|auto)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Parser"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/source": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Download Source",
+        "operationId": "download_source_api_v1_documents__doc_id__source_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/job": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Document Job",
+        "operationId": "get_document_job_api_v1_documents__doc_id__job_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "operationId": "get_job_api_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/pages": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Pages",
+        "operationId": "get_pages_api_v1_documents__doc_id__pages_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentPage"
+                  },
+                  "title": "Response Get Pages Api V1 Documents  Doc Id  Pages Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/pages/{page_no}": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Page",
+        "operationId": "get_page_api_v1_documents__doc_id__pages__page_no__get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "page_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Page No"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/evidence": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Evidence",
+        "operationId": "get_evidence_api_v1_documents__doc_id__evidence_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(disclosure|table|figure)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Evidence"
+                  },
+                  "title": "Response Get Evidence Api V1 Documents  Doc Id  Evidence Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/export/docling": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Export Docling",
+        "operationId": "export_docling_api_v1_documents__doc_id__export_docling_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/pages/{page_no}/image": {
+      "get": {
+        "tags": [
+          "renders"
+        ],
+        "summary": "Page Image",
+        "description": "Render a page of the original PDF to PNG (PyMuPDF).  Use with `bboxNormalized` for overlays.",
+        "operationId": "page_image_api_v1_documents__doc_id__pages__page_no__image_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "page_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Page No"
+            }
+          },
+          {
+            "name": "dpi",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 36
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dpi"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "image/png": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}/blocks/{block_id}/image": {
+      "get": {
+        "tags": [
+          "renders"
+        ],
+        "summary": "Block Image",
+        "description": "Crop a block's bbox (e.g. a figure/chart or table region) from the original PDF page.",
+        "operationId": "block_image_api_v1_documents__doc_id__blocks__block_id__image_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Block Id"
+            }
+          },
+          {
+            "name": "dpi",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 36
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dpi"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "image/png": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ApiError"
+      },
+      "BBox": {
+        "properties": {
+          "l": {
+            "type": "number",
+            "title": "L"
+          },
+          "t": {
+            "type": "number",
+            "title": "T"
+          },
+          "r": {
+            "type": "number",
+            "title": "R"
+          },
+          "b": {
+            "type": "number",
+            "title": "B"
+          },
+          "coordOrigin": {
+            "type": "string",
+            "const": "top-left",
+            "title": "Coordorigin",
+            "default": "top-left"
+          },
+          "unit": {
+            "type": "string",
+            "const": "pt",
+            "title": "Unit",
+            "default": "pt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "l",
+          "t",
+          "r",
+          "b"
+        ],
+        "title": "BBox"
+      },
+      "Body_upload_document_api_v1_documents_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "PDF file"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Annual Report",
+                  "Quarterly Report",
+                  "Prospectus",
+                  "Sustainability Report"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_document_api_v1_documents_post"
+      },
+      "DocumentPage": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "section": {
+            "type": "string",
+            "title": "Section",
+            "description": "Most recent heading text at or before this page; '' if none"
+          },
+          "width": {
+            "type": "number",
+            "title": "Width"
+          },
+          "height": {
+            "type": "number",
+            "title": "Height"
+          },
+          "rotation": {
+            "type": "integer",
+            "title": "Rotation"
+          },
+          "hasTextLayer": {
+            "type": "boolean",
+            "title": "Hastextlayer"
+          },
+          "charCount": {
+            "type": "integer",
+            "title": "Charcount"
+          },
+          "imageCount": {
+            "type": "integer",
+            "title": "Imagecount"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageConfidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "Imageurl"
+          },
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/PageBlock"
+            },
+            "type": "array",
+            "title": "Blocks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "section",
+          "width",
+          "height",
+          "rotation",
+          "hasTextLayer",
+          "charCount",
+          "imageCount",
+          "imageUrl",
+          "blocks"
+        ],
+        "title": "DocumentPage"
+      },
+      "Evidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "blockId": {
+            "type": "string",
+            "title": "Blockid"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "disclosure",
+              "table",
+              "figure"
+            ],
+            "title": "Category"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          },
+          "extracted": {
+            "type": "null",
+            "title": "Extracted",
+            "description": "Reserved: semantic field extraction is not implemented"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence",
+            "description": "Parser-reported confidence if any; never invented"
+          },
+          "related": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Related"
+          },
+          "detection": {
+            "$ref": "#/components/schemas/EvidenceDetection"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "page",
+          "blockId",
+          "category",
+          "label",
+          "excerpt",
+          "detection",
+          "provenance"
+        ],
+        "title": "Evidence",
+        "description": "An addressable, provenance-backed region.  It is *not* a verified financial fact."
+      },
+      "EvidenceDetection": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "rule": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method"
+        ],
+        "title": "EvidenceDetection"
+      },
+      "FigureClassification": {
+        "properties": {
+          "className": {
+            "type": "string",
+            "title": "Classname"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdby"
+          }
+        },
+        "type": "object",
+        "required": [
+          "className"
+        ],
+        "title": "FigureClassification"
+      },
+      "FigureData": {
+        "properties": {
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "classification": {
+            "items": {
+              "$ref": "#/components/schemas/FigureClassification"
+            },
+            "type": "array",
+            "title": "Classification",
+            "description": "Only populated when the Docling picture classifier is enabled"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "Imageurl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imageUrl"
+        ],
+        "title": "FigureData"
+      },
+      "FinDocument": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Annual Report",
+                  "Quarterly Report",
+                  "Prospectus",
+                  "Sustainability Report"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploadedat"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "processing",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "sizeMb": {
+            "type": "number",
+            "title": "Sizemb"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "processedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processedat"
+          },
+          "latestJobId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latestjobid"
+          },
+          "parser": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParserInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "pages",
+          "uploadedAt",
+          "status",
+          "sizeMb",
+          "filename",
+          "sha256"
+        ],
+        "title": "FinDocument"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "parser": {
+            "type": "string",
+            "title": "Parser"
+          },
+          "doclingVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doclingversion"
+          },
+          "pymupdfVersion": {
+            "type": "string",
+            "title": "Pymupdfversion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "parser",
+          "doclingVersion",
+          "pymupdfVersion"
+        ],
+        "title": "Health"
+      },
+      "Job": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "State"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "inspecting",
+              "parsing",
+              "assembling",
+              "persisting",
+              "done"
+            ],
+            "title": "Stage"
+          },
+          "progress": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "maxAttempts": {
+            "type": "integer",
+            "title": "Maxattempts"
+          },
+          "requestedParser": {
+            "type": "string",
+            "title": "Requestedparser"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finishedat"
+          },
+          "heartbeatAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heartbeatat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "documentId",
+          "state",
+          "stage",
+          "progress",
+          "attempts",
+          "maxAttempts",
+          "requestedParser",
+          "createdAt"
+        ],
+        "title": "Job"
+      },
+      "NormalizedBBox": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X"
+          },
+          "y": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y"
+          },
+          "width": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Width"
+          },
+          "height": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Height"
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "NormalizedBBox"
+      },
+      "PageBlock": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "heading",
+              "paragraph",
+              "table",
+              "figure"
+            ],
+            "title": "Kind"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "title",
+              "section_header",
+              "text",
+              "list_item",
+              "caption",
+              "footnote",
+              "page_header",
+              "page_footer",
+              "formula",
+              "code",
+              "table",
+              "picture",
+              "chart",
+              "other"
+            ],
+            "title": "Role"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level",
+            "description": "Heading level when reported by the parser"
+          },
+          "table": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TableData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "figure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FigureData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "captionBlockId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captionblockid"
+          },
+          "bbox": {
+            "$ref": "#/components/schemas/BBox"
+          },
+          "bboxNormalized": {
+            "$ref": "#/components/schemas/NormalizedBBox"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "role",
+          "bbox",
+          "bboxNormalized",
+          "provenance"
+        ],
+        "title": "PageBlock"
+      },
+      "PageConfidence": {
+        "properties": {
+          "layoutScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layoutscore"
+          },
+          "parseScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parsescore"
+          },
+          "tableScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tablescore"
+          },
+          "ocrScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocrscore"
+          }
+        },
+        "type": "object",
+        "title": "PageConfidence",
+        "description": "Docling page-level confidence scores (0..1); null when the parser does not report them."
+      },
+      "ParserInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "docling",
+              "pymupdf"
+            ],
+            "title": "Name"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "options": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "version"
+        ],
+        "title": "ParserInfo"
+      },
+      "Provenance": {
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "title": "Sourcesha256"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page",
+            "description": "1-based page number"
+          },
+          "bbox": {
+            "$ref": "#/components/schemas/BBox"
+          },
+          "bboxNormalized": {
+            "$ref": "#/components/schemas/NormalizedBBox"
+          },
+          "pageWidth": {
+            "type": "number",
+            "title": "Pagewidth"
+          },
+          "pageHeight": {
+            "type": "number",
+            "title": "Pageheight"
+          },
+          "charspan": {
+            "anyOf": [
+              {
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 2,
+                "minItems": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charspan"
+          },
+          "sourceRef": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceref",
+            "description": "Parser-native reference, e.g. Docling '#/texts/12'"
+          },
+          "parser": {
+            "type": "string",
+            "enum": [
+              "docling",
+              "pymupdf"
+            ],
+            "title": "Parser"
+          },
+          "parserVersion": {
+            "type": "string",
+            "title": "Parserversion"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "description": "Extraction method, e.g. 'docling:layout-model', 'pymupdf:find_tables'"
+          },
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documentId",
+          "sourceSha256",
+          "page",
+          "bbox",
+          "bboxNormalized",
+          "pageWidth",
+          "pageHeight",
+          "parser",
+          "parserVersion",
+          "method",
+          "jobId"
+        ],
+        "title": "Provenance",
+        "description": "Where a block came from: enough to re-locate it in the original PDF bytes."
+      },
+      "TableCell": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "col": {
+            "type": "integer",
+            "title": "Col"
+          },
+          "rowSpan": {
+            "type": "integer",
+            "title": "Rowspan",
+            "default": 1
+          },
+          "colSpan": {
+            "type": "integer",
+            "title": "Colspan",
+            "default": 1
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "columnHeader": {
+            "type": "boolean",
+            "title": "Columnheader",
+            "default": false
+          },
+          "rowHeader": {
+            "type": "boolean",
+            "title": "Rowheader",
+            "default": false
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "row",
+          "col",
+          "text"
+        ],
+        "title": "TableCell"
+      },
+      "TableData": {
+        "properties": {
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/TableRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "numRows": {
+            "type": "integer",
+            "title": "Numrows"
+          },
+          "numCols": {
+            "type": "integer",
+            "title": "Numcols"
+          },
+          "headerRows": {
+            "type": "integer",
+            "title": "Headerrows"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/TableCell"
+            },
+            "type": "array",
+            "title": "Cells"
+          }
+        },
+        "type": "object",
+        "required": [
+          "columns",
+          "rows",
+          "numRows",
+          "numCols",
+          "headerRows",
+          "cells"
+        ],
+        "title": "TableData",
+        "description": "Superset of frontend TableData.  `columns`/`rows` are verbatim cell text, no normalisation."
+      },
+      "TableRow": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "values"
+        ],
+        "title": "TableRow"
+      },
+      "UploadResponse": {
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/FinDocument"
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document",
+          "job"
+        ],
+        "title": "UploadResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

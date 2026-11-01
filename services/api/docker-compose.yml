@@ -1,0 +1,43 @@
+# Local development stack: API + background worker sharing one data volume.
+#   docker compose up --build
+#   API:   http://localhost:8000/api/v1/health      OpenAPI docs: http://localhost:8000/docs
+services:
+  api:
+    build:
+      context: .
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.12-slim}
+        TORCH_INDEX_URL: ${TORCH_INDEX_URL:-https://download.pytorch.org/whl/cpu}
+        DOCLING_PRELOAD_MODELS: ${DOCLING_PRELOAD_MODELS:-true}
+        INSTALL_DEV: ${INSTALL_DEV:-true}
+    image: finaudit-api:dev
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      FINAUDIT_DATA_DIR: /data
+    volumes:
+      - finaudit-data:/data
+
+  worker:
+    image: finaudit-api:dev
+    depends_on:
+      - api            # api builds the shared image
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      FINAUDIT_DATA_DIR: /data
+    volumes:
+      - finaudit-data:/data
+    healthcheck:
+      disable: true
+    stop_grace_period: 60s   # let an in-flight PDF finish
+    # Scale horizontally with: docker compose up --scale worker=2
+
+volumes:
+  finaudit-data:

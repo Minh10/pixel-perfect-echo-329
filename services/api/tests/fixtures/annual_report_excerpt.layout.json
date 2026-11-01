@@ -1,0 +1,85 @@
+{
+  "file": "annual_report_excerpt.pdf",
+  "pageSize": [
+    595.2755905511812,
+    841.8897637795277
+  ],
+  "pages": {
+    "1": {
+      "title": "Fictional Example Holdings plc"
+    },
+    "2": {
+      "heading": {
+        "text": "Financial review",
+        "bbox": [
+          72,
+          76.0,
+          212,
+          94.0
+        ]
+      },
+      "table": {
+        "bbox": [
+          72,
+          170.0,
+          522,
+          324.0
+        ],
+        "rows": [
+          [
+            "",
+            "2025",
+            "2024",
+            "Change"
+          ],
+          [
+            "Revenue",
+            "4,812",
+            "4,281",
+            "+12.4%"
+          ],
+          [
+            "Cost of sales",
+            "(3,018)",
+            "(2,722)",
+            "+10.9%"
+          ],
+          [
+            "Gross profit",
+            "1,794",
+            "1,559",
+            "+15.1%"
+          ],
+          [
+            "Operating expenses",
+            "(1,091)",
+            "(968)",
+            "+12.7%"
+          ],
+          [
+            "Operating profit",
+            "703",
+            "591",
+            "+18.9%"
+          ],
+          [
+            "Profit for the year",
+            "471",
+            "392",
+            "+20.2%"
+          ]
+        ]
+      }
+    },
+    "3": {
+      "figure": {
+        "bbox": [
+          72,
+          120.0,
+          472,
+          360.0
+        ]
+      }
+    }
+  }
+}
