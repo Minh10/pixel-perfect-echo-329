@@ -5,6 +5,8 @@ import { PendingModule } from "@/components/app/pending-module";
 export const Route = createFileRoute("/audit")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Consistency Audit — FINAUDIT AI" },
       { name: "description", content: "Detect potential inconsistencies between narrative, tables and charts." },
       { property: "og:title", content: "Consistency Audit — FINAUDIT AI" },

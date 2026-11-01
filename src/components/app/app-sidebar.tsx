@@ -13,12 +13,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-3">
+      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
         <Link to="/" className="flex items-center gap-2.5 overflow-hidden">
-          <span className="grid size-7 shrink-0 place-items-center rounded-sm bg-sidebar-primary font-mono text-xs font-semibold text-sidebar-primary-foreground">
+          <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
             FA
           </span>
-          <span className="truncate text-sm font-semibold tracking-tight text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden">
+          <span className="truncate text-sm font-semibold text-foreground group-data-[collapsible=icon]:hidden">
             FINAUDIT <span className="font-normal text-sidebar-foreground">AI</span>
           </span>
         </Link>
@@ -26,14 +26,14 @@ export function AppSidebar() {
       <SidebarContent className="pt-2">
         {GROUPS.map((group) => (
           <SidebarGroup key={group}>
-            <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-widest text-sidebar-foreground/50">
+            <SidebarGroupLabel className="text-xs font-medium text-muted-foreground">
               {group}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {NAV_ITEMS.filter((i) => i.group === group).map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={isActive(item.to)} tooltip={item.title}>
+                    <SidebarMenuButton className="h-10 border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:font-semibold" asChild isActive={isActive(item.to)} tooltip={item.title}>
                       <Link to={item.to}>
                         <item.icon />
                         <span>{item.title}</span>
@@ -47,8 +47,8 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-3 group-data-[collapsible=icon]:hidden">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-sidebar-foreground/50">Environment</p>
-        <p className="text-xs text-sidebar-foreground">Demo data · backend not connected</p>
+        <p className="text-xs font-medium text-muted-foreground">Environment</p>
+        <p className="text-xs text-sidebar-foreground">DEMO · Backend not connected</p>
       </SidebarFooter>
     </Sidebar>
   );

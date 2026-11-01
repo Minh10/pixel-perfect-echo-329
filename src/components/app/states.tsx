@@ -9,25 +9,25 @@ export function DemoBadge({ className }: { className?: string }) {
     <span
       title="Values shown are fictional demo data, not verified financial results."
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-sm bg-demo px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-demo-foreground",
+        "inline-flex items-center gap-1.5 rounded-sm bg-demo px-2 py-0.5 text-[10px] font-semibold text-demo-foreground",
         className,
       )}
     >
       <span className="size-1.5 rounded-full bg-demo-foreground" />
-      Demo data
+      DEMO data
     </span>
   );
 }
 
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: string; description?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-5">
-      <div className="space-y-1.5">
+    <div className="grid min-w-0 grid-cols-1 items-end gap-5 border-b pb-6 xl:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0 space-y-2">
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1 className="font-serif text-2xl font-semibold tracking-tight md:text-[1.75rem]">{title}</h1>
+        <h1 className="text-2xl font-semibold leading-tight md:text-[2rem]">{title}</h1>
         {description && <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex min-w-0 flex-wrap items-center gap-2">{actions}</div>}
     </div>
   );
 }

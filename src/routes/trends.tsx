@@ -9,6 +9,8 @@ export const Route = createFileRoute("/trends")({
   loader: ({ context }) => context.queryClient.ensureQueryData(trendsQuery(DEFAULT_DOCUMENT_ID)),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Trends — FINAUDIT AI" },
       { name: "description", content: "Multi-period revenue and profitability trends from parsed reports." },
       { property: "og:title", content: "Trends — FINAUDIT AI" },
@@ -31,7 +33,7 @@ function Trends() {
   const withMargin = data.map((d) => ({ ...d, margin: +((d.operatingIncome / d.revenue) * 100).toFixed(1) }));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
+    <div className="page-layout space-y-6">
       <PageHeader eyebrow="Analysis" title="Trends" description="Northwind Holdings (demo issuer) · five-year series, £ millions." actions={<DemoBadge />} />
       <div className="grid gap-4 lg:grid-cols-5">
         <section className="rounded-md border bg-card p-5 lg:col-span-3">

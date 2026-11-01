@@ -12,6 +12,8 @@ export const Route = createFileRoute("/documents")({
   loader: ({ context }) => context.queryClient.ensureQueryData(documentsQuery()),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Documents — FINAUDIT AI" },
       { name: "description", content: "Library of uploaded financial reports and their processing status." },
       { property: "og:title", content: "Documents — FINAUDIT AI" },
@@ -28,7 +30,7 @@ function Documents() {
   const filtered = data.filter((d) => `${d.title} ${d.issuer} ${d.period}`.toLowerCase().includes(q.toLowerCase()));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
+    <div className="page-layout space-y-6">
       <PageHeader
         eyebrow="Library"
         title="Documents"

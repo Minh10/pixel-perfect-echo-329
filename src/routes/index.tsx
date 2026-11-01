@@ -14,6 +14,8 @@ export const Route = createFileRoute("/")({
     ]),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Overview — FINAUDIT AI" },
       { name: "description", content: "Workspace overview of financial documents, evidence and audit readiness." },
       { property: "og:title", content: "Overview — FINAUDIT AI" },
