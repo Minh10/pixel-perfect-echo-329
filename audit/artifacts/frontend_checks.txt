@@ -1,0 +1,6 @@
+## npm run test
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+## tsc --noEmit: exit 0 (no output)
+## npm run lint: 0 errors, 6 warnings (react-refresh/only-export-components in src/components/ui/*)
+## npm run build: success (vite + nitro)
