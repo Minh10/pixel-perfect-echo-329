@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
 from typing import Annotated
 
@@ -29,6 +30,7 @@ from app.storage.db import Repository, new_id
 from app.storage.files import FileStore
 
 router = APIRouter()
+log = logging.getLogger("finaudit.api")
 
 
 # --------------------------------------------------------------------------- dependencies
@@ -67,7 +69,8 @@ def to_document(row: dict) -> FinDocument:
 
 def to_job(row: dict) -> Job:
     return Job(
-        id=row["id"], document_id=row["document_id"], state=row["state"], stage=row["stage"],
+        id=row["id"], document_id=row["document_id"], kind=row.get("kind", "parse"), state=row["state"],
+        stage=row["stage"],
         progress=round(min(max(row["progress"], 0.0), 1.0), 3), attempts=row["attempts"],
         max_attempts=row["max_attempts"], requested_parser=row["requested_parser"],
         error=ApiError(code=row["error_code"], message=row["error_message"] or "") if row["error_code"] else None,
@@ -158,12 +161,18 @@ def get_document(doc_id: str, repo: Repo) -> FinDocument:
 
 
 @router.delete("/documents/{doc_id}", status_code=204, tags=["documents"])
-def delete_document(doc_id: str, repo: Repo, files: Files) -> Response:
+def delete_document(doc_id: str, request: Request, repo: Repo, files: Files) -> Response:
     _require_doc(repo, doc_id)
     if repo.has_active_job(doc_id):
         raise api_error(409, "job_running", "Document is being processed; retry after the job finishes")
-    repo.delete_document(doc_id)
+    repo.delete_document(doc_id)  # FK cascade removes chunks, FTS rows, index runs, chart readings
     files.delete(doc_id)
+    try:  # vectors live in Qdrant: best effort, never blocks deletion of the source of truth
+        from app.indexing.vectors import delete_document_everywhere
+
+        delete_document_everywhere(request.app.state.settings, doc_id)
+    except Exception:
+        log.warning("could not delete vectors for %s", doc_id, exc_info=True)
     return Response(status_code=204)
 
 

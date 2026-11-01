@@ -14,10 +14,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
+from app.api.v1.rag_routes import router as rag_router
 from app.api.v1.routes import router as v1_router
 from app.config import Settings, get_settings
 from app.storage.db import Repository
+from app.indexing.store import ChunkStore
+from app.retrieval.search import Retriever
 from app.storage.files import FileStore
+from app.visual.charts import ChartStore
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -25,12 +29,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title="FINAUDIT AI API",
         version=__version__,
-        description="Financial PDF ingestion, layout-aware parsing and evidence provenance. "
-        "No LLM auditing: all outputs are parser outputs with provenance.",
+        description="Financial PDF ingestion, layout-aware parsing, evidence provenance, layout-aware retrieval "
+        "and evidence-grounded QA. Answers are validated against cited evidence; this is not financial auditing.",
     )
     app.state.settings = s
     app.state.repo = Repository(s.db_path)
     app.state.files = FileStore(s.documents_dir)
+    app.state.chunks = ChunkStore(s.db_path)
+    app.state.charts = ChartStore(s.db_path)
+    app.state.retriever = Retriever(s, store=app.state.chunks)  # embedder loaded lazily, cached per process
 
     app.add_middleware(
         CORSMiddleware, allow_origins=s.cors_origins, allow_methods=["*"], allow_headers=["*"],
@@ -55,6 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app.include_router(v1_router, prefix="/api/v1")
+    app.include_router(rag_router, prefix="/api/v1")
     return app
 
 

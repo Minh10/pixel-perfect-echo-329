@@ -43,6 +43,53 @@ class Settings(BaseSettings):
     render_default_dpi: int = 110
     render_max_dpi: int = 300
 
+    # ---------------------------------------------------------------- indexing / retrieval (Milestone 3)
+    auto_index: bool = True  # queue an index job after every successful parse
+    # Embedders: onnx | wordllama | openai | sentence-transformers | none
+    embedder: str = "onnx"
+    embedder_model_path: Path = Path("./models/all-MiniLM-L6-v2")
+    embedder_model: str | None = None          # openai / sentence-transformers model name
+    embedder_base_url: str | None = None       # openai-compatible base URL, e.g. http://localhost:11434/v1
+    embedder_api_key_env: str = "FINAUDIT_EMBEDDER_API_KEY"  # name of the env var holding the key
+    embedder_dim: int | None = None
+    embedder_max_length: int = 256
+    embedder_query_prefix: str = ""            # e.g. "query: " for e5 models
+    embedder_document_prefix: str = ""
+    # Qdrant: server URL (recommended, required when API and worker are separate processes) or
+    # embedded on-disk mode (single process only: tests, benchmark scripts).
+    qdrant_url: str | None = None
+    qdrant_api_key_env: str = "FINAUDIT_QDRANT_API_KEY"
+    qdrant_path: Path | None = None            # default: {data_dir}/qdrant when qdrant_url is unset
+    qdrant_collection_prefix: str = "finaudit"
+    rrf_k: int = 60
+    retrieval_candidates: int = 50             # per-method candidate depth before fusion
+    # Reranker: none | cross-encoder (sentence-transformers CrossEncoder model) — off unless measured
+    reranker: str = "none"
+    reranker_model: str | None = None
+
+    # ---------------------------------------------------------------- LLM (QA + chart interpretation)
+    # Provider: none | anthropic | openai (any OpenAI-compatible chat endpoint, incl. vLLM/Ollama)
+    llm_provider: str = "none"
+    llm_model: str | None = None
+    llm_base_url: str | None = None
+    llm_api_key_env: str = "FINAUDIT_LLM_API_KEY"   # name of the env var holding the key (never the key)
+    llm_timeout_s: float = 120.0
+    llm_max_output_tokens: int = 2048
+    llm_temperature: float = 0.0               # OpenAI-compatible providers only (Claude models reject sampling params)
+    llm_effort: str | None = "high"            # Anthropic output_config.effort: low|medium|high|xhigh|max
+    llm_refusal_fallback: bool = True          # Anthropic server-side refusal fallback on supported models
+    # Optional pricing (USD per 1M tokens) for cost reporting.  Unset -> cost reported as null.
+    llm_price_input_per_mtok: float | None = None
+    llm_price_output_per_mtok: float | None = None
+    qa_top_k: int = 8
+    qa_method: str = "hybrid"                  # retrieval method used by /qa (see eval/results for evidence)
+    qa_chunk_set: str = "layout"
+    qa_max_evidence_chars: int = 24000
+
+    @property
+    def resolved_qdrant_path(self) -> Path:
+        return self.qdrant_path or (self.data_dir / "qdrant")
+
     @property
     def db_path(self) -> Path:
         return self.data_dir / "finaudit.sqlite3"

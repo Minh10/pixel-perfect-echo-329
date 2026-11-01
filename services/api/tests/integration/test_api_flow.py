@@ -43,7 +43,7 @@ def test_full_ingestion_flow(client: TestClient, worker: Worker, fixtures_dir: P
     r = client.get(f"/api/v1/documents/{doc['id']}/pages")
     assert r.status_code == 200 and r.json() == [] and r.headers["x-document-status"] == "processing"
 
-    assert worker.run_until_idle() == 1
+    assert worker.run_until_idle() == 2  # parse job, then the automatically queued index job
 
     job = client.get(f"/api/v1/jobs/{job['id']}").json()
     assert job["state"] == "succeeded" and job["stage"] == "done" and job["progress"] == 1
