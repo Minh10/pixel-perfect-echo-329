@@ -78,7 +78,7 @@ def test_b2_fabricated_negative_percentage_is_not_grounded(qa_env) -> None:  # n
 
 
 # --------------------------------------------------------------------------- AUDIT-B3 (period false accept)
-@pytest.mark.xfail(strict=True, reason="AUDIT-B3: unlabelled period columns let the 2021 value pass as 2022")
+
 def test_b3_wrong_period_rejected_when_columns_are_unlabelled() -> None:
     checks = operand_association_checks(kind="table", label="Cash and cash equivalents 2022", quote="$2,535",
                                         scale="units", text=AMD_BALANCE_SHEET,
@@ -86,7 +86,7 @@ def test_b3_wrong_period_rejected_when_columns_are_unlabelled() -> None:
     assert not _ok(checks, "operand_period_matches")
 
 
-@pytest.mark.xfail(strict=True, reason="AUDIT-B4: a cumulative 'Plan to Date through 12/31/2022' column is accepted as FY2022")
+
 def test_b4_cumulative_column_is_not_a_fiscal_year() -> None:
     checks = operand_association_checks(kind="table", label="FLNA restructuring charges 2022", quote="$210",
                                         scale="units", text=PEPSICO_RESTRUCTURING,
@@ -95,7 +95,7 @@ def test_b4_cumulative_column_is_not_a_fiscal_year() -> None:
 
 
 # --------------------------------------------------------------------------- AUDIT-B5 (calculation false reject)
-@pytest.mark.xfail(strict=True, reason="AUDIT-B5: every operand must name the question's metric, so derived metrics always fail")
+
 def test_b5_operand_of_a_derived_metric_is_not_rejected() -> None:
     checks = operand_association_checks(
         kind="table", label="Purchases of property, plant and equipment (PP&E) 2018", quote="(1,577)", scale="millions",
@@ -105,7 +105,6 @@ def test_b5_operand_of_a_derived_metric_is_not_rejected() -> None:
 
 
 # --------------------------------------------------------------------------- AUDIT-B6 (chunker percent merge)
-@pytest.mark.xfail(strict=True, reason="AUDIT-B6: a '%)' cell is not merged, producing '(7.0; %)'")
 def test_b6_percent_closing_paren_cell_is_merged() -> None:
     from app.indexing.chunker import _row_line, normalize_table
     from app.schemas import BBox, NormalizedBBox, PageBlock, Provenance, TableCell, TableData

@@ -1,7 +1,8 @@
 """Answer-text grounding: numbers (fail closed) and non-numeric claims.
 
 Every numeric-looking token in an answer is classified by `scan_numeric_tokens`:
-  * value      must equal a number in the cited evidence, an operand, or a (rounded/rescaled) calculation result;
+  * value      must equal an operand or a (rounded/rescaled) calculation result, or restate the question;
+               a number that merely appears in a cited excerpt is NOT accepted (it is not bound to row/period/unit);
   * year       must appear in the question or the cited evidence;
   * malformed  is never accepted (fail closed: e.g. "1,57,7" or "(7.0" in an answer is an error, not ignored);
   * reference / date tokens are identifiers, not quantities, and are reported but not grounded.
@@ -33,11 +34,12 @@ def _close(n: Decimal, allowed: set[Decimal]) -> bool:
 
 
 def number_checks(answer: str, question: str, cited_texts: Iterable[str], allowed_values: set[Decimal]) -> list[dict]:
+    # A value in the answer must be an operand or a calculation result (the caller passes their rounding and
+    # rescaling variants) or restate the question.  Merely appearing somewhere in a cited excerpt is NOT enough:
+    # that let an answer repeat any figure from the chunk -- including one planted by injected text -- without
+    # it ever being bound to a row, period and unit.
     cited = list(cited_texts)
-    evidence_nums: set[Decimal] = set()
-    for t in cited:
-        evidence_nums |= set(numbers_in(t))
-    allowed = set(allowed_values) | evidence_nums | set(numbers_in(question))
+    allowed = set(allowed_values) | set(numbers_in(question))
     years_ok = {tok.value for t in [question, *cited] for tok in scan_numeric_tokens(t) if tok.kind == "year"}
     malformed, ungrounded, bad_years = [], [], []
     for tok in scan_numeric_tokens(answer):
@@ -51,7 +53,7 @@ def number_checks(answer: str, question: str, cited_texts: Iterable[str], allowe
         {"check": "answer_numbers_wellformed", "ok": not malformed,
          "detail": f"malformed numeric text in answer: {malformed[:5]}" if malformed else ""},
         {"check": "answer_numbers_grounded", "ok": not ungrounded,
-         "detail": f"numbers not found in cited evidence or calculations: {', '.join(ungrounded[:6])}" if ungrounded else ""},
+         "detail": f"numbers that are not validated operands or calculation results: {', '.join(ungrounded[:6])}" if ungrounded else ""},
         {"check": "answer_years_grounded", "ok": not bad_years,
          "detail": f"years not in the question or cited evidence: {bad_years[:5]}" if bad_years else ""},
     ]

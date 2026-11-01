@@ -25,7 +25,7 @@ from pathlib import Path
 from app.processing.geometry import Box
 from app.schemas import DocumentPage, PageBlock, ParseResult
 
-CHUNKER_VERSION = "layout-v2"  # v2: content-based header rows + period recovery from context
+CHUNKER_VERSION = "layout-v3"  # v3: tables serialized from geometric FinancialFacts (periods/units bound per column)
 FLAT_CHUNKER_VERSION = "flat-v1"
 
 TEXT_WORD_BUDGET = 220
@@ -155,10 +155,13 @@ def normalize_table(b: PageBlock) -> NormTable:
                 if k is not None and NUM_RE.match(row[k]):
                     row[k] = f"{v}{row[k]}" if v != "$" else f"${row[k]}"
                     row[j] = ""
-            elif v == "%" and j > 0:
+            elif v in ("%", "%)", ")%", ")") and j > 0:
                 k = next((k for k in range(j - 1, -1, -1) if row[k]), None)
-                if k is not None and NUM_RE.match(row[k]):
-                    row[k] += "%"
+                if k is not None and NUM_RE.match(row[k] + (")" if row[k].count("(") > row[k].count(")") else "")):
+                    if row[k].count("(") > row[k].count(")"):
+                        row[k] += ")" + ("%" if "%" in v else "")
+                    else:
+                        row[k] += "%" if "%" in v else v
                     row[j] = ""
     keep = [j for j in range(t.num_cols) if any(r[j] for r in grid)]
     grid = [[r[j] for j in keep] for r in grid]
@@ -205,7 +208,8 @@ def _row_line(label: str, values: list[str], columns: list[str]) -> str:
 
 
 # --------------------------------------------------------------------------- layout chunker
-def chunk_layout(parse: ParseResult, meta: DocMeta) -> list[Chunk]:
+def chunk_layout(parse: ParseResult, meta: DocMeta, normalizations: dict | None = None) -> list[Chunk]:
+    normalizations = normalizations or {}
     chunks: list[Chunk] = []
     furniture = _furniture_texts(parse.pages)
     section: list[tuple[int, str]] = []  # heading stack (level, text)
@@ -237,7 +241,11 @@ def chunk_layout(parse: ParseResult, meta: DocMeta) -> list[Chunk]:
             elif b.kind == "table" and b.table is not None:
                 flush()
                 prev = [x for x in blocks[max(0, i - 2):i] if x.kind != "table" and x.text]
-                _emit_table(chunks, b, page, meta, path(), header, blocks, prev)
+                norm = normalizations.get(b.id)
+                if norm is not None and norm.facts:
+                    _emit_fact_table(chunks, b, page, meta, path(), header, blocks, prev, norm)
+                else:
+                    _emit_table(chunks, b, page, meta, path(), header, blocks, prev)
             elif b.kind == "figure":
                 flush()
                 _emit_figure(chunks, b, page, meta, path(), header, blocks, i)
@@ -372,6 +380,90 @@ def _emit_table(chunks: list[Chunk], b: PageBlock, page: DocumentPage, meta: Doc
             period=meta.period, pages=[page.number], section_path=spath, content=content, search_text=search,
             blocks=refs,
             meta={**base_meta, "part": part, "parts": len(groups), "rowRange": [min(rows), max(rows)] if rows else None},
+        ))
+
+
+def _period_tag(slot) -> str:
+    """Short column label for serialization: the aligned header text, or an explicit unknown marker."""
+    if slot.header_text:
+        return slot.header_text
+    return f"column {slot.index + 1} (period not stated)"
+
+
+def _emit_fact_table(chunks: list[Chunk], b: PageBlock, page: DocumentPage, meta: DocMeta, spath: list[str],
+                     header: str, blocks: list[PageBlock], prev: list[PageBlock], norm) -> None:
+    """Serialize a table from its FinancialFacts: every value is written next to its row label and the
+    header text actually aligned with its column; unknown periods are marked as such, never guessed."""
+    caption = next((x.text for x in blocks if x.id == b.caption_block_id), None)
+    context = " ".join((x.text or "").strip() for x in prev) or None
+    first_label = next((f.row_label for f in norm.facts if f.row_label), None)
+    if context and first_label and first_label in context:
+        context = context[:context.index(first_label)].strip() or None
+    if context:
+        context = context[-240:]
+    title = caption or context or (spath[-1] if spath else None)
+    slots = {s.index: s for s in norm.slots}
+    head = [f"[Table] {title}" if title else "[Table]"]
+    units = norm.units_text or (norm.facts[0].scale_source if norm.facts and norm.facts[0].scale_source
+                                and norm.facts[0].scale_source.startswith("document statement") else None)
+    if units:
+        head.append(f"Units: {units}")
+    head.append("Periods: " + " | ".join(
+        f"{_period_tag(s)} [{s.period.period_type}]" for s in norm.slots))
+    by_row: dict[int, list] = {}
+    for f in norm.facts:
+        by_row.setdefault(f.row_index, []).append(f)
+    lines: list[tuple[int, str, str | None, list[str]]] = []
+    group = None
+    for r in sorted(by_row):
+        fs = sorted(by_row[r], key=lambda f: f.slot_index)
+        g = fs[0].row_group
+        if g and g != group:
+            group = g
+            lines.append((r, f"[{g}]", group, []))
+        label = fs[0].row_label
+        pairs = "; ".join(f"{_period_tag(slots[f.slot_index])} = {f.cell_text}" for f in fs)
+        lines.append((r, f"{label}: {pairs}" if label else pairs, group, [f.fact_id for f in fs]))
+    if not lines:
+        return
+    body_words = _words(" ".join(x[1] for x in lines))
+    if body_words + _words(" ".join(head)) <= TABLE_WORD_BUDGET:
+        groups = [lines]
+    else:
+        groups, cur = [], []
+        for item in lines:
+            starts_group = item[1].startswith("[") and cur
+            if cur and (_words(" ".join(x[1] for x in cur)) + _words(item[1]) > TABLE_GROUP_WORD_BUDGET or starts_group):
+                groups.append(cur)
+                cur = []
+            cur.append(item)
+        if cur:
+            groups.append(cur)
+    fact_box = {f.fact_id: f.bbox for f in norm.facts}
+    sec = " > ".join(spath)
+    for part, gl in enumerate(groups):
+        rows = [x[0] for x in gl]
+        gh = list(head)
+        if len(groups) > 1 and gl[0][2] and not gl[0][1].startswith("["):
+            gh.append(f"[{gl[0][2]}] (continued)")
+        content = "\n".join(gh + [x[1] for x in gl])
+        ids = [i for x in gl for i in x[3]]
+        boxes = [fact_box[i] for i in ids if fact_box.get(i)]
+        bbox = None
+        if len(groups) > 1 and boxes:
+            bbox = Box(min(x.l for x in boxes), min(x.t for x in boxes), max(x.r for x in boxes), max(x.b for x in boxes))
+        chunks.append(Chunk(
+            chunk_id=_cid(meta.document_id, CHUNKER_VERSION, "table", page.number, b.id, part),
+            chunk_set="layout", kind="table", document_id=meta.document_id, company=meta.company,
+            period=meta.period, pages=[page.number], section_path=spath, content=content,
+            search_text=f"{header} | p.{page.number}" + (f" | {sec}" if sec else "") + f"\n{content}",
+            blocks=[_ref(page, b, bbox)],
+            meta={"caption": caption, "title": title, "units": units, "tableBlockId": b.id, "part": part,
+                  "parts": len(groups), "rowRange": [min(rows), max(rows)], "factIds": ids,
+                  "normalizationVersion": norm.normalization_version, "scale": norm.scale, "currency": norm.currency,
+                  "context": norm.title_context,
+                  "slots": [{"index": s.index, "header": s.header_text, "periodType": s.period.period_type,
+                             "fiscalYear": s.period.fiscal_year, "endDate": s.period.end_date} for s in norm.slots]},
         ))
 
 

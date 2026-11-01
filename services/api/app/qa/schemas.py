@@ -120,6 +120,14 @@ class Operand(ApiModel):
     scale: str
     value_kind: Literal["reported", "visual_estimate"]
     evidence_kind: EvidenceKind
+    row_label: str | None = Field(default=None, description="Source row label / metric phrase quoted by the model")
+    period: str | None = Field(default=None, description="Period claimed by the model (verified against the source)")
+    metric: str | None = None
+    currency: str | None = None
+    fact_id: str | None = Field(default=None, description="Bound FinancialFact (table evidence normalized as facts)")
+    period_type: str | None = Field(default=None, description="Period type of the bound source column")
+    binding: Literal["fact", "table_text", "statement", "figure"] | None = Field(
+        default=None, description="How the operand was bound to evidence")
 
 
 class Calculation(ApiModel):

@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.api.v1.routes import Cfg, Files, Repo, _load_parse, _require_doc, api_error, to_job
+from app.financial.schema import FinancialFact
 from app.indexing.store import ChunkStore
 from app.indexing.vectors import VectorStoreUnavailable, get_client
 from app.qa.evidence import chunk_ref, ranked
@@ -92,6 +93,17 @@ def index_status(repo: Repo, store: Store, cfg: Cfg) -> dict:
             "qaRetrieval": {"method": cfg.qa_method, "chunkSet": cfg.qa_chunk_set, "topK": cfg.qa_top_k},
             "chunks": {"layout": store.count(chunk_set="layout"), "flat": store.count(chunk_set="flat")},
             "documentsIndexed": len({r["document_id"] for r in store.runs() if r["status"] == "ok"})}
+
+
+# --------------------------------------------------------------------------- structured financial facts
+@router.get("/documents/{doc_id}/facts", response_model=list[FinancialFact], tags=["facts"])
+def document_facts(doc_id: str, repo: Repo, store: Store,
+                   page: Annotated[int | None, Query(ge=1)] = None,
+                   table_id: Annotated[str | None, Query(alias="tableId", max_length=64)] = None) -> list[FinancialFact]:
+    """Normalized FinancialFacts (one per table value cell) with row, column/period, scale, currency, scope and
+    cell bbox.  Unknown metadata is reported as unknown.  The original parse is unchanged."""
+    _require_doc(repo, doc_id)
+    return [FinancialFact.model_validate(f) for f in store.facts_for_document(doc_id, page, table_id)]
 
 
 # --------------------------------------------------------------------------- retrieval
