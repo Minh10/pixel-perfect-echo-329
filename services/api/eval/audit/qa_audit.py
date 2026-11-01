@@ -89,7 +89,7 @@ def best_case_validation(store: ChunkStore, it: dict, ev: dict) -> tuple[str, st
               and any(n == target for n in numbers_in(c["content"]))]
     if not chunks:
         return "NO_CHUNK", f"no layout chunk on p{ev['page']} contains {ev['value']}"
-    scale = "percent" if (it.get("gold_unit") == "percent" or "%" in ev["value"]) else "millions"
+    scale = "percent" if "%" in ev["value"] else "millions"
     if ev["value"].strip("()").replace(".", "").isdigit() and "." in ev["value"]:
         scale = "percent"  # e.g. effective tax rate "(0.6)"
     qy = YEAR.findall(it["question"])

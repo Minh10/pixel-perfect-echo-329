@@ -194,6 +194,16 @@ function AnalysisWorkspace() {
                     {KIND_TAG[operand.evidenceKind]}
                   </span>
                   <span className="ml-2 text-xs text-primary">{VALUE_KIND[operand.valueKind]}</span>
+                  {(operand.rowLabel || operand.period) && (
+                    <span className="block text-xs text-muted-foreground">
+                      Source row “{operand.rowLabel ?? "?"}”
+                      {operand.period ? ` · period ${operand.period}` : ""}
+                      {operand.periodType && operand.periodType !== "unknown"
+                        ? ` (${operand.periodType.replace(/_/g, " ")})`
+                        : ""}
+                      {operand.binding === "fact" ? " · bound to table cell" : ""}
+                    </span>
+                  )}
                 </p>
               ))}
               {result.calculations.map((step) => (

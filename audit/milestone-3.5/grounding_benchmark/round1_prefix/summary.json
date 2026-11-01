@@ -1,0 +1,191 @@
+{
+ "validator_m35": {
+  "dev": {
+   "cases": 38,
+   "should_reject": 20,
+   "should_accept": 18,
+   "false_accepts": 1,
+   "false_accept_ids": [
+    "D34"
+   ],
+   "false_accept_rate": 0.05,
+   "false_accept_ci95": [
+    0.0013,
+    0.2487
+   ],
+   "false_rejects": 5,
+   "false_reject_ids": [
+    "V16",
+    "V24",
+    "V25",
+    "D29",
+    "D38"
+   ],
+   "false_reject_rate": 0.2778,
+   "false_reject_ci95": [
+    0.0969,
+    0.5348
+   ],
+   "documents": [
+    "doc_3m_2018_10k",
+    "doc_amd_2022_10k",
+    "doc_boeing_2022_10k",
+    "doc_pepsico_2022_10k",
+    "doc_synthetic_annual_report_excerpt"
+   ]
+  },
+  "heldout": {
+   "cases": 58,
+   "should_reject": 32,
+   "should_accept": 26,
+   "false_accepts": 4,
+   "false_accept_ids": [
+    "H41",
+    "H42",
+    "H56",
+    "H57"
+   ],
+   "false_accept_rate": 0.125,
+   "false_accept_ci95": [
+    0.0351,
+    0.2899
+   ],
+   "false_rejects": 15,
+   "false_reject_ids": [
+    "H06",
+    "H10",
+    "H12",
+    "H16",
+    "H18",
+    "H19",
+    "H25",
+    "H26",
+    "H28",
+    "H31",
+    "H33",
+    "H35",
+    "H45",
+    "H47",
+    "H52"
+   ],
+   "false_reject_rate": 0.5769,
+   "false_reject_ci95": [
+    0.3692,
+    0.7665
+   ],
+   "documents": [
+    "doc_3m_2022_10k",
+    "doc_3m_2023q2_10q",
+    "doc_aes_2022_10k",
+    "doc_amcor_2023_10k",
+    "doc_americanexpress_2022_10k",
+    "doc_bestbuy_2023_10k",
+    "doc_bestbuy_2024q2_10q",
+    "doc_cvshealth_2022_10k"
+   ]
+  }
+ },
+ "validator_pr2": {
+  "dev": {
+   "cases": 38,
+   "should_reject": 20,
+   "should_accept": 18,
+   "false_accepts": 1,
+   "false_accept_ids": [
+    "V11"
+   ],
+   "false_accept_rate": 0.05,
+   "false_accept_ci95": [
+    0.0013,
+    0.2487
+   ],
+   "false_rejects": 15,
+   "false_reject_ids": [
+    "V02",
+    "V03",
+    "V09",
+    "V12",
+    "V14",
+    "V16",
+    "V24",
+    "V25",
+    "D27",
+    "D29",
+    "D30",
+    "D32",
+    "D35",
+    "D37",
+    "D38"
+   ],
+   "false_reject_rate": 0.8333,
+   "false_reject_ci95": [
+    0.5858,
+    0.9642
+   ],
+   "documents": [
+    "doc_3m_2018_10k",
+    "doc_amd_2022_10k",
+    "doc_boeing_2022_10k",
+    "doc_pepsico_2022_10k",
+    "doc_synthetic_annual_report_excerpt"
+   ]
+  },
+  "heldout": {
+   "cases": 58,
+   "should_reject": 32,
+   "should_accept": 26,
+   "false_accepts": 1,
+   "false_accept_ids": [
+    "H56"
+   ],
+   "false_accept_rate": 0.0312,
+   "false_accept_ci95": [
+    0.0008,
+    0.1622
+   ],
+   "false_rejects": 25,
+   "false_reject_ids": [
+    "H01",
+    "H03",
+    "H06",
+    "H09",
+    "H10",
+    "H12",
+    "H16",
+    "H18",
+    "H19",
+    "H21",
+    "H22",
+    "H25",
+    "H26",
+    "H28",
+    "H31",
+    "H33",
+    "H35",
+    "H36",
+    "H38",
+    "H40",
+    "H43",
+    "H45",
+    "H47",
+    "H52",
+    "H54"
+   ],
+   "false_reject_rate": 0.9615,
+   "false_reject_ci95": [
+    0.8036,
+    0.999
+   ],
+   "documents": [
+    "doc_3m_2022_10k",
+    "doc_3m_2023q2_10q",
+    "doc_aes_2022_10k",
+    "doc_amcor_2023_10k",
+    "doc_americanexpress_2022_10k",
+    "doc_bestbuy_2023_10k",
+    "doc_bestbuy_2024q2_10q",
+    "doc_cvshealth_2022_10k"
+   ]
+  }
+ }
+}

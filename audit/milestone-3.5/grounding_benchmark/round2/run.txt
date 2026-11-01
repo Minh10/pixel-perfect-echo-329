@@ -1,0 +1,153 @@
+validator_m35  dev      n= 38  FA 0/20 CI95 [0.0, 0.1684]  FR 4/18 CI95 [0.0641, 0.4764]
+                        FA ids []  FR ids ['V16', 'V25', 'D29', 'D38']
+validator_m35  heldout  n= 58  FA 1/32 CI95 [0.0008, 0.1622]  FR 0/26 CI95 [0.0, 0.1323]
+                        FA ids ['H34']  FR ids []
+validator_m35  heldout2 n= 40  FA 1/20 CI95 [0.0013, 0.2487]  FR 0/20 CI95 [0.0, 0.1684]
+                        FA ids ['K17']  FR ids []
+validator_pr2  dev      n= 38  FA 1/20 CI95 [0.0013, 0.2487]  FR 15/18 CI95 [0.5858, 0.9642]
+                        FA ids ['V11']  FR ids ['V02', 'V03', 'V09', 'V12', 'V14', 'V16', 'V24', 'V25', 'D27', 'D29', 'D30', 'D32', 'D35', 'D37', 'D38']
+validator_pr2  heldout  n= 58  FA 1/32 CI95 [0.0008, 0.1622]  FR 25/26 CI95 [0.8036, 0.999]
+                        FA ids ['H56']  FR ids ['H01', 'H03', 'H06', 'H09', 'H10', 'H12', 'H16', 'H18', 'H19', 'H21', 'H22', 'H25', 'H26', 'H28', 'H31', 'H33', 'H35', 'H36', 'H38', 'H40', 'H43', 'H45', 'H47', 'H52', 'H54']
+validator_pr2  heldout2 n= 40  FA 0/20 CI95 [0.0, 0.1684]  FR 20/20 CI95 [0.8316, 1.0]
+                        FA ids []  FR ids ['K01', 'K03', 'K06', 'K08', 'K10', 'K13', 'K14', 'K16', 'K18', 'K20', 'K21', 'K23', 'K25', 'K27', 'K29', 'K31', 'K33', 'K36', 'K37', 'K39']
+V01 dev     expect=accept m35=correct       pr2=correct       correct
+V02 dev     expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+V03 dev     expect=accept m35=correct       pr2=FALSE_REJECT  currency_ok
+V04 dev     expect=reject m35=correct       pr2=correct       wrong_period
+V05 dev     expect=reject m35=correct       pr2=correct       period_vs_question
+V06 dev     expect=reject m35=correct       pr2=correct       wrong_row
+V07 dev     expect=reject m35=correct       pr2=correct       wrong_scale
+V08 dev     expect=reject m35=correct       pr2=correct       currency
+V09 dev     expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+V10 dev     expect=reject m35=correct       pr2=correct       wrong_period
+V11 dev     expect=reject m35=correct       pr2=FALSE_ACCEPT  wrong_period
+V12 dev     expect=accept m35=correct       pr2=FALSE_REJECT  correct
+V13 dev     expect=reject m35=correct       pr2=correct       wrong_period
+V14 dev     expect=accept m35=correct       pr2=FALSE_REJECT  negative_value
+V15 dev     expect=reject m35=correct       pr2=correct       wrong_row
+V16 dev     expect=accept m35=FALSE_REJECT  pr2=FALSE_REJECT  segment_row
+      x operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'
+      x operand_period_matches: year 2022 labels 2 columns of this row and the claim does not say which (state the full column date)
+V17 dev     expect=reject m35=correct       pr2=correct       period_type
+V18 dev     expect=reject m35=correct       pr2=correct       wrong_period
+V19 dev     expect=accept m35=correct       pr2=correct       correct
+V20 dev     expect=reject m35=correct       pr2=correct       wrong_row
+V21 dev     expect=reject m35=correct       pr2=correct       wrong_period
+V22 dev     expect=accept m35=correct       pr2=correct       text_correct
+V23 dev     expect=reject m35=correct       pr2=correct       wrong_metric
+V24 dev     expect=accept m35=correct       pr2=FALSE_REJECT  text_two_years
+V25 dev     expect=accept m35=FALSE_REJECT  pr2=FALSE_REJECT  text_two_years
+      x operand_metric_supported: metric 'employment decrease' is not supported by source 'decreased by 48 positions in 2017.'
+V26 dev     expect=reject m35=correct       pr2=correct       wrong_period
+D27 dev     expect=accept m35=correct       pr2=FALSE_REJECT  negative_percent
+D28 dev     expect=reject m35=correct       pr2=correct       wrong_period
+D29 dev     expect=accept m35=NO_EVIDENCE   pr2=NO_EVIDENCE   negative_percent
+D30 dev     expect=accept m35=correct       pr2=FALSE_REJECT  negative_percent
+D31 dev     expect=reject m35=correct       pr2=correct       wrong_period
+D32 dev     expect=accept m35=correct       pr2=FALSE_REJECT  correct
+D33 dev     expect=reject m35=correct       pr2=correct       wrong_period
+D34 dev     expect=reject m35=correct       pr2=correct       wrong_metric
+D35 dev     expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+D36 dev     expect=reject m35=correct       pr2=correct       wrong_period
+D37 dev     expect=accept m35=correct       pr2=FALSE_REJECT  derived_input
+D38 dev     expect=accept m35=FALSE_REJECT  pr2=FALSE_REJECT  cumulative
+      x operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'
+      x operand_period_matches: year 2022 labels 2 columns of this row and the claim does not say which (state the full column date)
+H01 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H02 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H03 heldout expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+H04 heldout expect=reject m35=correct       pr2=correct       wrong_metric
+H05 heldout expect=reject m35=correct       pr2=correct       wrong_scale
+H06 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H07 heldout expect=reject m35=correct       pr2=correct       currency
+H08 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H09 heldout expect=accept m35=correct       pr2=FALSE_REJECT  negative_value
+H10 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H11 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H12 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H13 heldout expect=reject m35=correct       pr2=correct       wrong_metric
+H14 heldout expect=reject m35=correct       pr2=correct       wrong_row
+H15 heldout expect=reject m35=correct       pr2=correct       scope
+H16 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H17 heldout expect=reject m35=correct       pr2=correct       wrong_scale
+H18 heldout expect=accept m35=correct       pr2=FALSE_REJECT  per_share
+H19 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H20 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H21 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H22 heldout expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+H23 heldout expect=reject m35=correct       pr2=correct       currency
+H24 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H25 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H26 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H27 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H28 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H29 heldout expect=reject m35=correct       pr2=correct       wrong_metric
+H30 heldout expect=reject m35=correct       pr2=correct       wrong_scale
+H31 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H32 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H33 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H34 heldout expect=reject m35=FALSE_ACCEPT  pr2=correct       wrong_metric
+H35 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H36 heldout expect=accept m35=correct       pr2=FALSE_REJECT  correct
+H37 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H38 heldout expect=accept m35=correct       pr2=FALSE_REJECT  negative_value
+H39 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H40 heldout expect=accept m35=correct       pr2=FALSE_REJECT  quarterly
+H41 heldout expect=reject m35=correct       pr2=correct       period_type
+H42 heldout expect=reject m35=correct       pr2=correct       period_type
+H43 heldout expect=accept m35=correct       pr2=FALSE_REJECT  ytd
+H44 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H45 heldout expect=accept m35=correct       pr2=FALSE_REJECT  quarterly
+H46 heldout expect=reject m35=correct       pr2=correct       period_type
+H47 heldout expect=accept m35=correct       pr2=FALSE_REJECT  negative_value
+H48 heldout expect=reject m35=correct       pr2=correct       period_type
+H49 heldout expect=accept m35=correct       pr2=correct       text_correct
+H50 heldout expect=reject m35=correct       pr2=correct       wrong_scale
+H51 heldout expect=reject m35=correct       pr2=correct       currency
+H52 heldout expect=accept m35=correct       pr2=FALSE_REJECT  text_respectively
+H53 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H54 heldout expect=accept m35=correct       pr2=FALSE_REJECT  text_correct
+H55 heldout expect=reject m35=correct       pr2=correct       wrong_period
+H56 heldout expect=reject m35=correct       pr2=FALSE_ACCEPT  wrong_period
+H57 heldout expect=reject m35=correct       pr2=correct       aggregate_period
+H58 heldout expect=reject m35=correct       pr2=correct       scope
+K01 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K02 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K03 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K04 heldout2 expect=reject m35=correct       pr2=correct       wrong_metric
+K05 heldout2 expect=reject m35=correct       pr2=correct       wrong_scale
+K06 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+K07 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K08 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  negative_value
+K09 heldout2 expect=reject m35=correct       pr2=correct       wrong_metric
+K10 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K11 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K12 heldout2 expect=reject m35=correct       pr2=correct       currency
+K13 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K14 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K15 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K16 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K17 heldout2 expect=reject m35=FALSE_ACCEPT  pr2=correct       wrong_metric
+K18 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K19 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K20 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K21 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+K22 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K23 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+K24 heldout2 expect=reject m35=correct       pr2=correct       scope
+K25 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  correct
+K26 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K27 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  paraphrase
+K28 heldout2 expect=reject m35=correct       pr2=correct       wrong_scale
+K29 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K30 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K31 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K32 heldout2 expect=reject m35=correct       pr2=correct       wrong_metric
+K33 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  ytd
+K34 heldout2 expect=reject m35=correct       pr2=correct       period_type
+K35 heldout2 expect=reject m35=correct       pr2=correct       wrong_period
+K36 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  ytd
+K37 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K38 heldout2 expect=reject m35=correct       pr2=correct       same_year_columns
+K39 heldout2 expect=accept m35=correct       pr2=FALSE_REJECT  point_in_time
+K40 heldout2 expect=reject m35=correct       pr2=correct       same_year_columns

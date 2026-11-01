@@ -166,11 +166,15 @@ export interface Evidence {
 }
 
 export type JobState = "queued" | "running" | "succeeded" | "failed";
-export type JobStage = "queued" | "inspecting" | "parsing" | "assembling" | "persisting" | "done";
+export type JobStage =
+  "queued" | "inspecting" | "parsing" | "assembling" | "persisting" | "indexing" | "done";
+export type JobKind = "parse" | "index";
 
 export interface Job {
   id: string;
   documentId: string;
+  /** "parse" jobs parse the PDF; "index" jobs build chunks, FinancialFacts and vectors. */
+  kind?: JobKind;
   state: JobState;
   stage: JobStage;
   progress: number;
@@ -249,6 +253,16 @@ export interface QAOperand {
   scale: string;
   valueKind: "reported" | "visual_estimate";
   evidenceKind: ChunkRef["kind"];
+  /** Source row label / metric phrase quoted by the model (verified against the evidence). */
+  rowLabel?: string | null;
+  /** Period claimed by the model; the validator checks it against the bound column/clause. */
+  period?: string | null;
+  metric?: string | null;
+  currency?: string | null;
+  /** FinancialFact the operand was bound to (table evidence). */
+  factId?: string | null;
+  periodType?: string | null;
+  binding?: "fact" | "table_text" | "statement" | "figure" | null;
 }
 
 export interface QACalculation {
@@ -294,4 +308,53 @@ export interface QARequest {
   question: string;
   documentIds?: string[] | null;
   topK?: number;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Structured financial evidence (GET /api/v1/documents/{id}/facts). Unknown metadata stays explicitly unknown.
+export type FactPeriodType =
+  "annual" | "quarterly" | "ytd" | "cumulative" | "point_in_time" | "unknown";
+export type FactScale =
+  "units" | "thousands" | "millions" | "billions" | "percent" | "per_share" | "unknown";
+export type FactScope = "consolidated" | "segment" | "unknown";
+export type FactValueStatus = "parsed" | "nil" | "malformed" | "non_numeric" | "empty";
+
+export interface FactPeriod {
+  label: string | null;
+  fiscalYear: number | null;
+  endDate: string | null;
+  periodType: FactPeriodType;
+  source: "column_header" | "column_header_geometric" | "narrative_clause" | "unknown";
+}
+
+export interface FinancialFact {
+  factId: string;
+  normalizationVersion: string;
+  documentId: string;
+  issuer: string | null;
+  sourceSha256: string;
+  tableId: string;
+  page: number;
+  rowIndex: number;
+  colIndices: number[];
+  slotIndex: number;
+  rowLabel: string;
+  rowGroup: string | null;
+  columnHeader: string | null;
+  /** Verbatim cell text, e.g. "(7.0)%". */
+  cellText: string;
+  /** Exact decimal string; null unless valueStatus is "parsed". */
+  value: string | null;
+  valueStatus: FactValueStatus;
+  isPercent: boolean;
+  period: FactPeriod;
+  scale: FactScale;
+  scaleSource: string | null;
+  currency: string | null;
+  currencySource: string | null;
+  scope: FactScope;
+  scopeSource: string | null;
+  bbox: BBox | null;
+  parser: string;
+  parserVersion: string;
 }

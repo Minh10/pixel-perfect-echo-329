@@ -829,6 +829,87 @@
         }
       }
     },
+    "/api/v1/documents/{doc_id}/facts": {
+      "get": {
+        "tags": [
+          "facts"
+        ],
+        "summary": "Document Facts",
+        "description": "Normalized FinancialFacts (one per table value cell) with row, column/period, scale, currency, scope and\ncell bbox.  Unknown metadata is reported as unknown.  The original parse is unchanged.",
+        "operationId": "document_facts_api_v1_documents__doc_id__facts_get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            }
+          },
+          {
+            "name": "tableId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tableid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinancialFact"
+                  },
+                  "title": "Response Document Facts Api V1 Documents  Doc Id  Facts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/retrieve": {
       "post": {
         "tags": [
@@ -2125,6 +2206,237 @@
         ],
         "title": "FinDocument"
       },
+      "FinancialFact": {
+        "properties": {
+          "factId": {
+            "type": "string",
+            "title": "Factid"
+          },
+          "normalizationVersion": {
+            "type": "string",
+            "title": "Normalizationversion",
+            "default": "facts-v1"
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "title": "Sourcesha256"
+          },
+          "tableId": {
+            "type": "string",
+            "title": "Tableid",
+            "description": "Parsed table block id (e.g. p56-b006)"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "rowIndex": {
+            "type": "integer",
+            "title": "Rowindex",
+            "description": "Row index in the parsed table grid"
+          },
+          "colIndices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Colindices",
+            "description": "Parsed grid columns merged into this value (e.g. '$' + number)"
+          },
+          "slotIndex": {
+            "type": "integer",
+            "title": "Slotindex",
+            "description": "Value column after geometric alignment (0 = leftmost value column)"
+          },
+          "rowLabel": {
+            "type": "string",
+            "title": "Rowlabel",
+            "description": "Verbatim row label"
+          },
+          "rowGroup": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rowgroup",
+            "description": "Nearest preceding label-only row (e.g. section heading)"
+          },
+          "columnHeader": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columnheader",
+            "description": "Verbatim header text aligned with this value column"
+          },
+          "cellText": {
+            "type": "string",
+            "title": "Celltext",
+            "description": "Verbatim value text (merged with adjacent currency/percent cells)"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value",
+            "description": "Exact decimal value; null unless value_status='parsed'"
+          },
+          "valueStatus": {
+            "type": "string",
+            "enum": [
+              "parsed",
+              "nil",
+              "malformed",
+              "non_numeric",
+              "empty"
+            ],
+            "title": "Valuestatus"
+          },
+          "isPercent": {
+            "type": "boolean",
+            "title": "Ispercent",
+            "default": false
+          },
+          "period": {
+            "$ref": "#/components/schemas/PeriodInfo"
+          },
+          "scale": {
+            "type": "string",
+            "enum": [
+              "units",
+              "thousands",
+              "millions",
+              "billions",
+              "percent",
+              "per_share",
+              "unknown"
+            ],
+            "title": "Scale",
+            "default": "unknown"
+          },
+          "scaleSource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scalesource",
+            "description": "Verbatim text the scale was read from"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency",
+            "description": "ISO code when stated (USD...), 'dollar' when only '$'/'Dollars'"
+          },
+          "currencySource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currencysource"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "consolidated",
+              "segment",
+              "unknown"
+            ],
+            "title": "Scope",
+            "default": "unknown"
+          },
+          "scopeSource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scopesource"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BBox"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parser": {
+            "type": "string",
+            "title": "Parser"
+          },
+          "parserVersion": {
+            "type": "string",
+            "title": "Parserversion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "factId",
+          "documentId",
+          "issuer",
+          "sourceSha256",
+          "tableId",
+          "page",
+          "rowIndex",
+          "colIndices",
+          "slotIndex",
+          "rowLabel",
+          "cellText",
+          "valueStatus",
+          "period",
+          "parser",
+          "parserVersion"
+        ],
+        "title": "FinancialFact"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2476,6 +2788,94 @@
               "window"
             ],
             "title": "Evidencekind"
+          },
+          "rowLabel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rowlabel",
+            "description": "Source row label / metric phrase quoted by the model"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period",
+            "description": "Period claimed by the model (verified against the source)"
+          },
+          "metric": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "factId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factid",
+            "description": "Bound FinancialFact (table evidence normalized as facts)"
+          },
+          "periodType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periodtype",
+            "description": "Period type of the bound source column"
+          },
+          "binding": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "fact",
+                  "table_text",
+                  "statement",
+                  "figure"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Binding",
+            "description": "How the operand was bound to evidence"
           }
         },
         "type": "object",
@@ -2679,6 +3079,71 @@
           "version"
         ],
         "title": "ParserInfo"
+      },
+      "PeriodInfo": {
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label",
+            "description": "Verbatim column header text the period was read from"
+          },
+          "fiscalYear": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiscalyear"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "ISO date when a full date is printed (e.g. 2022-12-31)"
+          },
+          "periodType": {
+            "type": "string",
+            "enum": [
+              "annual",
+              "quarterly",
+              "ytd",
+              "cumulative",
+              "point_in_time",
+              "unknown"
+            ],
+            "title": "Periodtype",
+            "default": "unknown"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "column_header",
+              "column_header_geometric",
+              "narrative_clause",
+              "unknown"
+            ],
+            "title": "Source",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "title": "PeriodInfo"
       },
       "Provenance": {
         "properties": {

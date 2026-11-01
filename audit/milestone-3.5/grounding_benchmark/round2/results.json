@@ -1,0 +1,6143 @@
+[
+ {
+  "id": "V01",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "purchases of property, plant and equipment",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "PP&E (1,577) (1,373) (1,420)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "V02",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "vocabulary paraphrase",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V03",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "accept",
+  "category": "currency_ok",
+  "note": "USD claim on a dollar-denominated statement",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_currency_matches: label currency ['usd'] is not stated in the evidence"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V04",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2017",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2018 value labelled 2017",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2017] vs column period '2018' (2018)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2017'] do not match column ['2018']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V05",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,373)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2017",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_vs_question",
+  "note": "true 2017 value, question asks 2018",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": false,
+     "failed": [
+      "operand_period_in_question: operand year [2017] vs question years [2018]; not asked"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: source years ['2017'] are outside the years asked ['2018']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V06",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Proceeds from sale of PP&E and other assets",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_row",
+  "note": "value of another row",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row ((1,577) / 'Proceeds from sale of PP&E and other assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V07",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "thousands",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "(Millions)",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale millions vs operand thousands"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_units_match: operand scale thousands does not match evidence scale millions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V08",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2018?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": "EUR"
+  },
+  "expect": "reject",
+  "category": "currency",
+  "note": "wrong currency",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": false,
+     "failed": [
+      "operand_currency_matches: source is in dollars, not ['EUR']"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_currency_matches: label currency ['eur'] is not stated in the evidence"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V09",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "claim": {
+   "quote": "$4,835",
+   "row_label": "Cash and cash equivalents",
+   "period": "December 31, 2022",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Cash and cash equivalents $ 4,835 $ 2,535",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_54cfb6b7d3ba14bcbc675c3d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V10",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "claim": {
+   "quote": "$2,535",
+   "row_label": "Cash and cash equivalents",
+   "period": "December 31, 2022",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "December 25, 2021 value labelled 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_54cfb6b7d3ba14bcbc675c3d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period 'December 25, 2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V11",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "question": "What was AMD's cash and cash equivalents at the end of 2022?",
+  "claim": {
+   "quote": "$2,535",
+   "row_label": "Cash and cash equivalents",
+   "period": "2022",
+   "metric": "cash and cash equivalents",
+   "scale": "units",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "same claim as V-ten with the wrong scale too",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_54cfb6b7d3ba14bcbc675c3d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period 'December 25, 2021' (2021)",
+      "operand_units_match: source scale millions vs operand units"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "FALSE_ACCEPT",
+   "candidates": [
+    {
+     "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "V12",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What were Boeing's revenues in 2022?",
+  "claim": {
+   "quote": "$66,608",
+   "row_label": "Revenues",
+   "period": "2022",
+   "metric": "revenues",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Revenues $66,608 $62,286 $58,158",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": true,
+     "failed": []
+    },
+    {
+     "chunk_id": "chk_5f223a48ebc64fa124d2a1d7",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row ($66,608 / 'Revenues')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    },
+    {
+     "chunk_id": "chk_e06abc07d484cef98d152461",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['revenue'] but that metric is not in the source row or its header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V13",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What were Boeing's revenues in 2022?",
+  "claim": {
+   "quote": "$62,286",
+   "row_label": "Revenues",
+   "period": "2022",
+   "metric": "revenues",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2021 value labelled 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    },
+    {
+     "chunk_id": "chk_5f223a48ebc64fa124d2a1d7",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row ($62,286 / 'Revenues')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    },
+    {
+     "chunk_id": "chk_e06abc07d484cef98d152461",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['revenue'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] do not match column ['2021']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V14",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's net loss in 2022?",
+  "claim": {
+   "quote": "($4,935)",
+   "row_label": "Net loss attributable to Boeing Shareholders",
+   "period": "2022",
+   "metric": "net loss",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_value",
+  "note": "($4,935) ($4,202) ($11,873)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V15",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's net loss in 2022?",
+  "claim": {
+   "quote": "($3,547)",
+   "row_label": "Net loss attributable to Boeing Shareholders",
+   "period": "2022",
+   "metric": "net loss",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_row",
+  "note": "loss from operations value claimed in the net-loss row",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (($3,547) / 'Net loss attributable to Boeing Shareholders')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V16",
+  "split": "dev",
+  "doc": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "claim": {
+   "quote": "$46",
+   "row_label": "FLNA",
+   "period": "2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "segment_row",
+  "note": "FLNA $46 $28 $83 $210",
+  "m35": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c0a1677ece6f863dcf2dcf3a",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'",
+      "operand_period_matches: year 2022 labels 2 columns of this row and the claim does not say which (state the full column date)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_1d9e2d279488337c46420bf5",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V17",
+  "split": "dev",
+  "doc": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "claim": {
+   "quote": "$210",
+   "row_label": "FLNA",
+   "period": "2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "cumulative Plan to Date through 12/31/2022 value claimed as FY2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c0a1677ece6f863dcf2dcf3a",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'",
+      "operand_period_matches: cumulative column 'Plan to Date through 12/31/2022' used for a non-cumulative question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1d9e2d279488337c46420bf5",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V18",
+  "split": "dev",
+  "doc": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "question": "What were PepsiCo's FLNA restructuring charges in 2022?",
+  "claim": {
+   "quote": "$28",
+   "row_label": "FLNA",
+   "period": "2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2021 value labelled 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c0a1677ece6f863dcf2dcf3a",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'",
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    },
+    {
+     "chunk_id": "chk_1f08b6c91c1f8f35c60374fe",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in this table ($28 / 'FLNA')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1d9e2d279488337c46420bf5",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2022'] do not match column ['2021']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    },
+    {
+     "chunk_id": "chk_6c0d1250e18184d2f583b314",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value was not found in a table cell ($28); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V19",
+  "split": "dev",
+  "doc": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "question": "What was operating profit in 2025?",
+  "claim": {
+   "quote": "703",
+   "row_label": "Operating profit",
+   "period": "2025",
+   "metric": "operating profit",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "synthetic fixture",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_30d37ea2e25608330b0fb974",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "V20",
+  "split": "dev",
+  "doc": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "question": "What was operating profit in 2025?",
+  "claim": {
+   "quote": "1,794",
+   "row_label": "Operating profit",
+   "period": "2025",
+   "metric": "operating profit",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_row",
+  "note": "gross profit value",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_30d37ea2e25608330b0fb974",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (1,794 / 'Operating profit')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label ['operating profit'] vs source ['gross profit']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V21",
+  "split": "dev",
+  "doc": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "table",
+  "question": "What was operating profit in 2025?",
+  "claim": {
+   "quote": "591",
+   "row_label": "Operating profit",
+   "period": "2025",
+   "metric": "operating profit",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2024 value labelled 2025",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_30d37ea2e25608330b0fb974",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2025] vs column period '2024' (2024)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_12d8630d7e5a8bdccd789b6d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2025'] do not match column ['2024']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V22",
+  "split": "dev",
+  "doc": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "text",
+  "question": "What was operating profit in 2025?",
+  "claim": {
+   "quote": "703",
+   "row_label": "operating profit",
+   "period": "2025",
+   "metric": "operating profit",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_correct",
+  "note": "narrative statement",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4f6ff1387aa137e123318d80",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a07c6aa2e47a7c41cd47d543",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "V23",
+  "split": "dev",
+  "doc": "doc_synthetic_annual_report_excerpt",
+  "page": 2,
+  "kind": "text",
+  "question": "What was revenue in 2025?",
+  "claim": {
+   "quote": "703",
+   "row_label": "revenue",
+   "period": "2025",
+   "metric": "revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "operating profit figure labelled revenue",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4f6ff1387aa137e123318d80",
+     "accepted": false,
+     "failed": [
+      "operand_row_label_quoted: 'revenue' not in the clause holding the value ('operating profit rose to GBP 703 million.')",
+      "operand_metric_supported: metric 'revenue' (['revenue']) conflicts with source row 'operating profit rose to GBP 703 million.' (['operating_income'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a07c6aa2e47a7c41cd47d543",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label ['revenue'] vs source ['operating profit']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V24",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "question": "How many positions did 3M's employment increase by in 2018?",
+  "claim": {
+   "quote": "1,980",
+   "row_label": "Employment increased",
+   "period": "2018",
+   "metric": "employment increase",
+   "scale": "units",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_two_years",
+  "note": "two years in one sentence",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_05c21d7bf5e952dcc207e3a7",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V25",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "question": "How many positions did 3M's employment decrease by in 2017?",
+  "claim": {
+   "quote": "48",
+   "row_label": "decreased",
+   "period": "2017",
+   "metric": "employment decrease",
+   "scale": "units",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_two_years",
+  "note": "the 2017 clause",
+  "m35": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_05c21d7bf5e952dcc207e3a7",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'employment decrease' is not supported by source 'decreased by 48 positions in 2017.'"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2017'] are ambiguous across header years ['2017', '2018']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "V26",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 39,
+  "kind": "text",
+  "question": "How many positions did 3M's employment increase by in 2018?",
+  "claim": {
+   "quote": "48",
+   "row_label": "Employment increased",
+   "period": "2018",
+   "metric": "employment increase",
+   "scale": "units",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2017 decrease labelled 2018 increase",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_05c21d7bf5e952dcc207e3a7",
+     "accepted": false,
+     "failed": [
+      "operand_row_label_quoted: 'Employment increased' not in the clause holding the value ('decreased by 48 positions in 2017.')",
+      "operand_metric_supported: metric 'employment increase' is not supported by source 'decreased by 48 positions in 2017.'",
+      "operand_period_matches: claimed [2018] vs column period 'decreased by 48 positions in 2017.' (2017)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a72fffa06a16d0fc5f62dfd0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2018'] are ambiguous across header years ['2017', '2018']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D27",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's operating margin in 2022?",
+  "claim": {
+   "quote": "(5.3) %",
+   "row_label": "Operating margins",
+   "period": "2022",
+   "metric": "operating margins",
+   "scale": "percent",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_percent",
+  "note": "Operating margins (5.3) % (4.7) % (22.0) %",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value is not a single number"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D28",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's operating margin in 2022?",
+  "claim": {
+   "quote": "(4.7) %",
+   "row_label": "Operating margins",
+   "period": "2022",
+   "metric": "operating margins",
+   "scale": "percent",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2021 value",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value is not a single number"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D29",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's core operating margin in 2022?",
+  "claim": {
+   "quote": "(7.0%)",
+   "row_label": "Core operating margins",
+   "period": "2022",
+   "metric": "core operating margins",
+   "scale": "percent",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_percent",
+  "note": "Core operating margins (7.0 %) (6.5 %) (24.3 %)",
+  "m35": {
+   "accepted": false,
+   "outcome": "NO_EVIDENCE",
+   "candidates": []
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "NO_EVIDENCE",
+   "candidates": []
+  }
+ },
+ {
+  "id": "D30",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's effective income tax rate in 2022?",
+  "claim": {
+   "quote": "(0.6) %",
+   "row_label": "Effective income tax rate",
+   "period": "2022",
+   "metric": "effective income tax rate",
+   "scale": "percent",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_percent",
+  "note": "Effective income tax rate (0.6) % 14.8 % 17.5 %",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value is not a single number"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D31",
+  "split": "dev",
+  "doc": "doc_boeing_2022_10k",
+  "page": 24,
+  "kind": "table",
+  "question": "What was Boeing's effective income tax rate in 2022?",
+  "claim": {
+   "quote": "14.8 %",
+   "row_label": "Effective income tax rate",
+   "period": "2022",
+   "metric": "effective income tax rate",
+   "scale": "percent",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "14.8% is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0da784126890dc389a837eb5",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_614247ca895dbe64f86ac191",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D32",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 54,
+  "kind": "table",
+  "question": "What was AMD's net revenue in 2022?",
+  "claim": {
+   "quote": "23,601",
+   "row_label": "Net revenue",
+   "period": "2022",
+   "metric": "net revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Net revenue $ 23,601 $ 16,434 $ 9,763",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_dd4c7607d56c8d922cf98aae",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_285fa34be8ea68ec0b8b86de",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D33",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 54,
+  "kind": "table",
+  "question": "What was AMD's net revenue in 2022?",
+  "claim": {
+   "quote": "16,434",
+   "row_label": "Net revenue",
+   "period": "2022",
+   "metric": "net revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "2021 value",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_dd4c7607d56c8d922cf98aae",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period 'December 25, 2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_285fa34be8ea68ec0b8b86de",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D34",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 54,
+  "kind": "table",
+  "question": "What was AMD's net income in 2022?",
+  "claim": {
+   "quote": "1,264",
+   "row_label": "Operating income",
+   "period": "2022",
+   "metric": "net income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "operating income value claimed as net income",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_dd4c7607d56c8d922cf98aae",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'net income' (['net_income']) conflicts with source row 'Operating income' (['operating_income'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_285fa34be8ea68ec0b8b86de",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['net income'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D35",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "question": "What were AMD's total current assets at December 31, 2022?",
+  "claim": {
+   "quote": "15,019",
+   "row_label": "Total current assets",
+   "period": "December 31, 2022",
+   "metric": "total current assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total current assets 15,019 8,583",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_54cfb6b7d3ba14bcbc675c3d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D36",
+  "split": "dev",
+  "doc": "doc_amd_2022_10k",
+  "page": 56,
+  "kind": "table",
+  "question": "What were AMD's inventories at December 31, 2022?",
+  "claim": {
+   "quote": "1,955",
+   "row_label": "Inventories",
+   "period": "December 31, 2022",
+   "metric": "inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "1,955 is December 25, 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_54cfb6b7d3ba14bcbc675c3d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period 'December 25, 2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4390c0cd3e5e526c74d0fa34",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D37",
+  "split": "dev",
+  "doc": "doc_3m_2018_10k",
+  "page": 60,
+  "kind": "table",
+  "question": "What was 3M's free cash flow in 2018, operating cash flow minus purchases of property, plant and equipment?",
+  "claim": {
+   "quote": "(1,577)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2018",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "derived_input",
+  "note": "FCF input operand (AUD-B5)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f3506436ca517425f623d4c8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_6e0eb76f6458ef757da55db1",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_metric_matches_question: question ['cash flow', 'free cash flow'] vs label ['(none)']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "D38",
+  "split": "dev",
+  "doc": "doc_pepsico_2022_10k",
+  "page": 79,
+  "kind": "table",
+  "question": "What were PepsiCo's cumulative FLNA restructuring charges under the plan through December 31, 2022?",
+  "claim": {
+   "quote": "$210",
+   "row_label": "FLNA",
+   "period": "2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "cumulative",
+  "note": "Plan to Date through 12/31/2022 column",
+  "m35": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c0a1677ece6f863dcf2dcf3a",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'restructuring charges' is not supported by source 'FLNA Table of Contents Table of Contents Table of Contents'",
+      "operand_period_matches: year 2022 labels 2 columns of this row and the claim does not say which (state the full column date)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_1d9e2d279488337c46420bf5",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H01",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What were Best Buy's dividends paid in fiscal 2023?",
+  "claim": {
+   "quote": "(789)",
+   "row_label": "Dividends paid",
+   "period": "2023",
+   "metric": "dividends paid",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Dividends paid (789) (688) (568)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ba29664d42b76da098874c3a",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H02",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What were Best Buy's dividends paid in fiscal 2023?",
+  "claim": {
+   "quote": "(688)",
+   "row_label": "Dividends paid",
+   "period": "2023",
+   "metric": "dividends paid",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(688) is the January 29, 2022 column",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ba29664d42b76da098874c3a",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period 'January 29, 2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H03",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What was Best Buy's capital expenditure in fiscal 2023?",
+  "claim": {
+   "quote": "(930)",
+   "row_label": "Additions to property and equipment",
+   "period": "2023",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "Additions to property and equipment ... (930) (737) (713)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_753285dfa83ec4f520579bac",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H04",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What were Best Buy's dividends paid in fiscal 2023?",
+  "claim": {
+   "quote": "(930)",
+   "row_label": "Additions to property and equipment",
+   "period": "2023",
+   "metric": "dividends paid",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "capex value claimed as dividends",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_753285dfa83ec4f520579bac",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'dividends paid' (['dividends']) conflicts with source row 'Additions to property and equipment, net of $35, $46 and $32' (['capital_expenditure'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H05",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What was Best Buy's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,824",
+   "row_label": "Total cash provided by operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "thousands",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "statement is $ in millions",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_77baa2b605efae74256ab69b",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale millions vs operand thousands"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header",
+      "operand_units_match: operand scale thousands does not match evidence scale millions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H06",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What was Best Buy's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,824",
+   "row_label": "Total cash provided by operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Total cash provided by operating activities 1,824 3,252 4,927",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_77baa2b605efae74256ab69b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H07",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What was Best Buy's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,824",
+   "row_label": "Total cash provided by operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": "EUR"
+  },
+  "expect": "reject",
+  "category": "currency",
+  "note": "statement is in dollars",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_77baa2b605efae74256ab69b",
+     "accepted": false,
+     "failed": [
+      "operand_currency_matches: source is in dollars, not ['EUR']"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header",
+      "operand_currency_matches: label currency ['eur'] vs evidence ['usd']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H08",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What were Best Buy's restructuring charges in fiscal 2023?",
+  "claim": {
+   "quote": "(34)",
+   "row_label": "Restructuring charges",
+   "period": "2023",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(34) is fiscal 2022; fiscal 2023 is 147",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5de327f5d4011d4ca7ab245b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period 'January 29, 2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H09",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What were Best Buy's restructuring charges in fiscal 2022?",
+  "claim": {
+   "quote": "(34)",
+   "row_label": "Restructuring charges",
+   "period": "2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_value",
+  "note": "Restructuring charges 147 (34) 254",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5de327f5d4011d4ca7ab245b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H10",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were Amcor's net sales in fiscal 2023?",
+  "claim": {
+   "quote": "14,694",
+   "row_label": "Net sales",
+   "period": "2023",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Net sales $14,694 $14,544 $12,861",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H11",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were Amcor's net sales in fiscal 2023?",
+  "claim": {
+   "quote": "14,544",
+   "row_label": "Net sales",
+   "period": "2023",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "14,544 is fiscal 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period '2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H12",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What was Amcor's operating income in fiscal 2023?",
+  "claim": {
+   "quote": "1,508",
+   "row_label": "Operating income",
+   "period": "2023",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Operating income 1,508 1,239 1,321",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H13",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What was Amcor's net income in fiscal 2023?",
+  "claim": {
+   "quote": "1,508",
+   "row_label": "Operating income",
+   "period": "2023",
+   "metric": "net income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "operating income claimed as net income",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'net income' (['net_income']) conflicts with source row 'Operating income' (['operating_income'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['net income'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H14",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were Amcor's net sales in fiscal 2023?",
+  "claim": {
+   "quote": "2,725",
+   "row_label": "Net sales",
+   "period": "2023",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_row",
+  "note": "2,725 is gross profit",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (2,725 / 'Net sales')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label ['sales'] vs source ['gross profit']",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H15",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were Amcor's Flexibles segment net sales in fiscal 2023?",
+  "claim": {
+   "quote": "14,694",
+   "row_label": "Net sales",
+   "period": "2023",
+   "metric": "Flexibles segment net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "scope",
+  "note": "consolidated net sales claimed as a segment value",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": false,
+     "failed": [
+      "operand_scope_matches: claimed ['segment'] vs source scope consolidated"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header",
+      "operand_scope_matches: label scope ['segment'] contradicts evidence ['group', 'subsidiary']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H16",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were Amcor's restructuring, impairment, and other related activities in fiscal 2023?",
+  "claim": {
+   "quote": "104",
+   "row_label": "Restructuring, impairment, and other related activities, net",
+   "period": "2023",
+   "metric": "restructuring, impairment, and other related activities",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Restructuring, impairment, and other related activities, net 104 (234) (94)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H17",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What was Amcor's basic earnings per share in fiscal 2023?",
+  "claim": {
+   "quote": "0.709",
+   "row_label": "Basic earnings per share",
+   "period": "2023",
+   "metric": "basic earnings per share",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "per-share value claimed in millions",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale per_share vs operand millions"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H18",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What was Amcor's diluted earnings per share in fiscal 2023?",
+  "claim": {
+   "quote": "0.705",
+   "row_label": "Diluted earnings per share",
+   "period": "2023",
+   "metric": "diluted earnings per share",
+   "scale": "per_share",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "per_share",
+  "note": "Diluted earnings per share $0.705 $0.529 $0.602",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_1f96d306378501a36ec4ed9e",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f535dbf43c0ac0713ef2c4ca",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header",
+      "operand_units_match: operand scale per_share does not match evidence scale millions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H19",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 108,
+  "kind": "table",
+  "question": "What were CVS Health's total revenues in 2022?",
+  "claim": {
+   "quote": "322,467",
+   "row_label": "Total revenues",
+   "period": "2022",
+   "metric": "total revenues",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Total revenues 322,467 292,111 268,706",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9a33d13fd5f3a9ec3662ac3c",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_080a1bd516b075c94a9511cc",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H20",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 108,
+  "kind": "table",
+  "question": "What were CVS Health's total revenues in 2022?",
+  "claim": {
+   "quote": "292,111",
+   "row_label": "Total revenues",
+   "period": "2022",
+   "metric": "total revenues",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "292,111 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9a33d13fd5f3a9ec3662ac3c",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_080a1bd516b075c94a9511cc",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H21",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 111,
+  "kind": "table",
+  "question": "What was CVS Health's net cash provided by operating activities in 2022?",
+  "claim": {
+   "quote": "16,177",
+   "row_label": "Net cash provided by operating activities",
+   "period": "2022",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Net cash provided by operating activities 16,177 18,265 15,865",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_7b6656eac96e512b57bed3c4",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_bf5e92aff6c0e2d04d8b9ca3",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H22",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 111,
+  "kind": "table",
+  "question": "What was CVS Health's capital expenditure in 2022?",
+  "claim": {
+   "quote": "(2,727)",
+   "row_label": "Purchases of property and equipment",
+   "period": "2022",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "Purchases of property and equipment (2,727) (2,520) (2,437)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_438111324984d2dc5af99132",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_bf5e92aff6c0e2d04d8b9ca3",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H23",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 108,
+  "kind": "table",
+  "question": "What were CVS Health's total revenues in 2022 in pounds sterling?",
+  "claim": {
+   "quote": "322,467",
+   "row_label": "Total revenues",
+   "period": "2022",
+   "metric": "total revenues",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "currency",
+  "note": "question asks GBP; statement is in dollars (conversion unsupported)",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9a33d13fd5f3a9ec3662ac3c",
+     "accepted": false,
+     "failed": [
+      "question_currency_supported: source is in dollars, not ['GBP']"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_080a1bd516b075c94a9511cc",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H24",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 108,
+  "kind": "table",
+  "question": "What was CVS Health's operating income in 2021?",
+  "claim": {
+   "quote": "7,746",
+   "row_label": "Operating income",
+   "period": "2021",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "7,746 is 2022; 2021 is 13,193",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_33594ffc818ba7c9e883ade1",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2021] vs column period '2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_080a1bd516b075c94a9511cc",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2021'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H25",
+  "split": "heldout",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 108,
+  "kind": "table",
+  "question": "What was CVS Health's operating income in 2021?",
+  "claim": {
+   "quote": "13,193",
+   "row_label": "Operating income",
+   "period": "2021",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Operating income 7,746 13,193 13,911",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_33594ffc818ba7c9e883ade1",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_080a1bd516b075c94a9511cc",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2021'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H26",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 96,
+  "kind": "table",
+  "question": "What were American Express's total revenues net of interest expense in 2022?",
+  "claim": {
+   "quote": "52,862",
+   "row_label": "Total revenues net of interest expense",
+   "period": "2022",
+   "metric": "total revenues net of interest expense",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Total revenues net of interest expense 52,862 42,380 36,087",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_3d607de2a58583bc9d7d29ba",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c5a72e625b5bd4d1955b7868",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H27",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 96,
+  "kind": "table",
+  "question": "What were American Express's total revenues net of interest expense in 2022?",
+  "claim": {
+   "quote": "42,380",
+   "row_label": "Total revenues net of interest expense",
+   "period": "2022",
+   "metric": "total revenues net of interest expense",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "42,380 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_3d607de2a58583bc9d7d29ba",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c5a72e625b5bd4d1955b7868",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H28",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 96,
+  "kind": "table",
+  "question": "What was American Express's pretax income in 2022?",
+  "claim": {
+   "quote": "9,585",
+   "row_label": "Pretax income",
+   "period": "2022",
+   "metric": "pretax income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Pretax income 9,585 10,689 4,296",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b7833bb11b91503331943e6f",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c5a72e625b5bd4d1955b7868",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H29",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 96,
+  "kind": "table",
+  "question": "What was American Express's net income in 2022?",
+  "claim": {
+   "quote": "9,585",
+   "row_label": "Pretax income",
+   "period": "2022",
+   "metric": "net income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "pretax income claimed as net income",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b7833bb11b91503331943e6f",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'net income' is not supported by source 'Pretax income Expenses CONSOLIDATED STATEMENTS OF INCOME Year Ended December 31 '"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c5a72e625b5bd4d1955b7868",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['net income'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H30",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 96,
+  "kind": "table",
+  "question": "What were American Express's total revenues net of interest expense in 2022?",
+  "claim": {
+   "quote": "52,862",
+   "row_label": "Total revenues net of interest expense",
+   "period": "2022",
+   "metric": "total revenues net of interest expense",
+   "scale": "billions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "statement is in millions",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_3d607de2a58583bc9d7d29ba",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale millions vs operand billions"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c5a72e625b5bd4d1955b7868",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale billions does not match evidence scale millions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H31",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 48,
+  "kind": "table",
+  "question": "What were 3M's net sales in 2022?",
+  "claim": {
+   "quote": "34,229",
+   "row_label": "Net sales",
+   "period": "2022",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Net sales $34,229 $35,355 $32,184",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6442d4edae4f5a7b7de41388",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_b96e0edcaa9d2eb8368a69be",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H32",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 48,
+  "kind": "table",
+  "question": "What were 3M's net sales in 2022?",
+  "claim": {
+   "quote": "35,355",
+   "row_label": "Net sales",
+   "period": "2022",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "35,355 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6442d4edae4f5a7b7de41388",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b96e0edcaa9d2eb8368a69be",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H33",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 48,
+  "kind": "table",
+  "question": "What was 3M's operating income in 2022?",
+  "claim": {
+   "quote": "6,539",
+   "row_label": "Operating income",
+   "period": "2022",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Operating income 6,539 7,369 7,161",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_15c478964b034ef6581e81bc",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_b96e0edcaa9d2eb8368a69be",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H34",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 48,
+  "kind": "table",
+  "question": "What was 3M's operating income in 2022?",
+  "claim": {
+   "quote": "1,862",
+   "row_label": "Research, development and related expenses",
+   "period": "2022",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "R&D value claimed as operating income",
+  "m35": {
+   "accepted": true,
+   "outcome": "FALSE_ACCEPT",
+   "candidates": [
+    {
+     "chunk_id": "chk_15c478964b034ef6581e81bc",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b96e0edcaa9d2eb8368a69be",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H35",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 48,
+  "kind": "table",
+  "question": "What were 3M's research, development and related expenses in 2021?",
+  "claim": {
+   "quote": "1,994",
+   "row_label": "Research, development and related expenses",
+   "period": "2021",
+   "metric": "research, development and related expenses",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Research, development and related expenses 1,862 1,994 1,878",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_15c478964b034ef6581e81bc",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_b96e0edcaa9d2eb8368a69be",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2021'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H36",
+  "split": "heldout",
+  "doc": "doc_aes_2022_10k",
+  "page": 132,
+  "kind": "table",
+  "question": "What was AES's total revenue in 2022?",
+  "claim": {
+   "quote": "12,617",
+   "row_label": "Total revenue",
+   "period": "2022",
+   "metric": "total revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Total revenue 12,617 11,141 9,660",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ef5607f43a4d2bc2ef027e4b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_de561b1d84be346479125d2b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H37",
+  "split": "heldout",
+  "doc": "doc_aes_2022_10k",
+  "page": 132,
+  "kind": "table",
+  "question": "What was AES's total revenue in 2022?",
+  "claim": {
+   "quote": "11,141",
+   "row_label": "Total revenue",
+   "period": "2022",
+   "metric": "total revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "11,141 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ef5607f43a4d2bc2ef027e4b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_de561b1d84be346479125d2b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H38",
+  "split": "heldout",
+  "doc": "doc_aes_2022_10k",
+  "page": 132,
+  "kind": "table",
+  "question": "What was AES's interest expense in 2022?",
+  "claim": {
+   "quote": "(1,117)",
+   "row_label": "Interest expense",
+   "period": "2022",
+   "metric": "interest expense",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_value",
+  "note": "Interest expense (1,117) (911) (1,038)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_7f546b3991b30e855f7a6a59",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_81581b0ce9adfe6e0c0dd9f0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H39",
+  "split": "heldout",
+  "doc": "doc_aes_2022_10k",
+  "page": 132,
+  "kind": "table",
+  "question": "What was AES's interest expense in 2022?",
+  "claim": {
+   "quote": "(911)",
+   "row_label": "Interest expense",
+   "period": "2022",
+   "metric": "interest expense",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(911) is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_7f546b3991b30e855f7a6a59",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_81581b0ce9adfe6e0c0dd9f0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H40",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 4,
+  "kind": "table",
+  "question": "What was Best Buy's revenue for the three months ended July 29, 2023?",
+  "claim": {
+   "quote": "9,583",
+   "row_label": "Revenue",
+   "period": "July 29, 2023",
+   "metric": "revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "quarterly",
+  "note": "Revenue $9,583 $10,329 $19,050 $20,976",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6225a5a776232dcebde8005b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_5e7d7413794a044c5a5adf86",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H41",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 4,
+  "kind": "table",
+  "question": "What was Best Buy's revenue for the three months ended July 29, 2023?",
+  "claim": {
+   "quote": "19,050",
+   "row_label": "Revenue",
+   "period": "July 29, 2023",
+   "metric": "revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "19,050 is the six-month (year-to-date) column",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6225a5a776232dcebde8005b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: year-to-date column 'Six Months Ended July 29, 2023' used for a non-YTD question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5e7d7413794a044c5a5adf86",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H42",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 4,
+  "kind": "table",
+  "question": "What was Best Buy's revenue in calendar 2023?",
+  "claim": {
+   "quote": "9,583",
+   "row_label": "Revenue",
+   "period": "2023",
+   "metric": "revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "quarterly value is not an annual figure",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6225a5a776232dcebde8005b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: quarterly column 'Three Months Ended July 29, 2023' used for a non-quarterly question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5e7d7413794a044c5a5adf86",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H43",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 4,
+  "kind": "table",
+  "question": "What was Best Buy's revenue for the six months ended July 29, 2023?",
+  "claim": {
+   "quote": "19,050",
+   "row_label": "Revenue",
+   "period": "July 29, 2023",
+   "metric": "revenue",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "ytd",
+  "note": "six-month column",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6225a5a776232dcebde8005b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_5e7d7413794a044c5a5adf86",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H44",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 4,
+  "kind": "table",
+  "question": "What were Best Buy's restructuring charges for the three months ended July 30, 2022?",
+  "claim": {
+   "quote": "(7)",
+   "row_label": "Restructuring charges",
+   "period": "July 30, 2022",
+   "metric": "restructuring charges",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(7) is the July 29, 2023 quarter; July 30, 2022 quarter is 34",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_6225a5a776232dcebde8005b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period 'Three Months Ended July 29, 2023' (2023)"
+     ]
+    },
+    {
+     "chunk_id": "chk_d762d3c69c4ce4f96f1f11fd",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row ((7) / 'Restructuring charges')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5e7d7413794a044c5a5adf86",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value appears in more than one row or column ((7)); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H45",
+  "split": "heldout",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were 3M's net sales for the three months ended June 30, 2023?",
+  "claim": {
+   "quote": "8,325",
+   "row_label": "Net sales",
+   "period": "June 30, 2023",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "quarterly",
+  "note": "Net sales $8,325 $8,702 $16,356 ...",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_bb19a56c7298206a94659cf0",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_d3c1adb6b1d221620537d20f",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H46",
+  "split": "heldout",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were 3M's net sales for the three months ended June 30, 2023?",
+  "claim": {
+   "quote": "16,356",
+   "row_label": "Net sales",
+   "period": "June 30, 2023",
+   "metric": "net sales",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "16,356 is the six-month column",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_bb19a56c7298206a94659cf0",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: year-to-date column 'Six months ended June 2023' used for a non-YTD question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_d3c1adb6b1d221620537d20f",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H47",
+  "split": "heldout",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What was 3M's operating income (loss) for the three months ended June 30, 2023?",
+  "claim": {
+   "quote": "(8,958)",
+   "row_label": "Operating income (loss)",
+   "period": "June 30, 2023",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_value",
+  "note": "Operating income (loss) (8,958) 110 (7,717) 1,751",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_3665a62c8d95792af877e39b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_d3c1adb6b1d221620537d20f",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H48",
+  "split": "heldout",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What was 3M's operating income (loss) for the three months ended June 30, 2023?",
+  "claim": {
+   "quote": "(7,717)",
+   "row_label": "Operating income (loss)",
+   "period": "June 30, 2023",
+   "metric": "operating income",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "(7,717) is the six-month column",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_3665a62c8d95792af877e39b",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: year-to-date column 'Six months ended June 2023' used for a non-YTD question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_d3c1adb6b1d221620537d20f",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H49",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 38,
+  "kind": "text",
+  "question": "What was American Express's interest expense in 2022?",
+  "claim": {
+   "quote": "$2.8",
+   "row_label": "interest expense",
+   "period": "2022",
+   "metric": "interest expense",
+   "scale": "billions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_correct",
+  "note": "Our interest expense was approximately $2.8 billion for the year ended December 31, 2022.",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9e9b61c4fd9873069373637b",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_020c385ae0d55d381d1e9cdb",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "H50",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 38,
+  "kind": "text",
+  "question": "What was American Express's interest expense in 2022?",
+  "claim": {
+   "quote": "$2.8",
+   "row_label": "interest expense",
+   "period": "2022",
+   "metric": "interest expense",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "statement says billion",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9e9b61c4fd9873069373637b",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: statement scale billions vs operand millions"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_020c385ae0d55d381d1e9cdb",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: operand scale millions does not match evidence scale billions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H51",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 38,
+  "kind": "text",
+  "question": "What was American Express's interest expense in 2022?",
+  "claim": {
+   "quote": "$2.8",
+   "row_label": "interest expense",
+   "period": "2022",
+   "metric": "interest expense",
+   "scale": "billions",
+   "currency": "EUR"
+  },
+  "expect": "reject",
+  "category": "currency",
+  "note": "statement is in dollars",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9e9b61c4fd9873069373637b",
+     "accepted": false,
+     "failed": [
+      "operand_currency_matches: source is in dollars, not ['EUR']"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_020c385ae0d55d381d1e9cdb",
+     "accepted": false,
+     "failed": [
+      "operand_currency_matches: label currency ['eur'] vs evidence ['usd']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H52",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 30,
+  "kind": "text",
+  "question": "What was Best Buy's restricted cash as of January 28, 2023?",
+  "claim": {
+   "quote": "$379",
+   "row_label": "Restricted cash",
+   "period": "January 28, 2023",
+   "metric": "restricted cash",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_respectively",
+  "note": "...was $379 million and $269 million as of January 28, 2023, and January 29, 2022, respectively.",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a0329f7d7e6f9db94e7271ea",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_d1032a8000c06ef1627f004c",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H53",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 30,
+  "kind": "text",
+  "question": "What was Best Buy's restricted cash as of January 28, 2023?",
+  "claim": {
+   "quote": "$269",
+   "row_label": "Restricted cash",
+   "period": "January 28, 2023",
+   "metric": "restricted cash",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "$269 million is the January 29, 2022 balance (respectively)",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a0329f7d7e6f9db94e7271ea",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period 'January\\xa029, 2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_d1032a8000c06ef1627f004c",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H54",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 19,
+  "kind": "text",
+  "question": "What pre-tax gain did 3M record on the Food Safety split-off in 2022?",
+  "claim": {
+   "quote": "$2.7",
+   "row_label": "pre-tax gain",
+   "period": "2022",
+   "metric": "pre-tax gain",
+   "scale": "billions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "text_correct",
+  "note": "In 2022, 3M also completed the split-off of its Food Safety Division business resulting in a pre-tax gain of $2.7 billion",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_41f294ba3e8278f9495ae2f8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_9847a157904b8e0cbd440d91",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2022', '2025']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H55",
+  "split": "heldout",
+  "doc": "doc_3m_2022_10k",
+  "page": 19,
+  "kind": "text",
+  "question": "What pre-tax gain did 3M record on the Food Safety split-off in 2021?",
+  "claim": {
+   "quote": "$2.7",
+   "row_label": "pre-tax gain",
+   "period": "2021",
+   "metric": "pre-tax gain",
+   "scale": "billions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "the statement says 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_41f294ba3e8278f9495ae2f8",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2021] vs column period 'In 2022, 3M also completed the split-off of its Food Safety Division business re' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9847a157904b8e0cbd440d91",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2021'] contradict header years ['2022', '2025']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H56",
+  "split": "heldout",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 45,
+  "kind": "text",
+  "question": "What reserve build did American Express record in 2023?",
+  "claim": {
+   "quote": "$617",
+   "row_label": "reserve build",
+   "period": "2023",
+   "metric": "reserve build",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "$617 million is the current-year reserve build; 2023 appears only in an outlook clause",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_542c19f60a7dd248444a3fa9",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: the source column has no aligned period header; period cannot be verified"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": true,
+   "outcome": "FALSE_ACCEPT",
+   "candidates": [
+    {
+     "chunk_id": "chk_51fe4e8f1c3fbd17740e2a5c",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  }
+ },
+ {
+  "id": "H57",
+  "split": "heldout",
+  "doc": "doc_amcor_2023_10k",
+  "page": 31,
+  "kind": "text",
+  "question": "What insurance settlements did Amcor receive in fiscal 2023?",
+  "claim": {
+   "quote": "$46",
+   "row_label": "insurance settlements",
+   "period": "2023",
+   "metric": "insurance settlements",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "aggregate_period",
+  "note": "$46 million is the total for fiscal years 2023 and 2022 combined",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_bc16acad70f8802a453ba176",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: the source column has no aligned period header; period cannot be verified"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_22c5b61161d77360fa963411",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "H58",
+  "split": "heldout",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 42,
+  "kind": "table",
+  "question": "What was Best Buy's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,824",
+   "row_label": "Total cash provided by operating activities",
+   "period": "2023",
+   "metric": "segment operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "scope",
+  "note": "consolidated value claimed as segment",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_77baa2b605efae74256ab69b",
+     "accepted": false,
+     "failed": [
+      "operand_scope_matches: claimed ['segment'] vs source scope consolidated"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0df2466f749c8ce5ccefbacf",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header",
+      "operand_scope_matches: label scope ['segment'] contradicts evidence ['group']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K01",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What were Amcor's cash and cash equivalents as of June 30, 2023?",
+  "claim": {
+   "quote": "689",
+   "row_label": "Cash and cash equivalents",
+   "period": "June 30, 2023",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Cash and cash equivalents $ 689 $ 775",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b8e1c4d1d63d3b11f8edd73f",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_edcd1f035089740900806799",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K02",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What were Amcor's cash and cash equivalents as of June 30, 2023?",
+  "claim": {
+   "quote": "775",
+   "row_label": "Cash and cash equivalents",
+   "period": "June 30, 2023",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "775 is June 30, 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b8e1c4d1d63d3b11f8edd73f",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period '2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_edcd1f035089740900806799",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K03",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What were Amcor's total current liabilities as of June 30, 2023?",
+  "claim": {
+   "quote": "4,476",
+   "row_label": "Total current liabilities",
+   "period": "June 30, 2023",
+   "metric": "total current liabilities",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total current liabilities 4,476 5,103",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4276d2f7ae5cd018a1ecef7d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_edcd1f035089740900806799",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K04",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What were Amcor's total current assets as of June 30, 2023?",
+  "claim": {
+   "quote": "4,476",
+   "row_label": "Total current liabilities",
+   "period": "June 30, 2023",
+   "metric": "total current assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "liabilities value claimed as assets",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4276d2f7ae5cd018a1ecef7d",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'total current assets' (['current_assets']) conflicts with source row 'Total current liabilities Current liabilities:' (['current_liabilities'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_edcd1f035089740900806799",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K05",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What were Amcor's total assets as of June 30, 2023?",
+  "claim": {
+   "quote": "17,003",
+   "row_label": "Total assets",
+   "period": "June 30, 2023",
+   "metric": "total assets",
+   "scale": "thousands",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "$ in millions",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f6ed61b6a6bd6eb005d9c6b8",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale millions vs operand thousands"
+     ]
+    },
+    {
+     "chunk_id": "chk_8eada63d8d31eaea9ac01b6c",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (17,003 / 'Total assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_edcd1f035089740900806799",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value appears in more than one row or column (17,003); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K06",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 53,
+  "kind": "table",
+  "question": "What was Amcor's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,261",
+   "row_label": "Net cash provided by operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "Net cash provided by operating activities 1,261 1,526 1,461",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_16354b865a9761c336d2fc3d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_aef9d42f8a708ca64d3aebe4",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K07",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 53,
+  "kind": "table",
+  "question": "What was Amcor's operating cash flow in fiscal 2023?",
+  "claim": {
+   "quote": "1,526",
+   "row_label": "Net cash provided by operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "1,526 is fiscal 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_16354b865a9761c336d2fc3d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period '2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_aef9d42f8a708ca64d3aebe4",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K08",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 53,
+  "kind": "table",
+  "question": "What dividends did Amcor pay in fiscal 2023?",
+  "claim": {
+   "quote": "(723)",
+   "row_label": "Dividends paid",
+   "period": "2023",
+   "metric": "dividends paid",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "negative_value",
+  "note": "Dividends paid (723) (732) (742)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_15e947706690932959ea9dde",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_9ca05e8c47d23106fa91b499",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K09",
+  "split": "heldout2",
+  "doc": "doc_amcor_2023_10k",
+  "page": 53,
+  "kind": "table",
+  "question": "What was Amcor's capital expenditure in fiscal 2023?",
+  "claim": {
+   "quote": "(723)",
+   "row_label": "Dividends paid",
+   "period": "2023",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "dividends claimed as capex",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_15e947706690932959ea9dde",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'capital expenditure' (['capital_expenditure']) conflicts with source row 'Dividends paid Cash flows from financing activities:' (['dividends'])"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9ca05e8c47d23106fa91b499",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K10",
+  "split": "heldout2",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 110,
+  "kind": "table",
+  "question": "What were CVS Health's inventories at December 31, 2022?",
+  "claim": {
+   "quote": "19,090",
+   "row_label": "Inventories",
+   "period": "2022",
+   "metric": "inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Inventories 19,090 17,760",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2e970950ac1591515616a347",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c6d19b720d3da63a70166603",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K11",
+  "split": "heldout2",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 110,
+  "kind": "table",
+  "question": "What were CVS Health's inventories at December 31, 2022?",
+  "claim": {
+   "quote": "17,760",
+   "row_label": "Inventories",
+   "period": "2022",
+   "metric": "inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "17,760 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2e970950ac1591515616a347",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c6d19b720d3da63a70166603",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K12",
+  "split": "heldout2",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 110,
+  "kind": "table",
+  "question": "What were CVS Health's total current assets at December 31, 2022?",
+  "claim": {
+   "quote": "65,682",
+   "row_label": "Total current assets",
+   "period": "2022",
+   "metric": "total current assets",
+   "scale": "millions",
+   "currency": "EUR"
+  },
+  "expect": "reject",
+  "category": "currency",
+  "note": "dollar statement claimed in EUR",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2e970950ac1591515616a347",
+     "accepted": false,
+     "failed": [
+      "operand_currency_matches: source is in dollars, not ['EUR']"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_c6d19b720d3da63a70166603",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified",
+      "operand_currency_matches: label currency ['eur'] is not stated in the evidence"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K13",
+  "split": "heldout2",
+  "doc": "doc_cvshealth_2022_10k",
+  "page": 110,
+  "kind": "table",
+  "question": "What were CVS Health's total current assets at December 31, 2022?",
+  "claim": {
+   "quote": "65,682",
+   "row_label": "Total current assets",
+   "period": "2022",
+   "metric": "total current assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total current assets 65,682 60,008",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2e970950ac1591515616a347",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_c6d19b720d3da63a70166603",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header",
+      "operand_units_match: operand scale millions is not stated in the evidence; not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K14",
+  "split": "heldout2",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 98,
+  "kind": "table",
+  "question": "What were American Express's total assets at December 31, 2022?",
+  "claim": {
+   "quote": "228,354",
+   "row_label": "Total assets",
+   "period": "2022",
+   "metric": "total assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total assets $ 228,354 $ 188,548",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f204de8945b9054739535472",
+     "accepted": true,
+     "failed": []
+    },
+    {
+     "chunk_id": "chk_21f9675a0f3ca1b87c2b0edf",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (228,354 / 'Total assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_b06df4904c253b4892f0c727",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    },
+    {
+     "chunk_id": "chk_697fe671d06ca6ca020172c6",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['total assets'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K15",
+  "split": "heldout2",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 98,
+  "kind": "table",
+  "question": "What were American Express's total assets at December 31, 2022?",
+  "claim": {
+   "quote": "188,548",
+   "row_label": "Total assets",
+   "period": "2022",
+   "metric": "total assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "188,548 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f204de8945b9054739535472",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    },
+    {
+     "chunk_id": "chk_21f9675a0f3ca1b87c2b0edf",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (188,548 / 'Total assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b06df4904c253b4892f0c727",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    },
+    {
+     "chunk_id": "chk_697fe671d06ca6ca020172c6",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['total assets'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K16",
+  "split": "heldout2",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 98,
+  "kind": "table",
+  "question": "What were American Express's customer deposits at December 31, 2022?",
+  "claim": {
+   "quote": "110,239",
+   "row_label": "Customer deposits",
+   "period": "2022",
+   "metric": "customer deposits",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Customer deposits $ 110,239 $ 84,382",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_dcaa2cd891c6e4db30b893d8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_2941d3af0b6e7ae3b0ec52ab",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K17",
+  "split": "heldout2",
+  "doc": "doc_americanexpress_2022_10k",
+  "page": 98,
+  "kind": "table",
+  "question": "What were American Express's total assets at December 31, 2022?",
+  "claim": {
+   "quote": "110,239",
+   "row_label": "Customer deposits",
+   "period": "2022",
+   "metric": "total assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "deposits claimed as total assets",
+  "m35": {
+   "accepted": true,
+   "outcome": "FALSE_ACCEPT",
+   "candidates": [
+    {
+     "chunk_id": "chk_dcaa2cd891c6e4db30b893d8",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2941d3af0b6e7ae3b0ec52ab",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['total assets'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K18",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were 3M's cash and cash equivalents at December 31, 2022?",
+  "claim": {
+   "quote": "3,655",
+   "row_label": "Cash and cash equivalents",
+   "period": "2022",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": "USD"
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Cash and cash equivalents $ 3,655 $ 4,564",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_33b7272c8382f801a9551364",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_56437c5f885032c4c83b0ea1",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K19",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were 3M's cash and cash equivalents at December 31, 2022?",
+  "claim": {
+   "quote": "4,564",
+   "row_label": "Cash and cash equivalents",
+   "period": "2022",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "4,564 is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_33b7272c8382f801a9551364",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_56437c5f885032c4c83b0ea1",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K20",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 50,
+  "kind": "table",
+  "question": "What were 3M's total current assets at December 31, 2022?",
+  "claim": {
+   "quote": "14,688",
+   "row_label": "Total current assets",
+   "period": "2022",
+   "metric": "total current assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total current assets 14,688 15,403",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4fd7c4e98480298811ea1bc3",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_56437c5f885032c4c83b0ea1",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K21",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2022?",
+  "claim": {
+   "quote": "(1,749)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2022",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "PP&E (1,749) (1,603) (1,501)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_d87050335ee95a2c60f4c8d6",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_9545350c2d5ed91c9cb57a01",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K22",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure in 2022?",
+  "claim": {
+   "quote": "(1,603)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2022",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(1,603) is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_d87050335ee95a2c60f4c8d6",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_9545350c2d5ed91c9cb57a01",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K23",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What was 3M's operating cash flow in 2022?",
+  "claim": {
+   "quote": "5,591",
+   "row_label": "Net cash provided by (used in) operating activities",
+   "period": "2022",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "5,591 7,454 8,113",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2445a1bfa96bf2e9bb002419",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_a938a8e3dc5d4ef766433101",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K24",
+  "split": "heldout2",
+  "doc": "doc_3m_2022_10k",
+  "page": 52,
+  "kind": "table",
+  "question": "What was 3M's segment operating cash flow in 2022?",
+  "claim": {
+   "quote": "5,591",
+   "row_label": "Net cash provided by (used in) operating activities",
+   "period": "2022",
+   "metric": "segment operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "scope",
+  "note": "consolidated value claimed as segment",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_2445a1bfa96bf2e9bb002419",
+     "accepted": false,
+     "failed": [
+      "operand_scope_matches: claimed ['segment'] vs source scope consolidated"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_a938a8e3dc5d4ef766433101",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_scope_matches: label scope ['segment'] contradicts evidence ['group', 'subsidiary']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K25",
+  "split": "heldout2",
+  "doc": "doc_aes_2022_10k",
+  "page": 135,
+  "kind": "table",
+  "question": "What were AES's capital expenditures in 2022?",
+  "claim": {
+   "quote": "(4,551)",
+   "row_label": "Capital expenditures",
+   "period": "2022",
+   "metric": "capital expenditures",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "correct",
+  "note": "Capital expenditures (4,551) (2,116) (1,900)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b104a766ff6524d306528703",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_5621cf003bcb1de47c294049",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K26",
+  "split": "heldout2",
+  "doc": "doc_aes_2022_10k",
+  "page": 135,
+  "kind": "table",
+  "question": "What were AES's capital expenditures in 2022?",
+  "claim": {
+   "quote": "(2,116)",
+   "row_label": "Capital expenditures",
+   "period": "2022",
+   "metric": "capital expenditures",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(2,116) is 2021",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_b104a766ff6524d306528703",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2022] vs column period '2021 (in millions)' (2021)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_5621cf003bcb1de47c294049",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value was not found in a table cell ((2,116)); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K27",
+  "split": "heldout2",
+  "doc": "doc_aes_2022_10k",
+  "page": 135,
+  "kind": "table",
+  "question": "What was AES's operating cash flow in 2022?",
+  "claim": {
+   "quote": "2,715",
+   "row_label": "Net cash provided by operating activities",
+   "period": "2022",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "paraphrase",
+  "note": "Net cash provided by operating activities 2,715 1,902 2,755",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_303ddb415fbedc29ac75bfcd",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_43b99d157f332032e8319a0b",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K28",
+  "split": "heldout2",
+  "doc": "doc_aes_2022_10k",
+  "page": 135,
+  "kind": "table",
+  "question": "What was AES's operating cash flow in 2022?",
+  "claim": {
+   "quote": "2,715",
+   "row_label": "Net cash provided by operating activities",
+   "period": "2022",
+   "metric": "operating cash flow",
+   "scale": "billions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_scale",
+  "note": "in millions",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_303ddb415fbedc29ac75bfcd",
+     "accepted": false,
+     "failed": [
+      "operand_units_match: source scale millions vs operand billions"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_43b99d157f332032e8319a0b",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2022'] are ambiguous across header years ['2020', '2021', '2022']",
+      "operand_units_match: operand scale billions does not match evidence scale millions"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K29",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 39,
+  "kind": "table",
+  "question": "What were Best Buy's merchandise inventories as of January 28, 2023?",
+  "claim": {
+   "quote": "5,140",
+   "row_label": "Merchandise inventories",
+   "period": "January 28, 2023",
+   "metric": "merchandise inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Merchandise inventories 5,140 5,965",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_8dce65cc67f749a4528b3551",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f32ceff044e099037a957ddd",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K30",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 39,
+  "kind": "table",
+  "question": "What were Best Buy's merchandise inventories as of January 28, 2023?",
+  "claim": {
+   "quote": "5,965",
+   "row_label": "Merchandise inventories",
+   "period": "January 28, 2023",
+   "metric": "merchandise inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "5,965 is January 29, 2022",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_8dce65cc67f749a4528b3551",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period 'January 29, 2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f32ceff044e099037a957ddd",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K31",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 39,
+  "kind": "table",
+  "question": "What were Best Buy's total assets as of January 28, 2023?",
+  "claim": {
+   "quote": "15,803",
+   "row_label": "Total assets",
+   "period": "January 28, 2023",
+   "metric": "total assets",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Total assets $ 15,803 $ 17,504",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ca7848e92c08a88bfcba96a5",
+     "accepted": true,
+     "failed": []
+    },
+    {
+     "chunk_id": "chk_c49311355af1ef8bfade3f39",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (15,803 / 'Total assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_f32ceff044e099037a957ddd",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value appears in more than one row or column (15,803); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K32",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2023_10k",
+  "page": 39,
+  "kind": "table",
+  "question": "What was Best Buy's cash and cash equivalents as of January 28, 2023?",
+  "claim": {
+   "quote": "15,803",
+   "row_label": "Total assets",
+   "period": "January 28, 2023",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_metric",
+  "note": "total assets claimed as cash",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_ca7848e92c08a88bfcba96a5",
+     "accepted": false,
+     "failed": [
+      "operand_metric_supported: metric 'cash and cash equivalents' (['cash']) conflicts with source row 'Total assets Property and equipment' (['total_assets'])"
+     ]
+    },
+    {
+     "chunk_id": "chk_c49311355af1ef8bfade3f39",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: value not found in the quoted row (15,803 / 'Total assets')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_f32ceff044e099037a957ddd",
+     "accepted": false,
+     "failed": [
+      "operand_cell_located: quoted value appears in more than one row or column (15,803); association is not verified"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K33",
+  "split": "heldout2",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 6,
+  "kind": "table",
+  "question": "What was 3M's operating cash flow for the six months ended June 30, 2023?",
+  "claim": {
+   "quote": "2,784",
+   "row_label": "Net cash provided by (used in) operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "ytd",
+  "note": "2,784 2,138",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_550ec20df4b748330c24e33d",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_41dd0f6d1cbbef11c9507baa",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K34",
+  "split": "heldout2",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 6,
+  "kind": "table",
+  "question": "What was 3M's operating cash flow for fiscal year 2023?",
+  "claim": {
+   "quote": "2,784",
+   "row_label": "Net cash provided by (used in) operating activities",
+   "period": "2023",
+   "metric": "operating cash flow",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "period_type",
+  "note": "six-month value claimed as full-year",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_550ec20df4b748330c24e33d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: year-to-date column '2023' used for a non-YTD question"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_41dd0f6d1cbbef11c9507baa",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label names ['cash flow'] but that metric is not in the source row or its header",
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K35",
+  "split": "heldout2",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 6,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure for the six months ended June 30, 2023?",
+  "claim": {
+   "quote": "(808)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2023",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "wrong_period",
+  "note": "(808) is the 2022 six months",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0d19347f2268bca9a006c764",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed [2023] vs column period '2022' (2022)"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_41dd0f6d1cbbef11c9507baa",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K36",
+  "split": "heldout2",
+  "doc": "doc_3m_2023q2_10q",
+  "page": 6,
+  "kind": "table",
+  "question": "What was 3M's capital expenditure for the six months ended June 30, 2023?",
+  "claim": {
+   "quote": "(852)",
+   "row_label": "Purchases of property, plant and equipment (PP&E)",
+   "period": "2023",
+   "metric": "capital expenditure",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "ytd",
+  "note": "(852) (808)",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_0d19347f2268bca9a006c764",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_41dd0f6d1cbbef11c9507baa",
+     "accepted": false,
+     "failed": [
+      "operand_label_on_same_row: label/source token overlap 0.00; metric association was not verified",
+      "operand_period_matches: label years ['2023'] are ambiguous across header years ['2022', '2023']"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K37",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were Best Buy's merchandise inventories as of July 29, 2023?",
+  "claim": {
+   "quote": "5,651",
+   "row_label": "Merchandise inventories",
+   "period": "July 29, 2023",
+   "metric": "merchandise inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "Merchandise inventories 5,651 5,140 6,043",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4227a6781b5df3da57c62fbf",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_fbe2e920aa50798e68dc259d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K38",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were Best Buy's merchandise inventories as of July 29, 2023?",
+  "claim": {
+   "quote": "5,140",
+   "row_label": "Merchandise inventories",
+   "period": "July 29, 2023",
+   "metric": "merchandise inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "same_year_columns",
+  "note": "5,140 is the January 28, 2023 column (same calendar year, different date)",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4227a6781b5df3da57c62fbf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed date 2023-07-29 vs column date 2023-01-28 ('January 28, 2023')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_fbe2e920aa50798e68dc259d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K39",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were Best Buy's merchandise inventories as of July 30, 2022?",
+  "claim": {
+   "quote": "6,043",
+   "row_label": "Merchandise inventories",
+   "period": "July 30, 2022",
+   "metric": "merchandise inventories",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "accept",
+  "category": "point_in_time",
+  "note": "third column",
+  "m35": {
+   "accepted": true,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4227a6781b5df3da57c62fbf",
+     "accepted": true,
+     "failed": []
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "FALSE_REJECT",
+   "candidates": [
+    {
+     "chunk_id": "chk_fbe2e920aa50798e68dc259d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2022'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "K40",
+  "split": "heldout2",
+  "doc": "doc_bestbuy_2024q2_10q",
+  "page": 3,
+  "kind": "table",
+  "question": "What were Best Buy's cash and cash equivalents as of July 29, 2023?",
+  "claim": {
+   "quote": "1,874",
+   "row_label": "Cash and cash equivalents",
+   "period": "July 29, 2023",
+   "metric": "cash and cash equivalents",
+   "scale": "millions",
+   "currency": null
+  },
+  "expect": "reject",
+  "category": "same_year_columns",
+  "note": "1,874 is the January 28, 2023 column",
+  "m35": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_4227a6781b5df3da57c62fbf",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: claimed date 2023-07-29 vs column date 2023-01-28 ('January 28, 2023')"
+     ]
+    }
+   ]
+  },
+  "pr2": {
+   "accepted": false,
+   "outcome": "correct",
+   "candidates": [
+    {
+     "chunk_id": "chk_fbe2e920aa50798e68dc259d",
+     "accepted": false,
+     "failed": [
+      "operand_period_matches: label years ['2023'] are not tied to a column or table header"
+     ]
+    }
+   ]
+  }
+ }
+]
