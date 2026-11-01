@@ -88,9 +88,27 @@ export function compareReports(
       note: "More than one parsed value exists for the same report and period. The comparison is not plotted.",
     };
   }
-  const points = [...byDocPeriod.values()].sort(
+  const ordered = [...byDocPeriod.values()].sort(
     (a, b) => a.sortKey - b.sortKey || a.documentTitle.localeCompare(b.documentTitle),
   );
+  const byPeriod = new Map<string, ComparedPoint[]>();
+  for (const point of ordered) {
+    const group = byPeriod.get(point.periodLabel) ?? [];
+    group.push(point);
+    byPeriod.set(point.periodLabel, group);
+  }
+  const points: ComparedPoint[] = [];
+  const conflicts: string[] = [];
+  let collapsed = 0;
+  for (const [period, group] of byPeriod) {
+    const values = new Set(group.map((point) => point.displayValue));
+    if (values.size > 1) {
+      conflicts.push(period);
+      continue;
+    }
+    collapsed += group.length - 1;
+    points.push(group.find((point) => point.documentTitle.includes(period)) ?? group[0]!);
+  }
   const sample = points[0];
   const note = [
     sample
@@ -98,6 +116,10 @@ export function compareReports(
       : "",
     dropped > 0
       ? `${dropped} value(s) were left out because unit, currency, or scope did not match.`
+      : "",
+    collapsed > 0 ? "Overlapping years that report the same value are shown once." : "",
+    conflicts.length > 0
+      ? `${conflicts.join(", ")} is not plotted because the reports disagree.`
       : "",
     points.length <= 2
       ? "This is a comparison of the aligned reported values, not a comprehensive trend."
@@ -111,39 +133,47 @@ export function compareReports(
 export function visualDiscrepancy(
   check: TableCheck,
   facts: FinancialFact[],
-): { status: ComparisonStatus; detail: string } {
-  const label = norm(check.label);
-  const matches = facts.filter(
-    (fact) =>
-      fact.valueStatus === "parsed" && norm(fact.rowLabel).includes(label) && label.length > 0,
-  );
-  if (check.status === "no_table_evidence" || matches.length === 0) {
-    return {
-      status: "INSUFFICIENT_EVIDENCE",
-      detail: "No reported table fact is aligned with this chart reading.",
-    };
-  }
-  const scales = new Set(
-    matches.map((fact) => `${fact.scale}|${fact.currency ?? ""}|${fact.scope}`),
-  );
-  if (scales.size !== 1 || matches.length !== 1) {
+): { status: ComparisonStatus; detail: string; page: number | null; evidenceId: string | null } {
+  const linked = check.factId ? facts.find((fact) => fact.factId === check.factId) : undefined;
+  const aligned =
+    linked != null &&
+    linked.valueStatus === "parsed" &&
+    (check.tableValue == null ||
+      linked.value === check.tableValue ||
+      linked.cellText === check.tableValue);
+  if (!aligned || check.status === "no_table_evidence") {
     return {
       status: "INSUFFICIENT_EVIDENCE",
       detail:
-        "Several table facts could match this label, so period, unit, or scope is not unique.",
+        "No single reported fact shares this chart label, period, unit, currency, and scope.",
+      page: null,
+      evidenceId: null,
     };
   }
+  const page = linked.page;
+  const evidenceId = linked.tableId ? `ev-${linked.tableId}` : null;
+  const difference = check.absoluteDifference ? ` Absolute difference ${check.absoluteDifference}.` : "";
+  const period = linked.period.label ?? check.period ?? "the same period";
   if (check.status === "consistent") {
     return {
       status: "MATCH",
-      detail: `Visual estimate ${check.estimate} is close to reported ${matches[0]?.cellText}. The chart value remains an estimate.`,
+      detail: `Chart ${check.estimate} is close to reported ${linked.cellText} for ${period}.${difference} The chart value remains an estimate.`,
+      page,
+      evidenceId,
     };
   }
   if (check.status === "conflict") {
     return {
       status: "POTENTIAL_DISCREPANCY",
-      detail: `Visual estimate ${check.estimate} differs from reported ${matches[0]?.cellText}. This is not a verified discrepancy.`,
+      detail: `Chart ${check.estimate} differs from reported ${linked.cellText} for ${period}.${difference} This is not a verified discrepancy.`,
+      page,
+      evidenceId,
     };
   }
-  return { status: "INSUFFICIENT_EVIDENCE", detail: "The chart reading could not be checked." };
+  return {
+    status: "INSUFFICIENT_EVIDENCE",
+    detail: "The chart reading could not be checked.",
+    page: null,
+    evidenceId: null,
+  };
 }

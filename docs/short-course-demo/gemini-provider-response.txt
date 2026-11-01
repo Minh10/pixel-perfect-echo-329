@@ -1,0 +1,29 @@
+Provider probe, 1 November 2026. Credentials redacted. No chart summary was returned.
+
+Request
+- Client: existing OpenAICompatibleProvider (POST /chat/completions, image as data:image/png;base64, response_format json_schema strict)
+- Provider setting: openai
+- Model setting: gemini-3.8-flash
+- Base URL: https://generativelanguage.googleapis.com/v1beta/openai/
+- Credential: server environment variable FINAUDIT_LLM_API_KEY (present, length 53, value not recorded)
+- Image: PyMuPDF PNG crop of tests/fixtures/annual_report_excerpt.pdf page 3, bbox (72, 120, 472, 360), 5846 bytes, PNG signature verified
+
+OpenAI-compatible result
+- HTTP 403
+- Client exception: LLMUnavailable "LLM endpoint returned 403"
+- The client discards the response body for 401/403/404/429/5xx
+
+Native Gemini generateContent (same key in the x-goog-api-key header, same PNG, responseMimeType application/json)
+- HTTP 403
+- Body:
+{
+  "error": {
+    "code": 403,
+    "message": "The Gemini API free tier is not available for this project. To use the Gemini API, please set up billing to upgrade to the paid tier at https://aistudio.google.com/billing. For more information, see https://ai.google.dev/gemini-api/docs/troubleshooting#project-unavailable.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+
+This is a billing refusal, not a rejected request format. A native Google GenAI SDK adapter was not added, because it would receive the same refusal before any image or JSON schema is evaluated.
+
+The API process that was already running still reports FINAUDIT_LLM_PROVIDER=none, so the Consistency Audit interpret call returns HTTP 503 llm_unavailable and stores no reading.

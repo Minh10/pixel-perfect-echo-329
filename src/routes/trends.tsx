@@ -102,7 +102,7 @@ function LiveComparison() {
   const reportCount = new Set(comparison.points.map((point) => point.documentId)).size;
   const chartData = comparison.points.map((point) => ({
     ...point,
-    axis: `${point.periodLabel} · ${point.documentTitle}`,
+    axis: point.periodLabel,
   }));
 
   return (
@@ -168,7 +168,11 @@ function LiveComparison() {
       )}
       {selected.length >= 2 && !factsLoading && reportCount >= 2 && (
         <section className="space-y-4 rounded-md border bg-card p-5">
-          <p className="eyebrow">Comparison, not a comprehensive trend</p>
+          <p className="eyebrow">
+            {new Set(comparison.points.map((point) => point.periodLabel)).size >= 3
+              ? "Source-grounded series from parsed reports"
+              : "Comparison, not a comprehensive trend"}
+          </p>
           <p className="text-sm text-muted-foreground">{comparison.note}</p>
           <ChartContainer config={liveConfig} className="h-72 w-full">
             <BarChart data={chartData}>

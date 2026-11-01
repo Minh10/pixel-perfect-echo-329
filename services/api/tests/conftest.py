@@ -13,6 +13,15 @@ from app.worker import Worker
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def isolated_llm_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Developer .env must not turn 'no provider' tests into live model calls."""
+    monkeypatch.setenv("FINAUDIT_LLM_PROVIDER", "none")
+    monkeypatch.setenv("FINAUDIT_LLM_MODEL", "")
+    monkeypatch.setenv("FINAUDIT_LLM_BASE_URL", "")
+    monkeypatch.delenv("FINAUDIT_LLM_API_KEY", raising=False)
+
+
 @pytest.fixture
 def fixtures_dir() -> Path:
     return FIXTURES

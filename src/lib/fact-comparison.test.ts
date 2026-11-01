@@ -87,6 +87,39 @@ describe("compareReports", () => {
     expect(result.points).toHaveLength(1);
     expect(result.note).toContain("left out");
   });
+
+  it("shows one observation when two reports agree on the same year", () => {
+    const result = compareReports(
+      [
+        {
+          documentId: "a",
+          title: "Annual Report 2024",
+          facts: [fact({ documentId: "a", factId: "a1", value: "3200", cellText: "3,200" })],
+        },
+        {
+          documentId: "b",
+          title: "Annual Report 2025",
+          facts: [fact({ documentId: "b", factId: "b1", value: "3200", cellText: "3,200" })],
+        },
+      ],
+      "Revenue",
+    );
+    expect(result.points).toHaveLength(1);
+    expect(result.points[0]?.documentTitle).toBe("Annual Report 2025");
+    expect(result.note).toContain("shown once");
+  });
+
+  it("does not plot a year when the reports disagree", () => {
+    const result = compareReports(
+      [
+        { documentId: "a", title: "Annual Report 2024", facts: [fact({ factId: "a1", value: "3200" })] },
+        { documentId: "b", title: "Annual Report 2025", facts: [fact({ factId: "b1", value: "3000" })] },
+      ],
+      "Revenue",
+    );
+    expect(result.points).toHaveLength(0);
+    expect(result.note).toContain("disagree");
+  });
 });
 
 describe("visualDiscrepancy", () => {
@@ -108,8 +141,14 @@ describe("visualDiscrepancy", () => {
   });
 
   it("labels a single aligned conflict as potential, not verified", () => {
-    const result = visualDiscrepancy(check("conflict"), [fact({})]);
+    const result = visualDiscrepancy({ ...check("conflict"), factId: "f" }, [fact({})]);
     expect(result.status).toBe("POTENTIAL_DISCREPANCY");
     expect(result.detail).toContain("not a verified discrepancy");
+    expect(result.page).toBe(2);
+  });
+
+  it("does not treat an unlinked chart reading as a discrepancy", () => {
+    const result = visualDiscrepancy(check("conflict"), [fact({})]);
+    expect(result.status).toBe("INSUFFICIENT_EVIDENCE");
   });
 });

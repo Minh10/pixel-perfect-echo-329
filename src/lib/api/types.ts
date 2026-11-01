@@ -364,6 +364,7 @@ export interface ChartPoint {
   label: string;
   value: string;
   unit: string | null;
+  period?: string | null;
   valueKind: "visual_estimate";
   printedOnChart: boolean;
 }
@@ -375,6 +376,10 @@ export interface TableCheck {
   tableChunkId: string | null;
   relativeDifference: number | null;
   status: "consistent" | "conflict" | "no_table_evidence";
+  factId?: string | null;
+  page?: number | null;
+  period?: string | null;
+  absoluteDifference?: string | null;
 }
 
 export interface ChartInterpretation {
@@ -382,6 +387,7 @@ export interface ChartInterpretation {
   blockId: string;
   chartType: string | null;
   title: string | null;
+  summary?: string | null;
   points: ChartPoint[];
   tableChecks: TableCheck[];
   cropUrl: string;

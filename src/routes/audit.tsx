@@ -199,6 +199,7 @@ function ChartSummary({
   }
   return (
     <div className="space-y-2 text-sm">
+      {reading.summary && <p>{reading.summary}</p>}
       <p>
         {reading.title || reading.chartType || "Chart reading"}{" "}
         <span className="text-xs text-primary">Visual estimate from chart, approximate</span>
@@ -252,9 +253,15 @@ function DiscrepancyList({
         return (
           <li key={`${check.label}-${check.estimate}`} className="text-sm">
             <strong>{result.status}.</strong> {check.label}: {result.detail}
-            <span className="mt-1 block">
-              <SourceLink documentId={documentId} page={facts[0]?.page ?? 1} evidenceId={null} />
-            </span>
+            {result.page != null && (
+              <span className="mt-1 block">
+                <SourceLink
+                  documentId={documentId}
+                  page={result.page}
+                  evidenceId={result.evidenceId}
+                />
+              </span>
+            )}
           </li>
         );
       })}

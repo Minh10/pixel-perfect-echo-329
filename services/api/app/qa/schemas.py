@@ -198,6 +198,7 @@ class ChartPoint(ApiModel):
     label: str
     value: str = Field(description="Value as read from the image (string, verbatim number)")
     unit: str | None
+    period: str | None = Field(default=None, description="Reporting period printed for this point, when visible")
     value_kind: Literal["visual_estimate"] = "visual_estimate"
     printed_on_chart: bool = Field(description="True if the number is printed as a data label; still not authoritative")
 
@@ -209,6 +210,10 @@ class TableCheck(ApiModel):
     table_chunk_id: str | None
     relative_difference: float | None
     status: Literal["consistent", "conflict", "no_table_evidence"]
+    fact_id: str | None = None
+    page: int | None = None
+    period: str | None = None
+    absolute_difference: str | None = None
 
 
 class ChartInterpretation(ApiModel):
@@ -216,6 +221,7 @@ class ChartInterpretation(ApiModel):
     block_id: str
     chart_type: str | None
     title: str | None
+    summary: str | None = None
     points: list[ChartPoint]
     table_checks: list[TableCheck]
     crop_url: str
