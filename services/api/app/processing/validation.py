@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import gc
 import hashlib
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
@@ -28,6 +30,19 @@ class ValidatedPdf:
     sha256: str
     page_count: int
     metadata_title: str | None
+
+
+def discard_spooled_file(path: Path) -> None:
+    """Delete a rejected upload. PyMuPDF can keep the file locked briefly on Windows after close()."""
+    gc.collect()
+    for attempt in range(20):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05)
 
 
 def spool_upload(stream: BinaryIO, tmp_dir: Path, max_bytes: int) -> tuple[Path, int, str]:
@@ -61,8 +76,9 @@ def validate_pdf(path: Path, size: int, sha256: str, max_pages: int) -> Validate
     # The PDF spec allows junk before the header but requires it within the first 1024 bytes.
     if b"%PDF-" not in head:
         raise ValidationError("not_a_pdf", "File is not a PDF (missing %PDF- header)", 415)
+    # Open from memory so a failed open does not keep the spool file locked on Windows.
     try:
-        doc = pymupdf.open(path, filetype="pdf")
+        doc = pymupdf.open(stream=path.read_bytes(), filetype="pdf")
     except Exception as exc:  # pymupdf raises FileDataError / RuntimeError variants
         raise ValidationError("corrupt_pdf", f"PDF could not be opened: {exc}") from exc
     try:

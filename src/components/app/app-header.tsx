@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { NAV_ITEMS } from "./nav";
+import { IS_DEMO } from "@/lib/api/service";
 import { DemoBadge } from "./states";
 
 export function AppHeader() {
@@ -39,9 +40,7 @@ export function AppHeader() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="shrink-0">
-        <DemoBadge />
-      </div>
+      <div className="shrink-0">{IS_DEMO && <DemoBadge />}</div>
     </header>
   );
 }

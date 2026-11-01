@@ -13,7 +13,7 @@ from app import __version__
 from app.config import Settings
 from app.processing.docling_parser import docling_version
 from app.processing.pymupdf_parser import pymupdf_version
-from app.processing.validation import ValidationError, spool_upload, validate_pdf
+from app.processing.validation import ValidationError, discard_spooled_file, spool_upload, validate_pdf
 from app.schemas import (
     ApiError,
     DocumentPage,
@@ -128,7 +128,7 @@ def upload_document(
         try:
             v = validate_pdf(tmp, size, sha, cfg.max_pages)
         except BaseException:
-            tmp.unlink(missing_ok=True)
+            discard_spooled_file(tmp)
             raise
     except ValidationError as exc:
         raise api_error(exc.status_code, exc.code, exc.message) from exc

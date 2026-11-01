@@ -1,7 +1,9 @@
 import { X } from "lucide-react";
-import type { Evidence, EvidenceCategory } from "@/lib/api/types";
+import type { DocumentPage, Evidence, EvidenceCategory } from "@/lib/api/types";
+import { IS_DEMO } from "@/lib/api/service";
 import { Button } from "@/components/ui/button";
 import { DemoBadge } from "@/components/app/states";
+import { BlockContent } from "@/components/workspace/document-page";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_LABEL: Record<EvidenceCategory, string> = {
@@ -9,19 +11,29 @@ const CATEGORY_LABEL: Record<EvidenceCategory, string> = {
   disclosure: "Disclosure",
   table: "Table",
   chart: "Chart",
+  figure: "Figure",
 };
+
+const FILTERS = ["all", "metric", "table", "chart", "figure", "disclosure"] as const;
 
 interface Props {
   evidence: Evidence[];
+  pages: DocumentPage[];
   selected: Evidence | null;
   filter: EvidenceCategory | "all";
   onFilter: (f: EvidenceCategory | "all") => void;
   onSelect: (id: string | null) => void;
 }
 
-export function EvidenceInspector({ evidence, selected, filter, onFilter, onSelect }: Props) {
+export function EvidenceInspector({ evidence, pages, selected, filter, onFilter, onSelect }: Props) {
   const filtered = filter === "all" ? evidence : evidence.filter((e) => e.category === filter);
   const related = selected ? evidence.filter((e) => selected.related.includes(e.id)) : [];
+  const selectedBlock = selected
+    ? pages.flatMap((page) => page.blocks).find((block) => block.id === selected.blockId)
+    : undefined;
+  const filters = FILTERS.filter(
+    (item) => item !== "figure" || evidence.some((entry) => entry.category === "figure"),
+  );
 
   return (
     <div className="flex min-h-0 h-full flex-col">
@@ -47,6 +59,11 @@ export function EvidenceInspector({ evidence, selected, filter, onFilter, onSele
           <blockquote className="border-l-2 border-evidence pl-3 text-sm text-foreground/80">
             {selected.excerpt}
           </blockquote>
+          {selectedBlock && (selectedBlock.table || selectedBlock.figure) ? (
+            <div className="mt-4">
+              <BlockContent block={selectedBlock} />
+            </div>
+          ) : null}
           {selected.extracted && (
             <dl className="mt-4 divide-y rounded-sm border">
               {selected.extracted.map((f) => (
@@ -63,13 +80,34 @@ export function EvidenceInspector({ evidence, selected, filter, onFilter, onSele
               ))}
             </dl>
           )}
-          <div className="mt-4 flex items-center justify-between">
-            <ConfidenceBar value={selected.confidence} />
-            <DemoBadge />
+          <div className="mt-4 flex items-center justify-between gap-3">
+            {selected.confidence == null ? (
+              <p className="text-[11px] text-muted-foreground">Confidence: not reported by parser</p>
+            ) : (
+              <ConfidenceBar value={selected.confidence} />
+            )}
+            {IS_DEMO && <DemoBadge />}
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Extraction is illustrative. No figure has been verified against source filings.
-          </p>
+          {IS_DEMO && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Extraction is illustrative. No figure has been verified against source filings.
+            </p>
+          )}
+          {!IS_DEMO && selected.provenance && (
+            <dl className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
+              <div>
+                {selected.provenance.parser} · {selected.provenance.method}
+              </div>
+              <div>
+                p. {selected.provenance.page} · bbox {selected.provenance.bbox.l.toFixed(1)},{" "}
+                {selected.provenance.bbox.t.toFixed(1)}, {selected.provenance.bbox.r.toFixed(1)},{" "}
+                {selected.provenance.bbox.b.toFixed(1)} pt
+              </div>
+              {selected.category === "disclosure" && selected.detection?.rule && (
+                <div className="font-sans">{selected.detection.rule}</div>
+              )}
+            </dl>
+          )}
           {related.length > 0 && (
             <div className="mt-4">
               <p className="eyebrow mb-2">Linked evidence</p>
@@ -93,13 +131,15 @@ export function EvidenceInspector({ evidence, selected, filter, onFilter, onSele
         <section className="border-b p-4">
           <h2 className="text-base font-semibold">Evidence Inspector</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Report evidence · illustrative extraction only.
+            {IS_DEMO
+              ? "Report evidence · illustrative extraction only."
+              : "Parser regions traced back to the source PDF. Values are not verified facts."}
           </p>
         </section>
       )}
 
       <div className="flex flex-wrap items-center gap-1 border-b px-3 py-2">
-        {(["all", "metric", "table", "chart", "disclosure"] as const).map((f) => (
+        {filters.map((f) => (
           <Button
             variant="ghost"
             key={f}

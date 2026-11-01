@@ -1,8 +1,10 @@
-// Replaceable typed service layer. Swap `demoService` for an HTTP client
-// targeting the FastAPI backend without touching UI code.
+// Replaceable typed service layer. Live mode uses the FastAPI client when
+// VITE_FINAUDIT_API_URL is set. Demo mode stays on fictional fixtures and is
+// never mixed into live document, page, or evidence results.
 import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";
-import type { DocumentPage, Evidence, FinDocument, TrendPoint } from "./types";
+import { API_URL, httpService } from "./http-service";
+import type { DocumentPage, Evidence, FinDocument, Job, TrendPoint, UploadMeta } from "./types";
 
 export interface FinAuditService {
   listDocuments(): Promise<FinDocument[]>;
@@ -10,6 +12,12 @@ export interface FinAuditService {
   getPages(id: string): Promise<DocumentPage[]>;
   getEvidence(id: string): Promise<Evidence[]>;
   getTrends(id: string): Promise<TrendPoint[]>;
+  uploadDocument?(
+    file: File,
+    meta?: UploadMeta,
+    onProgress?: (fraction: number) => void,
+  ): Promise<{ document: FinDocument; job: Job }>;
+  getJob?(jobId: string): Promise<Job>;
 }
 
 const delay = <T,>(value: T, ms = 350) => new Promise<T>((r) => setTimeout(() => r(value), ms));
@@ -27,13 +35,48 @@ export const demoService: FinAuditService = {
 };
 
 /** Whether the active service returns demo data (drives DEMO labels in UI). */
-export const IS_DEMO = true;
-export const api: FinAuditService = demoService;
+export const IS_DEMO = !API_URL;
+export const api: FinAuditService = IS_DEMO ? demoService : httpService;
+/** Demo-mode default only. In live mode there is no fixed default document. */
+export const DEFAULT_DOCUMENT_ID: string | null = IS_DEMO ? "nhc-ar-2025" : null;
 
-export const DEFAULT_DOCUMENT_ID = "nhc-ar-2025";
+export const documentsQuery = () =>
+  queryOptions({
+    queryKey: ["documents"],
+    queryFn: () => api.listDocuments(),
+    refetchInterval: (query) =>
+      !IS_DEMO && query.state.data?.some((doc) => doc.status === "processing") ? 2000 : false,
+  });
 
-export const documentsQuery = () => queryOptions({ queryKey: ["documents"], queryFn: () => api.listDocuments() });
-export const documentQuery = (id: string) => queryOptions({ queryKey: ["document", id], queryFn: () => api.getDocument(id) });
-export const pagesQuery = (id: string) => queryOptions({ queryKey: ["pages", id], queryFn: () => api.getPages(id) });
-export const evidenceQuery = (id: string) => queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id) });
-export const trendsQuery = (id: string) => queryOptions({ queryKey: ["trends", id], queryFn: () => api.getTrends(id) });
+export const documentQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["document", id],
+    queryFn: () => api.getDocument(id),
+    refetchInterval: (query) =>
+      !IS_DEMO && query.state.data?.status === "processing" ? 1500 : false,
+  });
+
+export const pagesQuery = (id: string) =>
+  queryOptions({ queryKey: ["pages", id], queryFn: () => api.getPages(id) });
+
+export const evidenceQuery = (id: string) =>
+  queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id) });
+
+// Multi-period trends are not produced by the ingestion API. The Trends page
+// keeps calling the labelled demo series explicitly.
+export const trendsQuery = (id: string | null) =>
+  queryOptions({
+    queryKey: ["trends", "demo", id ?? "none"],
+    queryFn: () => demoService.getTrends(id ?? "demo"),
+  });
+
+export const jobQuery = (jobId: string) =>
+  queryOptions({
+    queryKey: ["job", jobId],
+    queryFn: () => {
+      if (!api.getJob) throw new Error("Job status is only available from the backend");
+      return api.getJob(jobId);
+    },
+    refetchInterval: (query) =>
+      query.state.data && ["succeeded", "failed"].includes(query.state.data.state) ? false : 1500,
+  });

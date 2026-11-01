@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import type { FinDocument } from "@/lib/api/types";
+import { IS_DEMO, jobQuery } from "@/lib/api/service";
 import {
   Table,
   TableBody,
@@ -10,6 +12,40 @@ import {
 } from "@/components/ui/table";
 import { DocStatus } from "./doc-status";
 import { FileText, ArrowUpRight } from "lucide-react";
+
+function display(value: string | null | undefined) {
+  const text = value?.trim();
+  return text ? text : "—";
+}
+
+function formatUploadedAt(value: string) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function StatusCell({ doc }: { doc: FinDocument }) {
+  const jobId = !IS_DEMO && doc.status === "processing" ? doc.latestJobId : null;
+  const { data: job } = useQuery({
+    ...jobQuery(jobId ?? "idle"),
+    enabled: Boolean(jobId),
+  });
+
+  return (
+    <div className="min-w-0">
+      <DocStatus status={doc.status} />
+      {job && doc.status === "processing" && (
+        <p className="mt-1 text-[11px] capitalize text-muted-foreground">
+          {job.stage} · {Math.round(job.progress * 100)}%
+        </p>
+      )}
+      {doc.status === "failed" && doc.error?.message && (
+        <p className="mt-1 max-w-52 text-[11px] text-destructive">{doc.error.message}</p>
+      )}
+    </div>
+  );
+}
 
 export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
   return (
@@ -48,24 +84,24 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
                       <span className="font-medium">{d.title}</span>
                     )}
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {d.issuer}
-                      <span className="sm:hidden"> · {d.period}</span>
+                      {display(d.issuer)}
+                      <span className="sm:hidden"> · {display(d.period)}</span>
                     </p>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="hidden text-sm text-muted-foreground xl:table-cell">
-                {d.type}
+                {display(d.type)}
               </TableCell>
-              <TableCell className="hidden text-sm tabular sm:table-cell">{d.period}</TableCell>
+              <TableCell className="hidden text-sm tabular sm:table-cell">{display(d.period)}</TableCell>
               <TableCell className="hidden text-right text-sm tabular md:table-cell">
                 {d.pages}
               </TableCell>
               <TableCell className="hidden text-xs text-muted-foreground xl:table-cell">
-                {d.uploadedAt}
+                {formatUploadedAt(d.uploadedAt)}
               </TableCell>
               <TableCell className="pr-5">
-                <DocStatus status={d.status} />
+                <StatusCell doc={d} />
               </TableCell>
             </TableRow>
           ))}

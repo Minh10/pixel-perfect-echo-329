@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { FinDocument, Evidence } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
+import { IS_DEMO } from "@/lib/api/service";
 import { DemoBadge } from "./states";
 import { NAV_ITEMS } from "./nav";
 
@@ -43,7 +44,7 @@ export function OverviewMetrics({
     {
       label: "Evidence Regions",
       value: evidence.length,
-      detail: "In the demo workspace report",
+      detail: IS_DEMO ? "In the demo workspace report" : "Across ready reports",
       icon: ScanSearch,
     },
   ];
@@ -60,7 +61,7 @@ export function OverviewMetrics({
           </dd>
           <div className="mt-auto flex items-center justify-between gap-2 pt-4">
             <p className="text-xs text-muted-foreground">{s.detail}</p>
-            <DemoBadge />
+            {IS_DEMO && <DemoBadge />}
           </div>
         </div>
       ))}
@@ -99,7 +100,7 @@ export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
           <h2 id="processing-title" className="text-base font-semibold">
             Document Processing
           </h2>
-          <DemoBadge />
+          {IS_DEMO && <DemoBadge />}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Current library status · {documents.length} reports
@@ -128,7 +129,7 @@ export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
           <h2 id="actions-title" className="text-base font-semibold">
             Quick Actions
           </h2>
-          <DemoBadge />
+          {IS_DEMO && <DemoBadge />}
         </div>
         <div className="grid gap-x-5 sm:grid-cols-2">
           {NAV_ITEMS.filter((n) =>

@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { DEFAULT_DOCUMENT_ID, trendsQuery } from "@/lib/api/service";
+import { DEFAULT_DOCUMENT_ID, IS_DEMO, trendsQuery } from "@/lib/api/service";
 import { DemoBadge, PageHeader, PageSkeleton } from "@/components/app/states";
 
 export const Route = createFileRoute("/trends")({
@@ -51,7 +51,11 @@ function Trends() {
       <PageHeader
         eyebrow="Analysis"
         title="Trends"
-        description="Northwind Holdings (demo issuer) · five-year series, £ millions."
+        description={
+          IS_DEMO
+            ? "Northwind Holdings (demo issuer) · five-year series, £ millions."
+            : "Demo series only. Uploaded PDFs are not turned into multi-period trends."
+        }
         actions={<DemoBadge />}
       />
       <div className="grid gap-4 lg:grid-cols-5">

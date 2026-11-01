@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { IS_DEMO } from "@/lib/api/service";
 import { NAV_ITEMS } from "./nav";
 
 const GROUPS = ["Workspace", "Analysis", "Quality"] as const;
@@ -61,7 +62,9 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-3 group-data-[collapsible=icon]:hidden">
         <p className="text-xs font-medium text-muted-foreground">Environment</p>
-        <p className="text-xs text-sidebar-foreground">DEMO · Backend not connected</p>
+        <p className="text-xs text-sidebar-foreground">
+          {IS_DEMO ? "DEMO · Backend not connected" : "Live · Document service"}
+        </p>
       </SidebarFooter>
     </Sidebar>
   );

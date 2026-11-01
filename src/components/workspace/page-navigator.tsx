@@ -1,4 +1,5 @@
 import type { DocumentPage, Evidence } from "@/lib/api/types";
+import { API_URL, apiAsset } from "@/lib/api/http-service";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -33,15 +34,26 @@ export function PageNavigator({
           >
             <span
               className={cn(
-                "relative aspect-[3/4] w-10 shrink-0 overflow-hidden border bg-paper p-1",
+                "relative aspect-[3/4] w-10 shrink-0 overflow-hidden border bg-paper",
+                !p.imageUrl && "p-1",
                 active && "border-primary ring-1 ring-primary",
               )}
             >
-              <span className="block h-1 w-3/4 bg-primary/60" />
-              <span className="mt-1 block h-0.5 w-full bg-muted-foreground/25" />
-              <span className="mt-0.5 block h-0.5 w-5/6 bg-muted-foreground/25" />
-              <span className="mt-0.5 block h-0.5 w-full bg-muted-foreground/25" />
-              {count > 0 && <span className="mt-1 block h-1.5 w-full bg-evidence/40" />}
+              {p.imageUrl && API_URL ? (
+                <img
+                  src={apiAsset(`${p.imageUrl}?dpi=40`)}
+                  alt=""
+                  className="h-full w-full object-cover object-top"
+                />
+              ) : (
+                <>
+                  <span className="block h-1 w-3/4 bg-primary/60" />
+                  <span className="mt-1 block h-0.5 w-full bg-muted-foreground/25" />
+                  <span className="mt-0.5 block h-0.5 w-5/6 bg-muted-foreground/25" />
+                  <span className="mt-0.5 block h-0.5 w-full bg-muted-foreground/25" />
+                  {count > 0 && <span className="mt-1 block h-1.5 w-full bg-evidence/40" />}
+                </>
+              )}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block font-mono text-[11px] text-muted-foreground">

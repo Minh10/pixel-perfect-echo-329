@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Highlighter,
   Minus,
   Plus,
@@ -16,7 +17,15 @@ import { Switch } from "@/components/ui/switch";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
-import { DEFAULT_DOCUMENT_ID, documentQuery, evidenceQuery, pagesQuery } from "@/lib/api/service";
+import { ApiError, sourceDocumentUrl } from "@/lib/api/http-service";
+import {
+  DEFAULT_DOCUMENT_ID,
+  IS_DEMO,
+  documentQuery,
+  documentsQuery,
+  evidenceQuery,
+  pagesQuery,
+} from "@/lib/api/service";
 import type { EvidenceCategory } from "@/lib/api/types";
 import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
@@ -27,13 +36,18 @@ const search = z.object({ doc: z.string().optional(), page: z.number().int().min
 
 export const Route = createFileRoute("/intelligence")({
   validateSearch: search,
-  loaderDeps: ({ search }) => ({ doc: search.doc ?? DEFAULT_DOCUMENT_ID }),
+  loaderDeps: ({ search }) => ({ doc: search.doc }),
   loader: async ({ context, deps }) => {
+    const docs = await context.queryClient.ensureQueryData(documentsQuery());
+    const docId =
+      deps.doc ?? DEFAULT_DOCUMENT_ID ?? docs.find((doc) => doc.status === "ready")?.id ?? null;
+    if (!docId) return { docId: null as string | null };
     await Promise.all([
-      context.queryClient.ensureQueryData(documentQuery(deps.doc)),
-      context.queryClient.ensureQueryData(pagesQuery(deps.doc)),
-      context.queryClient.ensureQueryData(evidenceQuery(deps.doc)),
+      context.queryClient.ensureQueryData(documentQuery(docId)),
+      context.queryClient.ensureQueryData(pagesQuery(docId)),
+      context.queryClient.ensureQueryData(evidenceQuery(docId)),
     ]);
+    return { docId };
   },
   head: () => ({
     meta: [
@@ -54,9 +68,12 @@ export const Route = createFileRoute("/intelligence")({
   pendingComponent: WorkspaceSkeleton,
   errorComponent: function WorkspaceError({ error }) {
     const router = useRouter();
+    const unavailable =
+      error instanceof ApiError && (error.code === "backend_unavailable" || error.code === "timeout");
     return (
       <div className="p-8">
         <ErrorState
+          title={unavailable ? "Document service unavailable" : "Couldn't load this document"}
           message={error instanceof Error ? error.message : String(error)}
           onRetry={() => router.invalidate()}
         />
@@ -67,11 +84,40 @@ export const Route = createFileRoute("/intelligence")({
 });
 
 function Workspace() {
-  const { doc: docParam, page: pageParam } = Route.useSearch();
-  const docId = docParam ?? DEFAULT_DOCUMENT_ID;
+  const { docId } = Route.useLoaderData();
+  if (!docId) {
+    return (
+      <div className="p-8">
+        <EmptyState
+          title="Upload a report to begin"
+          description="Document Intelligence opens a processed financial PDF. Upload one from the library to inspect its pages and evidence."
+          action={
+            IS_DEMO ? (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/intelligence" search={{ doc: DEFAULT_DOCUMENT_ID ?? undefined }}>
+                  Open demo report
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/documents">Upload a report</Link>
+              </Button>
+            )
+          }
+        />
+      </div>
+    );
+  }
+  return <WorkspaceReady docId={docId} />;
+}
+
+function WorkspaceReady({ docId }: { docId: string }) {
+  const { page: pageParam } = Route.useSearch();
+  const queryClient = useQueryClient();
   const navigate = Route.useNavigate();
   const { data: doc } = useSuspenseQuery(documentQuery(docId));
-  const { data: pages } = useSuspenseQuery(pagesQuery(docId));
+  const pagesResult = useSuspenseQuery(pagesQuery(docId));
+  const pages = pagesResult.data;
   const { data: evidence } = useSuspenseQuery(evidenceQuery(docId));
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -80,6 +126,16 @@ function Workspace() {
   const [zoom, setZoom] = useState(1);
   const [showPages, setShowPages] = useState(true);
   const [showInspector, setShowInspector] = useState(true);
+
+  const previousStatus = useRef(doc.status);
+  useEffect(() => {
+    if (previousStatus.current === "processing" && doc.status !== "processing") {
+      void queryClient.invalidateQueries({ queryKey: ["pages", docId] });
+      void queryClient.invalidateQueries({ queryKey: ["evidence", docId] });
+      void queryClient.invalidateQueries({ queryKey: ["documents"] });
+    }
+    previousStatus.current = doc.status;
+  }, [doc.status, docId, queryClient]);
 
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
@@ -111,6 +167,10 @@ function Workspace() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  if (doc.status === "ready" && pages.length === 0 && pagesResult.isFetching) {
+    return <WorkspaceSkeleton />;
+  }
+
   if (doc.status !== "ready" || pages.length === 0) {
     return (
       <div className="p-8">
@@ -122,13 +182,23 @@ function Workspace() {
                 ? "Processing failed"
                 : "No pages available"
           }
-          description={`${doc.title} has no parsed pages to display yet.`}
+          description={
+            doc.status === "failed" && doc.error?.message
+              ? doc.error.message
+              : `${doc.title} has no parsed pages to display yet.`
+          }
           action={
-            <Button asChild variant="outline" size="sm">
-              <Link to="/intelligence" search={{}}>
-                Open demo report
-              </Link>
-            </Button>
+            IS_DEMO ? (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/intelligence" search={{}}>
+                  Open demo report
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/documents">Back to documents</Link>
+              </Button>
+            )
           }
         />
       </div>
@@ -142,10 +212,13 @@ function Workspace() {
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-3">
             <p className="truncate text-sm font-semibold">{doc.title}</p>
-            <DemoBadge className="shrink-0" />
+            {IS_DEMO && <DemoBadge className="shrink-0" />}
           </div>
           <p className="text-xs text-muted-foreground">
-            {doc.type} · {doc.period} · {doc.pages} pp · {evidence.length} evidence regions
+            {[doc.type, doc.period, `${doc.pages} pp`, `${evidence.length} evidence regions`]
+              .filter(Boolean)
+              .join(" · ")}
+            {!IS_DEMO && doc.parser ? ` · ${doc.parser.name}` : ""}
           </p>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
@@ -208,6 +281,13 @@ function Workspace() {
             </Label>
             <Switch id="hl" checked={showHighlights} onCheckedChange={setShowHighlights} />
           </div>
+          {!IS_DEMO && (
+            <Button asChild variant="outline" size="sm">
+              <a href={sourceDocumentUrl(doc.id)} target="_blank" rel="noreferrer">
+                <Download /> Source PDF
+              </a>
+            </Button>
+          )}
           <div className="flex shrink-0 items-center gap-1 border-l pl-3">
             <Button
               variant="ghost"
@@ -234,6 +314,9 @@ function Workspace() {
           </div>
         </div>
       </div>
+      {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
+        <p className="border-b bg-warning-soft px-4 py-2 text-xs text-warning">{doc.warnings.join(" ")}</p>
+      )}
 
       <div className="hidden min-h-0 flex-1 lg:block">
         <ResizablePanelGroup orientation="horizontal" id="document-workspace">
@@ -275,6 +358,7 @@ function Workspace() {
                 <aside className="h-full overflow-y-auto bg-card">
                   <EvidenceInspector
                     evidence={evidence}
+                    pages={pages}
                     selected={selected}
                     filter={filter}
                     onFilter={setFilter}
@@ -310,6 +394,7 @@ function Workspace() {
           <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
             <EvidenceInspector
               evidence={evidence}
+              pages={pages}
               selected={selected}
               filter={filter}
               onFilter={setFilter}
