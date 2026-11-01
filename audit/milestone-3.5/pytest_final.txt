@@ -1,0 +1,13 @@
+........................................................................ [ 18%]
+........................................................................ [ 37%]
+........................................................................ [ 56%]
+........................................................................ [ 75%]
+........................................................................ [ 93%]
+........................                                                 [100%]
+=============================== warnings summary ===============================
+tests/integration/test_api_flow.py::test_full_ingestion_flow
+  /home/user/fix/services/api/app/indexing/vectors.py:77: UserWarning: Payload indexes have no effect in the local Qdrant, except text indexes with `scoring`, which enable text queries. Please use server Qdrant if you need payload indexes.
+    self.client.create_payload_index(self.name, "document_id", models.PayloadSchemaType.KEYWORD)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+384 passed, 1 deselected, 1 warning in 19.49s

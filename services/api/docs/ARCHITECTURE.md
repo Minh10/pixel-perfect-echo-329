@@ -25,7 +25,7 @@
 | SQLite `chart_interpretations` | cached VLM chart readings + table checks | Cascade on document delete |
 | Qdrant `finaudit_{chunkSet}_{embedderId}` | vectors, payload `{chunk_id, document_id, kind, page}` | One collection per embedder, so models are never mixed |
 
-## Chunking (`app/indexing/chunker.py`, version `layout-v2`)
+## Chunking (`app/indexing/chunker.py`, version `layout-v3`; tables serialised from FinancialFacts — see FINANCIAL_EVIDENCE_SCHEMA.md)
 
 - **text:** consecutive body blocks under one section on one page, up to ~220 words. A block is never
   split unless it alone exceeds the budget; it is then split at sentence boundaries. Running
