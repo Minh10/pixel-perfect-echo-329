@@ -178,6 +178,18 @@ it("fails closed on rate/guard failure and blocks admin routes", async () => {
     (await proxyDocumentRequest(await req("api/v1/admin"), "api/v1/admin", config)).status,
   ).toBe(404);
 });
+it("reserves global daily work/upload budgets and per-minute request caps", async () => {
+  guard.consume.mockClear();
+  const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ ok: true }));
+  await proxyDocumentRequest(await req("api/v1/documents", "POST"), "api/v1/documents", config);
+  const calls = guard.consume.mock.calls;
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("requests:") && limit === 120)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("session:") && limit === 60)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("work:") && limit === 20)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("work-minute:") && limit === 2)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("uploads:") && limit === 3)).toBe(true);
+  expect(fetch).not.toHaveBeenCalled();
+});
 it("redacts upstream authentication errors and blocks redirects", async () => {
   const fetch = vi
     .spyOn(globalThis, "fetch")
