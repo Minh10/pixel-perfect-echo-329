@@ -1,5 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
+- [ ] Simplify navigation, report tool switching and dense overview/trend controls using presentation changes only; verify sample flow without uploads or paid calls.
+
 - [x] Add cursor-reactive background cells with fading trails and staggered entrance/icon motion. Verified at 1146×735: cells visible only on exposed background, fade clears, reduced motion hides effect, no runtime errors; 75 tests pass, lint zero errors/six existing warnings, host build OK. Backend unchanged; not published.
 
 - [x] Refine presentation with restrained pointer-following edge accents and hover motion, preserving backend and accepted intake.

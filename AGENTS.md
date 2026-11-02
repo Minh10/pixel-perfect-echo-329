@@ -25,6 +25,7 @@
 - Inspect bounded multipart PDF bytes with pdf-lib before forwarding temporary uploads; this enforces page limits without changing FastAPI/Docling processing.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.
+- Report tool navigation reuses the central nav labels and preserves the document search parameter; it is presentation-only and never triggers processing or selects service mode.
 
 - Overview summaries derive from query-loaded service values; do not introduce a second data source for dashboard visuals.
 - Document workspace uses the installed resizable panel primitives on desktop and stacked, bounded views on smaller screens, preserving URL-driven page navigation.
