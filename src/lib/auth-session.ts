@@ -48,6 +48,6 @@ export const readOwnerSession = createServerOnlyFn(async (refresh = false) => {
   }
   if (!token) return null;
   const { data, error } = await client.auth.getUser(token);
-  if (error || !isOwner(data.user?.id, owner)) return null;
+  if (error || !data.user || !isOwner(data.user.id, owner)) return null;
   return { userId: data.user.id, email: data.user.email ?? "", token };
 });

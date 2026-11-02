@@ -11,7 +11,7 @@ describe("document proxy fails closed", () => {
       "api/v1/documents",
       {},
     );
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(401);
     expect(upstream).not.toHaveBeenCalled();
     upstream.mockRestore();
   });

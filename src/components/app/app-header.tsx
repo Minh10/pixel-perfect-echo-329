@@ -12,8 +12,30 @@ import {
 import { NAV_ITEMS } from "./nav";
 import { IS_DEMO } from "@/lib/api/service";
 import { DemoBadge } from "./states";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ownerSession, refreshOwnerSession, signOut } from "@/lib/auth.functions";
+import { Button } from "@/components/ui/button";
+import { LogIn, LogOut } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export function AppHeader() {
+  const getSession = useServerFn(ownerSession);
+  const refresh = useServerFn(refreshOwnerSession);
+  const logout = useServerFn(signOut);
+  const queries = useQueryClient();
+  const navigate = useNavigate();
+  const { data: session } = useQuery({ queryKey: ["owner-session"], queryFn: () => getSession(), retry: false });
+  useEffect(() => {
+    const renew = async () => {
+      try { const result = await refresh(); queries.setQueryData(["owner-session"], result); }
+      catch { queries.setQueryData(["owner-session"], { signedIn: false, email: "" }); }
+    };
+    void renew();
+    const timer = window.setInterval(() => void renew(), 60_000);
+    return () => window.clearInterval(timer);
+  }, [refresh, queries]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = NAV_ITEMS.find((i) =>
     i.to === "/" ? pathname === "/" : pathname.startsWith(i.to),
@@ -34,13 +56,19 @@ export function AppHeader() {
             <BreadcrumbSeparator className="hidden sm:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="truncate font-medium">
-                {current?.title ?? "Not found"}
+                {current?.title ?? (pathname === "/login" ? "Private sign-in" : pathname === "/reset-password" ? "Reset password" : "Not found")}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="shrink-0">{IS_DEMO && <DemoBadge />}</div>
+      <div className="flex shrink-0 items-center gap-3">
+        {IS_DEMO && <DemoBadge />}
+        {session?.signedIn ? <Button variant="ghost" size="sm" title={session.email} onClick={async () => {
+          await queries.cancelQueries(); queries.clear(); await logout();
+          await navigate({ to: "/login", replace: true });
+        }}><LogOut />Sign out</Button> : <Button asChild variant="ghost" size="sm"><Link to="/login"><LogIn />Sign in</Link></Button>}
+      </div>
     </header>
   );
 }

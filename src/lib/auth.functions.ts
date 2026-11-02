@@ -38,6 +38,6 @@ export const refreshOwnerSession = createServerFn({ method: "POST" }).handler(as
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
   if (!sameOrigin(getRequest())) return { success: false };
   const token = getCookie(AUTH_COOKIE);
-  try { if (token) await authClient().auth.admin.signOut(token, "global"); } finally { clearAuthCookies(); }
+  try { if (token) await authClient().auth.admin.signOut(token, "global"); } catch { /* Always clear the browser session even if the provider is unavailable. */ } finally { clearAuthCookies(); }
   return { success: true };
 });

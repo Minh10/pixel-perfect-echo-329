@@ -23,13 +23,6 @@ const JSON_TIMEOUT_MS = 20_000;
 const UPLOAD_TIMEOUT_MS = 120_000;
 const QA_TIMEOUT_MS = 120_000;
 
-async function sessionHeaders(): Promise<Record<string, string>> {
-  if (typeof window === "undefined") return {};
-  const { supabase } = await import("@/integrations/supabase/client");
-  const { data } = await supabase.auth.getSession();
-  return data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {};
-}
-
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -64,7 +57,7 @@ async function req<T>(path: string, init?: RequestInit, timeoutMs = JSON_TIMEOUT
   try {
     res = await fetch(`${V1}${path}`, {
       ...init,
-      headers: { ...Object.fromEntries(new Headers(init?.headers)), ...(await sessionHeaders()) },
+      credentials: "same-origin",
       signal: init?.signal ?? AbortSignal.timeout(timeoutMs),
     });
   } catch (err) {
@@ -114,7 +107,6 @@ export const httpService = {
         new ApiError(0, "backend_unavailable", "The document service URL is not configured."),
       );
     }
-    const headers = await sessionHeaders();
     return new Promise<{ document: FinDocument; job: Job }>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       const fd = new FormData();
@@ -123,7 +115,7 @@ export const httpService = {
         if (value) fd.append(key, value);
       }
       xhr.open("POST", `${V1}/documents`);
-      for (const [name, value] of Object.entries(headers)) xhr.setRequestHeader(name, value);
+      xhr.withCredentials = true;
       xhr.timeout = UPLOAD_TIMEOUT_MS;
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable && event.total > 0) onProgress?.(event.loaded / event.total);
