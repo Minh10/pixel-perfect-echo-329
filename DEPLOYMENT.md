@@ -15,12 +15,12 @@ Official existing website: https://finauditai-cdac.lovable.app. Keep this Lovabl
 
 Open **Project Settings → Secrets** in this existing project. Never paste token values in chat or commit them.
 
-| Name | Required action |
-| --- | --- |
-| `FINAUDIT_DEMO_SESSION_SECRET` | Already generated and stored privately. Do not copy or reveal it. |
-| `FINAUDIT_BACKEND_URL` | Add the current HTTPS origin only, e.g. `https://strip-conduct-pct-newton.trycloudflare.com`, without `/api/v1`. This reported hostname has not been authenticated or verified here. |
-| `FINAUDIT_API_TOKEN` | Privately copy the existing Windows `services/api/.env` bearer token into this secret. It must match the API exactly. Lovable does not have it yet. |
-| `FINAUDIT_TEMPORARY_DEMO_ENABLED` | Leave absent or `false` now. Set exactly `true` only after the owner verifies limits and explicitly approves activation/publication. This is the single activation switch. |
+| Name                              | Required action                                                                                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FINAUDIT_DEMO_SESSION_SECRET`    | Already generated and stored privately. Do not copy or reveal it.                                                                                                                    |
+| `FINAUDIT_BACKEND_URL`            | Add the current HTTPS origin only, e.g. `https://strip-conduct-pct-newton.trycloudflare.com`, without `/api/v1`. This reported hostname has not been authenticated or verified here. |
+| `FINAUDIT_API_TOKEN`              | Privately copy the existing Windows `services/api/.env` bearer token into this secret. It must match the API exactly. Lovable does not have it yet.                                  |
+| `FINAUDIT_TEMPORARY_DEMO_ENABLED` | Leave absent or `false` now. Set exactly `true` only after the owner verifies limits and explicitly approves activation/publication. This is the single activation switch.           |
 
 `FINAUDIT_AUTHORIZED_USER_ID` is **not required** for temporary demo mode; no account must be created. Retained legacy owner policy is unchanged when the demo switch is off. `VITE_FINAUDIT_SERVICE_MODE` is no longer used to activate live requests. Never put bearer tokens, signing secrets or OpenAI credentials in VITE variables.
 

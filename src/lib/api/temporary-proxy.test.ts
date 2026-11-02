@@ -39,17 +39,15 @@ it.each([
   "export/docling",
   "figures/chart/interpretation",
 ])("guards and streams %s", async (suffix) => {
-  const fetch = vi
-    .spyOn(globalThis, "fetch")
-    .mockResolvedValue(
-      new Response("resource", {
-        headers: {
-          "Content-Type": "application/pdf",
-          "Set-Cookie": "must-not-pass",
-          Authorization: "must-not-pass",
-        },
-      }),
-    );
+  const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response("resource", {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Set-Cookie": "must-not-pass",
+        Authorization: "must-not-pass",
+      },
+    }),
+  );
   const path = `api/v1/documents/report/${suffix}`;
   const response = await proxyDocumentRequest(await req(path), path, config);
   expect(response.status).toBe(200);
