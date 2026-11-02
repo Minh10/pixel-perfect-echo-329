@@ -1,5 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
+- [ ] Improve document-scoped Ask AI and verify supported answers, abstention and source navigation against a readable real PDF; preserve running backend and guards.
+
 - [x] Focused published workspace review: one real synthetic-test QA HTTP 200 abstained faithfully because period/unit validation failed (two Windows model calls); no uploads or Gateway calls. Fixed narrow-pane question layout, source-loading guard/focus, mobile tool scroll and wrapping, misleading 503 configuration message and error-source link context. Local sample mobile and signed-live bbox selection verified; 102 tests pass, lint zero errors/six existing warnings, latest host typecheck/build OK. Fixes not published; published citation-answer click NOT RUN because QA returned no citations. Backend extraction/validation limitation unchanged.
 
 - [x] Redesign PDF workspace into a 65/35 reader with collapsed navigation/thumbnails and truthful Overview. Published snapshot 30b48ef to the existing official domain; post-deploy sample and signed live synthetic PDF/crop verified at 1280/1440, sample at 1920/390. Page jumps, keyboard, evidence/bbox linking, filters, fit, persisted zoom and tools pass without runtime errors or horizontal overflow. 102 tests pass, lint zero errors/six existing warnings, host build OK. No paid calls/uploads/backend changes. Standalone typecheck and fresh remote CI not independently observed. Screenshots saved in Files.
