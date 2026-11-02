@@ -167,7 +167,7 @@ function AuditWorkspace({
         }}
       />
       {figure && (
-        <section className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <section className={embedded ? "grid min-w-0 items-start gap-5" : "grid items-start gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"}>
           <article className="min-w-0">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="eyebrow">Source figure</p>

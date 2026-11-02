@@ -139,7 +139,7 @@ function LiveComparison({
           description="Compare one reported metric across processed reports. Values come only from parsed table facts."
         />
       )}
-      <div className="grid gap-6 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+      <div className={embedded ? "grid min-w-0 gap-5" : "grid gap-6 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]"}>
         <section className="space-y-3">
           <label className="block text-sm">
             <span className="text-xs text-muted-foreground">Find a report</span>
