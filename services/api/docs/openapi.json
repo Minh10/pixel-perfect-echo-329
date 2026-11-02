@@ -3,7 +3,7 @@
   "info": {
     "title": "FINAUDIT AI API",
     "description": "Financial PDF ingestion, layout-aware parsing, evidence provenance, layout-aware retrieval and evidence-grounded QA. Answers are validated against cited evidence; this is not financial auditing.",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "paths": {
     "/api/v1/health": {
@@ -1432,6 +1432,17 @@
             ],
             "title": "Title"
           },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
           "points": {
             "items": {
               "$ref": "#/components/schemas/ChartPoint"
@@ -1465,7 +1476,7 @@
           "caveat": {
             "type": "string",
             "title": "Caveat",
-            "default": "Values are visual estimates read from the chart image by a vision-language model, not reported figures."
+            "default": "Printed labels and visual estimates are distinguished on each point. Chart readings are not reported table figures."
           }
         },
         "type": "object",
@@ -1515,6 +1526,18 @@
               }
             ],
             "title": "Unit"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period",
+            "description": "Reporting period printed for this point, when visible"
           },
           "valueKind": {
             "type": "string",
@@ -3760,6 +3783,50 @@
               "no_table_evidence"
             ],
             "title": "Status"
+          },
+          "factId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factid"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "absoluteDifference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absolutedifference"
           }
         },
         "type": "object",

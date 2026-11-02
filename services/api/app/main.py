@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import hmac
 import logging
 
 from fastapi import FastAPI, HTTPException, Request
@@ -38,6 +39,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.chunks = ChunkStore(s.db_path)
     app.state.charts = ChartStore(s.db_path)
     app.state.retriever = Retriever(s, store=app.state.chunks)  # embedder loaded lazily, cached per process
+
+    @app.middleware("http")
+    async def require_api_token(request: Request, call_next):
+        """Protect document routes when FINAUDIT_API_TOKEN is set. Health stays open for probes."""
+        expected = (request.app.state.settings.api_token or "").strip()
+        path = request.url.path
+        protected = path.startswith("/api/v1") and path != "/api/v1/health"
+        if expected and protected:
+            presented = request.headers.get("authorization", "")
+            ok = presented.startswith("Bearer ") and hmac.compare_digest(presented.removeprefix("Bearer "), expected)
+            if not ok:
+                return JSONResponse(
+                    {"error": {"code": "unauthorized", "message": "A bearer token is required."}},
+                    status_code=401,
+                )
+        return await call_next(request)
 
     app.add_middleware(
         CORSMiddleware, allow_origins=s.cors_origins, allow_methods=["*"], allow_headers=["*"],

@@ -236,6 +236,24 @@ def grounded_summary(model_summary: str | None, reading: dict, points: list[Char
     return summary
 
 
+def chart_caveat(points: list[ChartPoint]) -> str:
+    """Say which numbers were copied from printed labels and which were estimated."""
+    if not points:
+        return "No chart values were extracted."
+    printed = [point.label for point in points if point.printed_on_chart]
+    estimated = [point.label for point in points if not point.printed_on_chart]
+    parts: list[str] = []
+    if printed and not estimated:
+        parts.append("Every number was copied from a printed label on the chart.")
+    elif estimated and not printed:
+        parts.append("Every number is a visual estimate. No printed data label was read.")
+    else:
+        parts.append(f"Printed chart labels: {', '.join(printed)}.")
+        parts.append(f"Visual estimates from the graphic: {', '.join(estimated)}.")
+    parts.append("These readings are not reported table figures.")
+    return " ".join(parts)
+
+
 def interpret_chart(document_id: str, block: dict, page_no: int, pdf: Path, llm: LLMProvider,
                     store: ChunkStore, context: str) -> ChartInterpretation:
     bb = block["bbox"]
@@ -259,7 +277,7 @@ def interpret_chart(document_id: str, block: dict, page_no: int, pdf: Path, llm:
         document_id=document_id, block_id=block["id"], chart_type=data.get("chart_type"), title=data.get("title"),
         summary=summary, points=points, table_checks=checks,
         crop_url=f"/api/v1/documents/{document_id}/blocks/{block['id']}/image", provider=res.provider,
-        model=res.model, created_at=datetime.now(UTC).isoformat())
+        model=res.model, created_at=datetime.now(UTC).isoformat(), caveat=chart_caveat(points))
 
 
 def evidence_text(ci: ChartInterpretation) -> str:

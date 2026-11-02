@@ -137,7 +137,7 @@ an environment with model access exists.
 
 ## Security posture
 
-- No authentication yet. Compose binds the API and Qdrant to 127.0.0.1; do not expose the stack publicly.
+- No user accounts. `FINAUDIT_API_TOKEN`, when set, requires a bearer token on every `/api/v1` route except `/health`. Compose binds the API and Qdrant to 127.0.0.1; do not publish those ports. See `DEPLOYMENT.md`.
 - Secrets are environment-only and never accepted in requests or returned (`/index/status` reports
   configuration, not keys).
 - The LLM output is data. It is parsed as JSON, validated, and never executed.

@@ -180,7 +180,7 @@ The main ones are `FINAUDIT_PARSER`, `FINAUDIT_DATA_DIR`, `FINAUDIT_MAX_UPLOAD_M
 
 - SQLite plus a shared volume suits a single host. For multi-host deployment, move the repository to
   Postgres (same interface) and the file store to object storage.
-- No authentication or authorisation, and no per-tenant isolation yet.
+- No user accounts or per-tenant isolation. Set `FINAUDIT_API_TOKEN` before any non-loopback deployment; see the repository `DEPLOYMENT.md`. The local loopback demo leaves the token unset.
 - OCR is off by default. Scanned pages are flagged (`hasTextLayer: false` plus a document warning)
   but yield no text until `FINAUDIT_DOCLING_DO_OCR=true`, which needs OCR model weights.
 - Chart values exist only as VLM *visual estimates* (`/figures/{id}/interpret`), never as reported

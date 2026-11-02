@@ -112,8 +112,16 @@ describe("compareReports", () => {
   it("does not plot a year when the reports disagree", () => {
     const result = compareReports(
       [
-        { documentId: "a", title: "Annual Report 2024", facts: [fact({ factId: "a1", value: "3200" })] },
-        { documentId: "b", title: "Annual Report 2025", facts: [fact({ factId: "b1", value: "3000" })] },
+        {
+          documentId: "a",
+          title: "Annual Report 2024",
+          facts: [fact({ factId: "a1", value: "3200" })],
+        },
+        {
+          documentId: "b",
+          title: "Annual Report 2025",
+          facts: [fact({ factId: "b1", value: "3000" })],
+        },
       ],
       "Revenue",
     );
