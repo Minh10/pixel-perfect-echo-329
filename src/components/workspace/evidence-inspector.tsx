@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DemoBadge } from "@/components/app/states";
 import { BlockContent } from "@/components/workspace/document-page";
 import { cn } from "@/lib/utils";
+import { evidenceRows } from "@/lib/evidence-list";
 
 const CATEGORY_LABEL: Record<EvidenceCategory, string> = {
   metric: "Metric",
@@ -21,6 +22,7 @@ interface Props {
   pages: DocumentPage[];
   selected: Evidence | null;
   filter: EvidenceCategory | "all";
+  currentPage: number;
   onFilter: (f: EvidenceCategory | "all") => void;
   onSelect: (id: string | null) => void;
 }
@@ -30,6 +32,7 @@ export function EvidenceInspector({
   pages,
   selected,
   filter,
+  currentPage,
   onFilter,
   onSelect,
 }: Props) {
@@ -38,8 +41,9 @@ export function EvidenceInspector({
   const selectedBlock = selected
     ? pages.flatMap((page) => page.blocks).find((block) => block.id === selected.blockId)
     : undefined;
+  // Only show filters that have something behind them.
   const filters = FILTERS.filter(
-    (item) => item !== "figure" || evidence.some((entry) => entry.category === "figure"),
+    (item) => item === "all" || evidence.some((entry) => entry.category === item),
   );
 
   return (
@@ -141,11 +145,9 @@ export function EvidenceInspector({
         </section>
       ) : (
         <section className="border-b p-4">
-          <h2 className="text-base font-semibold">Evidence Inspector</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {IS_DEMO
-              ? "Report evidence · illustrative extraction only."
-              : "Parser regions traced back to the source PDF. Values are not verified facts."}
+          <p className="text-sm text-muted-foreground">
+            Click an item to jump to it on the page. Items on the current page are listed first.
+            {IS_DEMO ? " Illustrative extraction only." : " Values are not verified facts."}
           </p>
         </section>
       )}
@@ -172,32 +174,44 @@ export function EvidenceInspector({
         {filtered.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No evidence in this category.</li>
         )}
-        {filtered.map((e) => (
-          <li key={e.id}>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => onSelect(e.id)}
-              className={cn(
-                "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted",
-                selected?.id === e.id && "bg-evidence-soft/60",
-              )}
-            >
-              <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
-                p.{e.page}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium">{e.label}</span>
-                <span className="block truncate text-[11px] text-muted-foreground">
-                  {e.excerpt}
+        {evidenceRows(filtered, currentPage).map((row) => {
+          const e = row.kind === "item" ? row.evidence : row.first;
+          const label =
+            row.kind === "group"
+              ? row.count > 1
+                ? `${row.count} figures on page ${row.page}`
+                : `Figure on page ${row.page}`
+              : e.label;
+          const excerpt =
+            row.kind === "group" ? "No caption detected · open the page to view" : row.excerpt;
+          return (
+            <li key={row.kind === "group" ? `g-${row.page}` : e.id}>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => onSelect(e.id)}
+                className={cn(
+                  "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted",
+                  selected?.id === e.id && "bg-evidence-soft/60",
+                  e.page === currentPage && "border-l-2 border-l-primary",
+                )}
+              >
+                <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
+                  p.{e.page}
                 </span>
-              </span>
-              <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
-                {CATEGORY_LABEL[e.category]}
-              </span>
-            </Button>
-          </li>
-        ))}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs font-medium">{label}</span>
+                  <span className="block truncate text-[11px] text-muted-foreground">
+                    {excerpt}
+                  </span>
+                </span>
+                <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
+                  {CATEGORY_LABEL[e.category]}
+                </span>
+              </Button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
