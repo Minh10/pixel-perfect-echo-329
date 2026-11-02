@@ -34,21 +34,37 @@ export function ChartBatchPanel({
   onOpen: (evidenceId: string) => void;
 }) {
   const queryClient = useQueryClient();
-  const stored = useQueries({
-    queries: figures.map((figure) => ({
-      queryKey: ["interpretation", documentId, figure.blockId],
-      queryFn: () => {
-        if (!api.getFigureInterpretation) throw new Error("Chart readings unavailable");
-        return api.getFigureInterpretation(documentId, figure.blockId);
-      },
-      enabled: Boolean(api.getFigureInterpretation),
-      retry: false,
-    })),
+  // Stored readings load one at a time (not a burst of parallel requests) so the
+  // demo's per-minute request allowance is not exhausted; results stay cached.
+  const stored = useQuery({
+    queryKey: ["interpretations", documentId, figures.map((f) => f.blockId).join(",")],
+    queryFn: async () => {
+      const out: Record<string, ChartInterpretation | undefined> = {};
+      for (const figure of figures) {
+        const cached = queryClient.getQueryData<ChartInterpretation>([
+          "interpretation",
+          documentId,
+          figure.blockId,
+        ]);
+        if (cached) {
+          out[figure.blockId] = cached;
+          continue;
+        }
+        try {
+          const reading = await api.getFigureInterpretation!(documentId, figure.blockId);
+          out[figure.blockId] = reading;
+          queryClient.setQueryData(["interpretation", documentId, figure.blockId], reading);
+        } catch (err) {
+          if (!(err instanceof ApiError && err.status === 404)) throw err;
+        }
+      }
+      return out;
+    },
+    enabled: Boolean(api.getFigureInterpretation) && figures.length > 0,
+    staleTime: 5 * 60_000,
+    retry: false,
   });
-  const readings: Record<string, ChartInterpretation | undefined> = {};
-  figures.forEach((figure, index) => {
-    readings[figure.blockId] = stored[index]?.data as ChartInterpretation | undefined;
-  });
+  const readings: Record<string, ChartInterpretation | undefined> = stored.data ?? {};
   const statuses = figures.map((figure) => chartStatus(readings[figure.blockId], facts));
   const counts = summariseCharts(statuses);
   const summaryQuery = useQuery({
