@@ -48,12 +48,13 @@ export function AppHeader() {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {IS_DEMO && <DemoBadge />}
-        {IS_DEMO &&
-          (demoEntered ? (
+        {(demoEntered || !IS_DEMO) ? (
             <Button
               variant="ghost"
               size="sm"
               onClick={async () => {
+                const response = await fetch("/api/public/demo-session", { method: "DELETE", credentials: "same-origin" });
+                if (!response.ok) return;
                 setDemoEntry(false);
                 await navigate({ to: "/", replace: true, reloadDocument: true });
               }}
@@ -68,7 +69,7 @@ export function AppHeader() {
                 Demo entry
               </Link>
             </Button>
-          ))}
+          )}
       </div>
     </header>
   );

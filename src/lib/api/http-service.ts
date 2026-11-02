@@ -15,10 +15,12 @@ import type {
 
 // Direct browser-to-FastAPI connections are intentionally disabled. Only enable
 // proxy mode after the hosted service and private account access are configured.
-export const API_URL =
-  import.meta.env["VITE_FINAUDIT_SERVICE_MODE"] === "proxy" ? "/api/document-service" : undefined;
+export let API_URL: string | undefined;
+export function configureHttpService(live: boolean) {
+  API_URL = live ? "/api/document-service" : undefined;
+}
 
-const V1 = `${API_URL}/api/v1`;
+const v1 = () => `${API_URL}/api/v1`;
 const JSON_TIMEOUT_MS = 20_000;
 const UPLOAD_TIMEOUT_MS = 120_000;
 const QA_TIMEOUT_MS = 120_000;
@@ -55,7 +57,7 @@ async function req<T>(path: string, init?: RequestInit, timeoutMs = JSON_TIMEOUT
   }
   let res: Response;
   try {
-    res = await fetch(`${V1}${path}`, {
+    res = await fetch(`${v1()}${path}`, {
       ...init,
       credentials: "same-origin",
       signal: init?.signal ?? AbortSignal.timeout(timeoutMs),
@@ -114,7 +116,7 @@ export const httpService = {
       for (const [key, value] of Object.entries(meta)) {
         if (value) fd.append(key, value);
       }
-      xhr.open("POST", `${V1}/documents`);
+      xhr.open("POST", `${v1()}/documents`);
       xhr.withCredentials = true;
       xhr.timeout = UPLOAD_TIMEOUT_MS;
       xhr.upload.onprogress = (event) => {

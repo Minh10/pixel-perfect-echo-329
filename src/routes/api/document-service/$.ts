@@ -9,6 +9,8 @@ export const Route = createFileRoute("/api/document-service/$")({
           proxyDocumentRequest(request, params._splat ?? "", {
             backendUrl: process.env["FINAUDIT_BACKEND_URL"],
             backendToken: process.env["FINAUDIT_API_TOKEN"],
+            demoEnabled: process.env["FINAUDIT_TEMPORARY_DEMO_ENABLED"],
+            demoSecret: process.env["FINAUDIT_DEMO_SESSION_SECRET"],
             authorizedUserId: process.env["FINAUDIT_AUTHORIZED_USER_ID"],
             authUrl: process.env["SUPABASE_URL"],
             authKey: process.env["SUPABASE_PUBLISHABLE_KEY"],

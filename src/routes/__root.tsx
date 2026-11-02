@@ -8,7 +8,8 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { configureDemoService } from "@/lib/api/service";
 
 import appCss from "../styles.css?url";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -129,6 +130,28 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const [mode, setMode] = useState("sample");
+  useEffect(() => {
+    let active = true;
+    const sync = async () => {
+      try {
+        const response = await fetch("/api/public/demo-session", { credentials: "same-origin" });
+        if (!response.ok) return;
+        const status = await response.json();
+        const live = status.enabled === true && status.entered === true;
+        if (!active || (live ? "live" : "sample") === mode) return;
+        configureDemoService(live);
+        await queryClient.cancelQueries();
+        queryClient.clear();
+        setMode(live ? "live" : "sample");
+        await router.invalidate();
+      } catch { /* Public sample remains available when live status is unavailable. */ }
+    };
+    void sync();
+    const timer = window.setInterval(sync, 30000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [mode, queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -139,7 +162,7 @@ function RootComponent() {
           <AppSidebar />
           <SidebarInset className="min-w-0">
             <AppHeader />
-            <Outlet />
+            <Outlet key={mode} />
           </SidebarInset>
         </SidebarProvider>
       </TooltipProvider>
