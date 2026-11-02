@@ -29,3 +29,4 @@
 - Overview summaries derive from query-loaded service values; do not introduce a second data source for dashboard visuals.
 - Document workspace uses the installed resizable panel primitives on desktop and stacked, bounded views on smaller screens, preserving URL-driven page navigation.
 - Header and upload entry controls derive from the server-verified demo-session status; a tab-local sample entry never shows as live, so stale entries prompt re-activation instead.
+- Decorative pointer feedback is browser-only, delegated and animation-frame throttled; global CSS owns motion tokens and reduced-motion handling so presentation never changes service selection or processing.

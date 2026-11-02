@@ -28,7 +28,7 @@ export function PdfIntake() {
 
 function SampleStart({ canActivate }: { canActivate: boolean }) {
   return (
-    <section className="rounded-md border bg-card p-5 sm:p-6">
+    <section data-pointer-surface className="intake-surface rounded-md border bg-card p-5 sm:p-6">
       <p className="eyebrow">Start</p>
       <h2 className="mt-2 text-xl font-semibold">
         {canActivate ? "Activate the live demo to upload a PDF" : "Open the sample report"}
@@ -95,6 +95,7 @@ function LiveIntake() {
   return (
     <section className="rounded-md border bg-card p-5 sm:p-6">
       <label
+        data-pointer-surface
         onDragOver={(event) => {
           event.preventDefault();
           setOver(true);
@@ -109,7 +110,7 @@ function LiveIntake() {
           void onFile(file ?? event.dataTransfer.files[0]);
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-start gap-2 rounded-md border border-dashed px-5 py-6 transition-colors",
+          "intake-surface flex cursor-pointer flex-col items-start gap-2 rounded-md border border-dashed px-5 py-6 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           over ? "border-primary bg-primary-soft" : "border-border bg-background hover:bg-muted/40",
           uploading && "pointer-events-none opacity-70",
         )}

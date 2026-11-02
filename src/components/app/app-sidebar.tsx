@@ -43,7 +43,7 @@ export function AppSidebar() {
                 {NAV_ITEMS.filter((i) => i.group === group).map((item) => (
                   <SidebarMenuItem key={item.to}>
                     <SidebarMenuButton
-                      className="h-10 border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:font-semibold"
+                      className="workstation-nav h-10 border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:font-semibold"
                       asChild
                       isActive={isActive(item.to)}
                       tooltip={item.title}
