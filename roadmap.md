@@ -13,6 +13,7 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 - [x] Prepare an authenticated, server-side FastAPI proxy without changing intake or processing architecture.
 - [x] Document exact connection settings and unresolved access requirements in DEPLOYMENT.md.
 - [x] Run proxy security and existing selection/routing tests; verify sample flow (18 tests passed, changed proxy/test files lint clean, preview build OK, sample opens and unconfigured proxy returns 503 with no browser errors).
-- [ ] Implement single-account sign-in and authenticated report cookies; disable signup at the provider.
-- [ ] Fix generated-file lint failures without excluding security checks; run tests, full lint and inspect automated compilation/build checks.
+- [x] Implement single-account sign-in, password recovery, sign-out and authenticated report cookies; public sample unchanged.
+- [ ] Disable signup at the provider and verify owner sign-in (blocked: no owner account exists; safe read of current provider settings unavailable, user must set Disable sign-up in Auth settings).
+- [x] Fix generated-file lint formatting failures without excluding semantic/security checks; full lint has zero errors and six existing warnings. Automated typecheck/build reports OK. Full frontend tests passed; production build was executed successfully by the investigation agent before final edits, not rerun after final edits.
 - [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, authorized account).
