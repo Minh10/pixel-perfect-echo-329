@@ -18,14 +18,20 @@ describe("document-grounded questions", () => {
   });
   it("does not suggest another report's facts or unknown periods", () => {
     expect(supportedQuestions([fact], "other")).toEqual([]);
-    expect(supportedQuestions([{ ...fact, period: { ...fact.period, source: "unknown" } }], "berkshire")).toEqual([]);
+    expect(
+      supportedQuestions([{ ...fact, period: { ...fact.period, source: "unknown" } }], "berkshire"),
+    ).toEqual([]);
   });
   it("does not suggest unparsed values", () => {
-    expect(supportedQuestions([{ ...fact, valueStatus: "malformed", value: null }], "berkshire")).toEqual([]);
+    expect(
+      supportedQuestions([{ ...fact, valueStatus: "malformed", value: null }], "berkshire"),
+    ).toEqual([]);
   });
   it("keeps the open PDF in scope and uses the allowed five retrieval results", () => {
     expect(groundedRequest("  What were earnings?  ", ["other", "other"], "berkshire")).toEqual({
-      question: "What were earnings?", documentIds: ["berkshire", "other"], topK: 5,
+      question: "What were earnings?",
+      documentIds: ["berkshire", "other"],
+      topK: 5,
     });
   });
 });

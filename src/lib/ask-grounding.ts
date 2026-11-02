@@ -9,8 +9,12 @@ export function supportedQuestions(facts: FinancialFact[], documentId: string): 
       fact.valueStatus !== "parsed" ||
       fact.value === null ||
       fact.period.source === "unknown"
-    ) continue;
-    const metric = fact.rowLabel.replace(/\.{2,}/g, "").replace(/\s+/g, " ").trim();
+    )
+      continue;
+    const metric = fact.rowLabel
+      .replace(/\.{2,}/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     const period = fact.period.label?.trim();
     if (!metric || !period || /^other\b/i.test(metric)) continue;
     questions.add(`What was ${metric} for ${period}?`);

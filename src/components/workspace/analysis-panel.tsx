@@ -49,7 +49,9 @@ export function AnalysisPanel({
       />
     );
   }
-  return <AnalysisWorkspace key={documentId ?? "library"} requestedId={documentId} embedded={embedded} />;
+  return (
+    <AnalysisWorkspace key={documentId ?? "library"} requestedId={documentId} embedded={embedded} />
+  );
 }
 
 function AnalysisWorkspace({
@@ -66,7 +68,7 @@ function AnalysisWorkspace({
   const [selected, setSelected] = useState<string[]>(requestedId ? [requestedId] : []);
   const facts = useQuery({
     queryKey: ["facts", requestedId],
-    queryFn: () => requestedId && api.getFacts ? api.getFacts(requestedId) : Promise.resolve([]),
+    queryFn: () => (requestedId && api.getFacts ? api.getFacts(requestedId) : Promise.resolve([])),
     enabled: Boolean(requestedId && api.getFacts),
     staleTime: 300_000,
     retry: false,
@@ -133,9 +135,17 @@ function AnalysisWorkspace({
           <div className="space-y-1 border-l-2 border-primary pl-3">
             <p className="text-xs font-medium text-muted-foreground">From this report</p>
             {suggestions.map((suggestion) => (
-              <Button key={suggestion} type="button" variant="link" disabled={mutation.isPending}
+              <Button
+                key={suggestion}
+                type="button"
+                variant="link"
+                disabled={mutation.isPending}
                 className="h-auto w-full justify-start whitespace-normal px-0 py-1 text-left text-xs"
-                onClick={() => { setQuestion(suggestion); mutation.reset(); }}>
+                onClick={() => {
+                  setQuestion(suggestion);
+                  mutation.reset();
+                }}
+              >
                 {suggestion}
               </Button>
             ))}
@@ -228,44 +238,52 @@ function AnalysisWorkspace({
               </span>
             </p>
           )}
-          {(result.operands.length > 0 || result.calculations.length > 0) && <Collapsible>
-            <CollapsibleTrigger className="text-sm font-medium">
-              How this was calculated
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3 space-y-3">
-              {result.operands.map((operand) => (
-                <p key={operand.id} className="text-sm">
-                  <span className="font-medium">{operand.label}</span>
-                  <span className="font-mono"> = {operand.quote}</span>
-                  <span className="text-muted-foreground"> [{operand.evidenceId}]</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {KIND_TAG[operand.evidenceKind]}
-                  </span>
-                  <span className="ml-2 text-xs text-primary">{VALUE_KIND[operand.valueKind]}</span>
-                  {(operand.rowLabel || operand.period) && (
-                    <span className="block text-xs text-muted-foreground">
-                      Source row “{operand.rowLabel ?? "?"}”
-                      {operand.period ? ` · period ${operand.period}` : ""}
-                      {operand.periodType && operand.periodType !== "unknown"
-                        ? ` (${operand.periodType.replace(/_/g, " ")})`
-                        : ""}
-                      {operand.binding === "fact" ? " · bound to table cell" : ""}
+          {(result.operands.length > 0 || result.calculations.length > 0) && (
+            <Collapsible>
+              <CollapsibleTrigger className="text-sm font-medium">
+                How this was calculated
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3 space-y-3">
+                {result.operands.map((operand) => (
+                  <p key={operand.id} className="text-sm">
+                    <span className="font-medium">{operand.label}</span>
+                    <span className="font-mono"> = {operand.quote}</span>
+                    <span className="text-muted-foreground"> [{operand.evidenceId}]</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {KIND_TAG[operand.evidenceKind]}
                     </span>
-                  )}
-                </p>
-              ))}
-              {result.calculations.map((step) => (
-                <p key={step.id} className="font-mono text-xs">
-                  {step.description}: {step.op}({step.inputs.map((input) => input.value).join(", ")}
-                  ) = {step.result}
-                </p>
-              ))}
-              {result.operands.length === 0 && result.calculations.length === 0 && (
-                <p className="text-sm text-muted-foreground">No calculation steps were returned.</p>
-              )}
-            </CollapsibleContent>
-          </Collapsible>}
-          <h4 className="text-xs font-semibold uppercase text-muted-foreground">Sources · {result.citations.length}</h4>
+                    <span className="ml-2 text-xs text-primary">
+                      {VALUE_KIND[operand.valueKind]}
+                    </span>
+                    {(operand.rowLabel || operand.period) && (
+                      <span className="block text-xs text-muted-foreground">
+                        Source row “{operand.rowLabel ?? "?"}”
+                        {operand.period ? ` · period ${operand.period}` : ""}
+                        {operand.periodType && operand.periodType !== "unknown"
+                          ? ` (${operand.periodType.replace(/_/g, " ")})`
+                          : ""}
+                        {operand.binding === "fact" ? " · bound to table cell" : ""}
+                      </span>
+                    )}
+                  </p>
+                ))}
+                {result.calculations.map((step) => (
+                  <p key={step.id} className="font-mono text-xs">
+                    {step.description}: {step.op}(
+                    {step.inputs.map((input) => input.value).join(", ")}) = {step.result}
+                  </p>
+                ))}
+                {result.operands.length === 0 && result.calculations.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No calculation steps were returned.
+                  </p>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+          <h4 className="text-xs font-semibold uppercase text-muted-foreground">
+            Sources · {result.citations.length}
+          </h4>
           <ul className="space-y-3">
             {result.citations.map((citation) => {
               const region = citation.chunk.regions[0];
