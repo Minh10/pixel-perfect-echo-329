@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { groundedRequest, supportedQuestions } from "@/lib/ask-grounding";
 import { ApiError, apiAsset } from "@/lib/api/http-service";
 import { IS_DEMO, api, documentsQuery } from "@/lib/api/service";
-import type { QACitation, QAResponse, ValueKind } from "@/lib/api/types";
+import type { QACitation, QARequest, QAResponse, ValueKind } from "@/lib/api/types";
 
 const VALUE_KIND: Record<ValueKind, string> = {
   reported: "Reported",
@@ -75,7 +75,7 @@ function AnalysisWorkspace({
   });
   const suggestions = requestedId ? supportedQuestions(facts.data ?? [], requestedId) : [];
   const mutation = useMutation({
-    mutationFn: (body: { question: string; documentIds?: string[] }) => {
+    mutationFn: (body: QARequest) => {
       if (!api.ask) throw new Error("Questions unavailable");
       return api.ask(body);
     },
@@ -84,7 +84,7 @@ function AnalysisWorkspace({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const text = question.trim();
-    if (!text || mutation.isPending) return;
+    if (text.length < 3 || mutation.isPending) return;
     mutation.mutate(groundedRequest(text, selected, requestedId));
   };
 
@@ -127,7 +127,7 @@ function AnalysisWorkspace({
             className="min-w-0 resize-y"
             disabled={mutation.isPending}
           />
-          <Button type="submit" disabled={mutation.isPending || question.trim().length === 0}>
+          <Button type="submit" disabled={mutation.isPending || question.trim().length < 3}>
             {mutation.isPending ? "Asking…" : "Ask"}
           </Button>
         </div>
@@ -216,9 +216,20 @@ function AnalysisWorkspace({
       {result?.status === "abstained" && (
         <div className="space-y-4">
           <EmptyState
-            title="No supported answer"
-            description={result.abstention?.detail || "The service abstained."}
+            title={result.abstention?.reason === "validation_failed" ? "Answer could not be verified" : "No supported answer"}
+            description={result.abstention?.reason === "validation_failed"
+              ? "Relevant passages were found, but the proposed answer did not pass source checks. No unverified answer is shown."
+              : result.abstention?.detail || "The service abstained."}
           />
+          {result.abstention?.reason === "validation_failed" && (
+            <details className="text-xs text-muted-foreground">
+              <summary className="cursor-pointer">Source-check details</summary>
+              <p className="mt-2 break-words">{result.abstention.detail}</p>
+            </details>
+          )}
+          <Button asChild variant="outline" size="sm">
+            <Link to="/intelligence" search={{ doc: requestedId, tool: "evidence" }}>Inspect report evidence</Link>
+          </Button>
           <AnswerFooter result={result} />
         </div>
       )}
