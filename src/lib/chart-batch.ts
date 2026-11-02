@@ -16,7 +16,9 @@ export function chartsToRead(
 /** Worst-case status for one chart reading against the document's table facts. */
 export function chartStatus(reading: ChartInterpretation | undefined, facts: Facts): ChartStatus {
   if (!reading) return "unread";
-  const results = (reading.tableChecks ?? []).map((check) => visualDiscrepancy(check, facts).status);
+  const results = (reading.tableChecks ?? []).map(
+    (check) => visualDiscrepancy(check, facts).status,
+  );
   if (results.length === 0) return "no-values";
   if (results.includes("POTENTIAL_DISCREPANCY")) return "discrepancy";
   if (results.every((status) => status === "MATCH")) return "match";
