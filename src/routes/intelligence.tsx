@@ -217,9 +217,10 @@ function WorkspaceReady({ docId }: { docId: string }) {
     enabled: Boolean(chunkParam && api.getCitation),
   });
   const loadedCitation = citationQuery.data;
-  const citation = loadedCitation && loadedCitation.chunkId === chunkParam && loadedCitation.documentId === docId
-    ? loadedCitation
-    : null;
+  const citation =
+    loadedCitation && loadedCitation.chunkId === chunkParam && loadedCitation.documentId === docId
+      ? loadedCitation
+      : null;
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
   const selected = useMemo(
@@ -262,7 +263,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
     lastTool.current = tool;
     if (!desktop && changed) {
       const frame = requestAnimationFrame(() => {
-        document.querySelector<HTMLElement>('.report-inspector:not(:empty)')?.scrollIntoView({ block: "start" });
+        document
+          .querySelector<HTMLElement>(".report-inspector:not(:empty)")
+          ?.scrollIntoView({ block: "start" });
       });
       return () => cancelAnimationFrame(frame);
     }
