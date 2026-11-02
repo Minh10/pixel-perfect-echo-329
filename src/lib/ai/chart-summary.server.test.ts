@@ -78,6 +78,10 @@ describe("signed Gateway chart endpoint", () => {
     expect(response.status).toBe(200);
     expect(await response.text()).toContain('"type":"done","summary":"Synthetic chart summary"');
     expect(gateway).toHaveBeenCalledTimes(1);
+    expect(guard.consume).toHaveBeenCalledWith(
+      expect.stringMatching(/^gateway-charts:\d{4}-\d{2}-\d{2}$/),
+      200,
+    );
   });
   it("rejects anonymous requests before storage or AI", async () => {
     expect(
@@ -112,14 +116,14 @@ describe("signed Gateway chart endpoint", () => {
     ).toBe(400);
     expect(proxy).not.toHaveBeenCalled();
   });
-  it("stops before AI when the 40 gateway allowance is exhausted", async () => {
+  it("stops before AI when the 200 gateway allowance is exhausted", async () => {
     guard.consume.mockImplementation(
       async (bucket: string) => !bucket.startsWith("gateway-charts:"),
     );
     expect((await handleChartSummary(await request())).status).toBe(429);
     expect(guard.consume).toHaveBeenCalledWith(
       expect.stringMatching(/^gateway-charts:\d{4}-\d{2}-\d{2}$/),
-      40,
+      200,
     );
     expect(gateway).not.toHaveBeenCalled();
   });

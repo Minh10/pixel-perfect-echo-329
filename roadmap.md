@@ -1,5 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
+- [x] Raise only AI Gateway chart allowance to 200 per UTC day; preserve historical counters, signed-session, request/work/PDF guards and Windows backend. All 15 targeted tests pass; lint zero errors/six existing warnings; host build OK. No paid calls or counter mutations; not published. Shared 40-work/day and 2-work/minute caps remain unchanged and can stop batches earlier.
+
 - [x] Consolidate existing PDF reader, questions, chart checks and report comparison into one workspace; simplify duplicate navigation and warning display without changing backend or paid-call behavior. Shared panels preserve legacy routes and draft state; sample and signed live navigation verified at 1280/1069/390px with no uploads or AI calls. 93 tests pass, lint zero errors/six existing warnings; host build OK. Not published. Windows restart remains owner-operated.
 
 - [x] Add signed-session AI Gateway summaries for all extracted charts, sequential progress/results, immediate Stop/error/quota termination and persistent cache/pause; preserve Windows processing. Preview verified signed cookie, anonymous 401, one real synthetic chart summary streamed and read back on Chart checks. Gateway log: HTTP 200, 599 input/69 output tokens, 0.03776 credits. No Windows model calls or uploads. Not published; existing work/rate caps can stop larger batches.
