@@ -1,6 +1,6 @@
 # FINAUDIT AI temporary Windows demonstration
 
-Official existing website: https://finauditai-cdac.lovable.app. Keep this Lovable project and GitHub main; do not fork. Nothing in this change activates or publishes live processing.
+Official existing website: https://finauditai-cdac.lovable.app. Keep this Lovable project and GitHub main; do not fork. Temporary live demo was activated and published on 2026-11-02 from the existing synchronized main b9eb94a; the official URL was exercised successfully. No frontend or Windows backend source was changed during activation.
 
 ## What is implemented
 
@@ -18,9 +18,9 @@ Open **Project Settings → Secrets** in this existing project. Never paste toke
 | Name                              | Required action                                                                                                                                                                      |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `FINAUDIT_DEMO_SESSION_SECRET`    | Already generated and stored privately. Do not copy or reveal it.                                                                                                                    |
-| `FINAUDIT_BACKEND_URL`            | Add the current HTTPS origin only, e.g. `https://strip-conduct-pct-newton.trycloudflare.com`, without `/api/v1`. This reported hostname has not been authenticated or verified here. |
-| `FINAUDIT_API_TOKEN`              | Privately copy the existing Windows `services/api/.env` bearer token into this secret. It must match the API exactly. Lovable does not have it yet.                                  |
-| `FINAUDIT_TEMPORARY_DEMO_ENABLED` | Leave absent or `false` now. Set exactly `true` only after the owner verifies limits and explicitly approves activation/publication. This is the single activation switch.           |
+| `FINAUDIT_BACKEND_URL`            | Add the current HTTPS origin only, e.g. `https://strip-conduct-pct-newton.trycloudflare.com`, without `/api/v1`. The configured HTTPS origin passed authenticated connectivity checks on 2026-11-02; do not restart the existing tunnel during this demonstration. |
+| `FINAUDIT_API_TOKEN`              | Privately copy the existing Windows `services/api/.env` bearer token into this secret. It must match the API exactly. Already provisioned and verified without revealing its value.                                  |
+| `FINAUDIT_TEMPORARY_DEMO_ENABLED` | Created with exact value `true` on 2026-11-02 following owner approval and reported upstream control verification. Set `false` and republish immediately after the course. This is the single activation switch.           |
 
 `FINAUDIT_AUTHORIZED_USER_ID` is **not required** for temporary demo mode; no account must be created. Retained legacy owner policy is unchanged when the demo switch is off. `VITE_FINAUDIT_SERVICE_MODE` is no longer used to activate live requests. Never put bearer tokens, signing secrets or OpenAI credentials in VITE variables.
 
@@ -67,20 +67,29 @@ Copy the newly printed HTTPS origin into `FINAUDIT_BACKEND_URL` in Lovable Secre
 4. At **https://finauditai-cdac.lovable.app**, enter admin/admin. Confirm no-cookie and forged-cookie API calls are 401; off switch denies demo access; cross-origin mutations are 403; unrelated paths are 404.
 5. Upload a real PDF through the existing drop area. Confirm actual job success, Docling pages, table facts, chart interpretations/comparisons, fact-based trends, grounded QA/citations and original PDF download. Check images and crops load through `/api/document-service`, never by direct token-bearing URLs.
 
-**This published acceptance has not been performed.** Unit tests use controlled fixtures, not the owner's PC. The reported old production proxy 404 is not fixed online until the new code is published and the exact production route is checked.
+**Published acceptance was performed on 2026-11-02.** See the actual results below; unit tests alone are not the basis for these live results.
 
 ## Disable immediately after the demo
 
-1. **Stop cloudflared on Windows (Ctrl+C)**: this immediately disconnects the upstream, including in-flight/new network requests where possible. Stop API/worker too if desired; already queued work must be stopped separately to halt its costs.
+1. Run the owner-verified Windows command `scripts/emergency-stop.ps1` immediately after the demonstration to block model calls. This command was reported tested by Cursor, not executed from Lovable. Do not restart the current tunnel during the demonstration. Stopping cloudflared afterward is optional additional disconnection; queued jobs require the worker stop mechanism.
 2. Set `FINAUDIT_TEMPORARY_DEMO_ENABLED=false` in Lovable Secrets and republish. All demo sessions then fail closed; public sample remains available.
 3. Exit demo to revoke the current cookie. Optionally rotate the shared FastAPI token on both Windows and Lovable privately before another demo.
 
-## Exact current blockers
+## Final activation and published acceptance — 2026-11-02
 
-- Preflight on 2026-11-02 inspected main `968a527`. The three named server secrets are present at runtime. The configured origin passed HTTPS Quick Tunnel validation; authorized health returned 200, authorized document list returned 200, and the same document list without a token returned 401. No secret values or document contents were printed. This is a point-in-time tunnel check, not a guarantee after tunnel restart.
-- The configured signing secret passed signing/verification and tamper rejection. All 69 frontend tests passed; lint had zero errors and six existing warnings. Typecheck/production build were not manually rerun during this preflight; the owner's reported successful CI and existing build artifact are not a new run.
-- Guard tables have RLS, no anonymous/authenticated SELECT, and service-role access; the counter RPC is service-role-only. A sandbox transaction could not assume service_role, so actual counter reservation/session revocation through the deployed app remains unverified. Mocked tests are not deployed end-to-end proof.
-- Preview session status is enabled:false/entered:false. Preview and official no-cookie document calls return 401 and unrelated paths return 404. The official demo-session endpoint still returns 404, so the new signed entry is not yet deployed there.
-- `FINAUDIT_TEMPORARY_DEMO_ENABLED` is absent/OFF. The owner has authorized activation, but upstream enforced monetary/model-call/concurrency/cancellation controls remain unverified. No per-IP limiter exists; the implemented global/session ceilings are documented above.
-- After those controls and the real guard/session round trip pass, create the server-only switch with value `true` in Project Settings → Secrets and publish the existing app. Current code does not read `VITE_FINAUDIT_SERVICE_MODE`; setting it to proxy does not activate live processing and is unnecessary.
-- Published live sign-in/logout, PDF upload/Ready, images/citations and chart/discrepancy/trend acceptance are NOT RUN. No new app, account, local backend modification, live activation or publication was performed during this preflight.
+- PASS: inspected current synchronized main `b9eb94a`; all three required secrets existed. Created only `FINAUDIT_TEMPORARY_DEMO_ENABLED=true`; existing credentials were not changed or disclosed.
+- PASS: authenticated tunnel document list 200 / seven documents, unauthenticated 401. Guard table read 200 and actual service-role budget RPC 200 / reservation true (dedicated probe bucket).
+- Upstream controls are **Cursor/owner-reported verification**, not independent Lovable model-cap tests: 40 model calls total, 41st rejected before OpenAI; emergency stop tested and reset; one worker/job; three attempts; no model client retries; 120-second model timeout; 2048 tokens per call; QA repair counted. No Windows server/tunnel changes were made here.
+- PASS: existing project publish was scheduled and subsequently confirmed serving the activated session endpoint and real proxy at https://finauditai-cdac.lovable.app. No branch or new project was created.
+- PASS: UI admin/admin entry 200; host-only signed demo cookie has Secure, HttpOnly, SameSite=Strict. Wrong password API 401 and unauthenticated proxy 401. UI exit returned to public sample; replay of revoked cookie returned 401.
+- PASS: live same-origin list initially contained seven documents. One 2257-byte synthetic_ar_2025.pdf was uploaded through the published intake, automatically opened, progressed from processing to ready, and returned one Docling page with extracted table data. The synthetic upload remains in the shared library (eight documents after upload).
+- PASS: original source download 200 / valid PDF; page image 200; subsequent rendered-page check confirmed both thumbnail and full-page images loaded through same-origin proxy. Initial screenshot was taken before images finished; later screenshot confirmed rendering.
+- PASS: one real published QA request returned answered with one citation; usage reported OpenAI gpt-4.1-mini-2025-04-14, **llmCalls=1**, 1208 input tokens and 127 output tokens. Citation endpoint returned 200. This is the known newly consumed model-call count; a global counter/remaining total and any worker embedding costs were not independently observable.
+- PASS: stored chart interpretation/crop loaded without re-running its model; four comparisons rendered (three matches, one potential discrepancy: East 90 versus 150). This is a synthetic example, not a financial fraud finding.
+- PASS: Trends selected the stored synthetic annual reports for 2024/2025 and rendered aligned Revenue values for 2023/2024/2025: 2900/3200/3550 GBP millions, with source-page links. Selecting unrelated default reports correctly showed no aligned values before explicit report selection.
+- PASS: captured browser requests showed no configured bearer/signing-secret exposure, no direct tunnel or OpenAI calls; no browser runtime errors in the upload/QA test. This is scoped test evidence, not a full security guarantee.
+- PASS: frontend lint zero errors / six existing warnings; all 69 tests passed. Basic security checks found no issues but did not include deep code analysis.
+- NOT RUN: fresh manual typecheck/build (host-managed verification; no current observability build report available), fresh remote GitHub CI status lookup, Windows restart/persistence, fresh VLM interpretation, independent emergency-stop/41st-call tests. Production successfully served and exercised current code, but that does not substitute for a new CI/typecheck report.
+- No missing activation secret or hosted-backend blocker remains at this point-in-time test. Availability still depends on the unchanged short-lived tunnel, Windows services, configured budgets and course window. No monetary total is claimed.
+
+**Publicly known admin/admin is not secure authentication. Any visitor can enter the shared library and spend the bounded demo budget. Use synthetic documents only, never confidential financial reports. Disable immediately after the course using Windows emergency stop, then Project Settings → Secrets → FINAUDIT_TEMPORARY_DEMO_ENABLED → false and Publish → Publish changes.**
