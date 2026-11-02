@@ -150,6 +150,31 @@ def test_grounded_answer_with_deterministic_calculation(qa_env) -> None:
     assert "TABLE" in llm.prompts[0] and "Units:" in llm.prompts[0]
 
 
+def test_verbatim_row_quote_with_year_keeps_amount_and_period_separate(qa_env) -> None:
+    def plan(e):
+        p = good_plan(e)
+        p["answer"] = "Operating profit was 703 GBP million in 2025."
+        p["operands"] = [p["operands"][1]]
+        p["operands"][0]["quote"] = "Operating profit: 2025 = 703"
+        p["calculations"] = []
+        p["final"] = {"ref": "op25", "unit": "GBP millions", "metric": "operating profit"}
+        return p
+    r, _ = run(qa_env, [plan], question=Q_OP)
+    assert r.status == "answered", r.abstention
+    assert r.value.value == "703" and r.operands[0].period == "2025"
+    assert r.citations[0].chunk.pages == [2]
+
+
+@pytest.mark.parametrize("quote", ["2025", "Operating profit: 2025 = 703; 2024 = 591"])
+def test_year_only_and_two_amount_quotes_still_abstain(qa_env, quote) -> None:
+    def bad(e):
+        p = good_plan(e)
+        p["operands"][1]["quote"] = quote
+        return p
+    r, _ = run(qa_env, [bad, bad])
+    assert r.status == "abstained" and "operand_is_single_number" in r.abstention.detail
+
+
 def test_fabricated_number_triggers_repair_then_abstains(qa_env) -> None:
     def bad(e):
         p = good_plan(e)

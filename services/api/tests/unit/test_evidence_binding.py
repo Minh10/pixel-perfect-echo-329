@@ -107,6 +107,30 @@ def test_year_is_never_an_operand() -> None:
     assert failed(checks, "operand_cell_located")
 
 
+def test_berkshire_repeated_total_binds_same_period_unit_and_scope() -> None:
+    row = "Net earnings attributable to Berkshire shareholders"
+    rows = [fact(row, "$ 4,603", "4603", year=2025, ptype="quarterly", label="First Quarter 2025", fid="a"),
+            fact(row, "$ 4,603", "4603", year=2025, ptype="quarterly", label="First Quarter 2025",
+                 group="Net earnings includes:", fid="b")]
+    checks, bound = bind_table(claim("$ 4,603", row, "First Quarter 2025", row), rows,
+                               "What were net earnings for First Quarter 2025?")
+    assert not failed(checks), checks
+    assert bound["value"] == "4603"
+    # A conflicting currency or segment scope must not be deduplicated.
+    for conflict in ({"currency": "EUR"}, {"scope": "segment"}, {"rowGroup": "Segment B"}):
+        checks, bound = bind_table(claim("$ 4,603", row, "First Quarter 2025", row),
+                                   [rows[0], dict(rows[1], **conflict)],
+                                   "What were net earnings for First Quarter 2025?")
+        assert bound is None and failed(checks, "operand_cell_located")
+
+
+def test_equal_values_in_different_years_bind_only_the_claimed_period() -> None:
+    rows = [fact("Revenue", "100", "100", year=2024), fact("Revenue", "100", "100", year=2025)]
+    checks, bound = bind_table(claim("100", "Revenue", "2025", "revenue"), rows, "What was revenue in 2025?")
+    assert not failed(checks), checks
+    assert bound["period"]["fiscalYear"] == 2025
+
+
 def test_narrative_binding_uses_the_clause_holding_the_value() -> None:
     text = ("Net sales increased 5% to $8.2 billion in 2022, while operating income declined to $412 million "
             "in 2021.")
