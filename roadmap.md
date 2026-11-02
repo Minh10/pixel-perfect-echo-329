@@ -1,6 +1,6 @@
 # Existing FINAUDIT AI demonstration
 
-- [ ] Simplify navigation, report tool switching and dense overview/trend controls using presentation changes only; verify sample flow without uploads or paid calls.
+- [x] Simplify action labels, context-preserving report tool navigation, collapsible overview statistics and question scope, and financial metric selection. Preview sample flow and signed live read-only navigation verified at 1280/390px; no uploads/model calls, no runtime errors or horizontal overflow. 78 tests pass, lint zero errors/six existing warnings, host typecheck/build OK. Backend/configuration untouched; not published. Existing Windows restart acceptance remains owner-operated and outside this UI task.
 
 - [x] Add cursor-reactive background cells with fading trails and staggered entrance/icon motion. Verified at 1146×735: cells visible only on exposed background, fade clears, reduced motion hides effect, no runtime errors; 75 tests pass, lint zero errors/six existing warnings, host build OK. Backend unchanged; not published.
 
