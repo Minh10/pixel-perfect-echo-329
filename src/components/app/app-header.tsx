@@ -12,40 +12,8 @@ import {
 import { NAV_ITEMS } from "./nav";
 import { IS_DEMO } from "@/lib/api/service";
 import { DemoBadge } from "./states";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { ownerSession, refreshOwnerSession, signOut } from "@/lib/auth.functions";
-import { Button } from "@/components/ui/button";
-import { LogIn, LogOut } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 export function AppHeader() {
-  const getSession = useServerFn(ownerSession);
-  const refresh = useServerFn(refreshOwnerSession);
-  const logout = useServerFn(signOut);
-  const queries = useQueryClient();
-  const navigate = useNavigate();
-  const { data: session } = useQuery({
-    queryKey: ["owner-session"],
-    queryFn: () => getSession(),
-    retry: false,
-  });
-  useEffect(() => {
-    const renew = async () => {
-      try {
-        const result = await refresh();
-        queries.setQueryData(["owner-session"], result);
-      } catch {
-        // A transient refresh failure must not present a successful login as lost.
-        // Every private resource is still revalidated by the server.
-        console.warn("Session renewal unavailable; private requests remain protected.");
-      }
-    };
-    void renew();
-    const timer = window.setInterval(() => void renew(), 60_000);
-    return () => window.clearInterval(timer);
-  }, [refresh, queries]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = NAV_ITEMS.find((i) =>
     i.to === "/" ? pathname === "/" : pathname.startsWith(i.to),
@@ -66,12 +34,7 @@ export function AppHeader() {
             <BreadcrumbSeparator className="hidden sm:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="truncate font-medium">
-                {current?.title ??
-                  (pathname === "/login"
-                    ? "Administrator sign-in"
-                    : pathname === "/reset-password"
-                      ? "Reset password"
-                      : "Not found")}
+                {current?.title ?? "Not found"}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -79,29 +42,6 @@ export function AppHeader() {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {IS_DEMO && <DemoBadge />}
-        {session?.signedIn ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            title={session.email}
-            onClick={async () => {
-              await queries.cancelQueries();
-              queries.clear();
-              await logout();
-              await navigate({ to: "/", replace: true });
-            }}
-          >
-            <LogOut />
-            Sign out
-          </Button>
-        ) : (
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">
-              <LogIn />
-              Admin sign-in
-            </Link>
-          </Button>
-        )}
       </div>
     </header>
   );

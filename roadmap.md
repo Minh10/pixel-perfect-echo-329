@@ -9,6 +9,7 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 
 # Secure backend preparation
 
+- [ ] Remove public account UI and redirect legacy account pages to Overview; preserve demo notices and locked private requests; verify lint, frontend tests, automated checks and browser flow.
 - [x] Simplify administrator sign-in while preserving public exploration, persistent cookies and disabled live processing (38 tests passed, full lint zero errors/six existing warnings, browser verified public Overview/Documents/sample and default-password rejection).
 
 - [x] Enable Cloud in the existing project, retaining the login-free demo.
@@ -16,6 +17,6 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 - [x] Document exact connection settings and unresolved access requirements in DEPLOYMENT.md.
 - [x] Run proxy security and existing selection/routing tests; verify sample flow (18 tests passed, changed proxy/test files lint clean, preview build OK, sample opens and unconfigured proxy returns 503 with no browser errors).
 - [x] Implement single-account sign-in, password recovery, sign-out and authenticated report cookies; public sample unchanged.
-- [ ] Disable signup at the provider and verify owner sign-in (blocked: no owner account exists; safe read of current provider settings unavailable, user must set Disable sign-up in Auth settings).
+- [ ] Implement and verify non-interactive owner-only access before live activation (blocked: hosting-edge/private-network access configuration is not supplied; existing cookie-based proxy remains locked).
 - [x] Fix generated-file lint formatting failures without excluding semantic/security checks; full lint has zero errors and six existing warnings. Automated typecheck/build reports OK. Full frontend tests passed; production build was executed successfully by the investigation agent before final edits, not rerun after final edits.
-- [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, authorized account).
+- [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, verified non-interactive owner-only access).
