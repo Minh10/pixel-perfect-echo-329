@@ -38,7 +38,7 @@ Durable, atomic Lovable Cloud counters apply across server instances, fail close
 
 These are custom application limits, not a built-in platform limiter. Global ceilings are stronger than an IP quota for this shared demo and do not trust client-supplied IP headers. Counters use UTC minutes/days. There is no automatic counter cleanup yet; session/counter records contain no user identities, tokens or document contents.
 
-**POST limits are not a dollar spending guarantee.** One Docling/index job or QA can trigger multiple embeddings/model calls. Cursor must verify explicit per-job model-call/token caps, worker concurrency and a provider spending cap on Windows before activation. Existing backend has no verified dollar ceiling. Do not claim an unbounded paid service is safe simply because admin/admin is required. No local Windows backend changes were made here.
+**POST limits are not a dollar spending guarantee.** One Docling/index job or QA can trigger multiple embeddings/model calls. Cursor must verify explicit per-job model-call/token caps, worker concurrency and an enforced spending cutoff on Windows before activation; reporting prices or a provider budget alert alone is not a hard cutoff. Cursor must also demonstrate how queued/in-flight jobs and retries are stopped after cancellation or disconnect. Existing backend has no verified dollar ceiling. Do not claim an unbounded paid service is safe simply because admin/admin is required. No local Windows backend changes were made here.
 
 ## Windows start and tunnel rotation
 
@@ -77,7 +77,10 @@ Copy the newly printed HTTPS origin into `FINAUDIT_BACKEND_URL` in Lovable Secre
 
 ## Exact current blockers
 
-- Signing secret and durable guards are provisioned; live switch remains OFF.
-- Upstream token and URL are not set in Lovable; Windows runtime/tunnel connectivity and model cost caps remain unverified.
-- No real PDF has been processed through the published website by this implementation.
-- No new app, account, local backend modification, live activation or publication was performed.
+- Preflight on 2026-11-02 inspected main `968a527`. The three named server secrets are present at runtime. The configured origin passed HTTPS Quick Tunnel validation; authorized health returned 200, authorized document list returned 200, and the same document list without a token returned 401. No secret values or document contents were printed. This is a point-in-time tunnel check, not a guarantee after tunnel restart.
+- The configured signing secret passed signing/verification and tamper rejection. All 69 frontend tests passed; lint had zero errors and six existing warnings. Typecheck/production build were not manually rerun during this preflight; the owner's reported successful CI and existing build artifact are not a new run.
+- Guard tables have RLS, no anonymous/authenticated SELECT, and service-role access; the counter RPC is service-role-only. A sandbox transaction could not assume service_role, so actual counter reservation/session revocation through the deployed app remains unverified. Mocked tests are not deployed end-to-end proof.
+- Preview session status is enabled:false/entered:false. Preview and official no-cookie document calls return 401 and unrelated paths return 404. The official demo-session endpoint still returns 404, so the new signed entry is not yet deployed there.
+- `FINAUDIT_TEMPORARY_DEMO_ENABLED` is absent/OFF. The owner has authorized activation, but upstream enforced monetary/model-call/concurrency/cancellation controls remain unverified. No per-IP limiter exists; the implemented global/session ceilings are documented above.
+- After those controls and the real guard/session round trip pass, create the server-only switch with value `true` in Project Settings → Secrets and publish the existing app. Current code does not read `VITE_FINAUDIT_SERVICE_MODE`; setting it to proxy does not activate live processing and is unnecessary.
+- Published live sign-in/logout, PDF upload/Ready, images/citations and chart/discrepancy/trend acceptance are NOT RUN. No new app, account, local backend modification, live activation or publication was performed during this preflight.
