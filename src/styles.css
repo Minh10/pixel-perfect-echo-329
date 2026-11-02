@@ -147,6 +147,8 @@
 .report-inspector {
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .report-toolbar button[aria-pressed="true"] {
   color: var(--primary);

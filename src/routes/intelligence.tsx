@@ -216,7 +216,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
     },
     enabled: Boolean(chunkParam && api.getCitation),
   });
-  const citation = citationQuery.data ?? null;
+  const citation = citationQuery.data?.chunkId === chunkParam && citationQuery.data.documentId === docId
+    ? citationQuery.data
+    : null;
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
   const selected = useMemo(
@@ -253,6 +255,15 @@ function WorkspaceReady({ docId }: { docId: string }) {
     setShowInspector(true);
     void navigate({ search: (s) => ({ ...s, tool: next }), replace: true });
   };
+  useEffect(() => {
+    if (!desktop) {
+      const frame = requestAnimationFrame(() => {
+        document.querySelector<HTMLElement>('.report-inspector:not(:empty)')?.scrollIntoView({ block: "start" });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+    return undefined;
+  }, [tool, desktop]);
   useEffect(() => {
     if (selected) {
       setShowHighlights(true);
@@ -336,10 +347,10 @@ function WorkspaceReady({ docId }: { docId: string }) {
         />
       </div>
       <div className="@container" hidden={tool === "overview" || tool === "evidence"}>
-        {citation && (
+        {(citation || (chunkParam && citationQuery.isFetching) || citationQuery.error) && (
           <details className="border-b px-4 py-3">
             <summary className="cursor-pointer text-xs font-medium">
-              Selected source · p. {citation.pages[0]}
+              Selected source{citation?.pages[0] ? ` · p. ${citation.pages[0]}` : ""}
             </summary>
             <CitedExcerpt
               citation={citation}
