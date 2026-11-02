@@ -1,5 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
+- [ ] Add more expressive cursor-reactive background cells and restrained entrance/icon motion; verify report readability and reduced motion without backend changes.
+
 - [x] Refine presentation with restrained pointer-following edge accents and hover motion, preserving backend and accepted intake.
 - [x] Verify sample navigation, document filtering, pointer feedback, reduced motion and 1280/390px layouts in the preview; 75 tests pass, lint zero errors/six existing warnings, host build OK. No uploads or paid calls; not published in this task.
 
