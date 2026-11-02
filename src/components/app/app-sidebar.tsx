@@ -18,7 +18,12 @@ const GROUPS = ["Workspace", "Quality"] as const;
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = (to: string) => to === "/intelligence" ? ["/intelligence", "/analysis", "/audit", "/trends"].includes(pathname) : to === "/" ? pathname === "/" : pathname.startsWith(to);
+  const isActive = (to: string) =>
+    to === "/intelligence"
+      ? ["/intelligence", "/analysis", "/audit", "/trends"].includes(pathname)
+      : to === "/"
+        ? pathname === "/"
+        : pathname.startsWith(to);
 
   return (
     <Sidebar collapsible="icon">

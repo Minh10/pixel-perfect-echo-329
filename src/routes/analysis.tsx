@@ -25,4 +25,7 @@ export const Route = createFileRoute("/analysis")({
   component: AnalysisPage,
 });
 
-function AnalysisPage() { const { doc } = Route.useSearch(); return <AnalysisPanel documentId={doc} />; }
+function AnalysisPage() {
+  const { doc } = Route.useSearch();
+  return <AnalysisPanel documentId={doc} />;
+}

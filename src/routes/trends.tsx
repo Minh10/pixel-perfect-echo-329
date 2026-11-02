@@ -32,4 +32,7 @@ export const Route = createFileRoute("/trends")({
   component: ComparisonPage,
 });
 
-function ComparisonPage() { const { doc } = Route.useSearch(); return <ComparisonPanel documentId={doc} />; }
+function ComparisonPage() {
+  const { doc } = Route.useSearch();
+  return <ComparisonPanel documentId={doc} />;
+}

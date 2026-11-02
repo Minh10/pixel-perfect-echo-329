@@ -27,4 +27,7 @@ export const Route = createFileRoute("/audit")({
   component: AuditPage,
 });
 
-function AuditPage() { const { doc } = Route.useSearch(); return <ChartChecksPanel documentId={doc} />; }
+function AuditPage() {
+  const { doc } = Route.useSearch();
+  return <ChartChecksPanel documentId={doc} />;
+}

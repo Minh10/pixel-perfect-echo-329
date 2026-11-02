@@ -15,8 +15,18 @@ import { compareReports } from "@/lib/fact-comparison";
 import { defaultTrendSelection } from "@/lib/report-selection";
 import { DEFAULT_DOCUMENT_ID, IS_DEMO, api, documentsQuery, trendsQuery } from "@/lib/api/service";
 
-export function ComparisonPanel({ documentId, embedded = false }: { documentId?: string; embedded?: boolean }) {
- return IS_DEMO || !api.getFacts ? <DemoTrends embedded={embedded} /> : <LiveComparison requestedId={documentId} embedded={embedded} />;
+export function ComparisonPanel({
+  documentId,
+  embedded = false,
+}: {
+  documentId?: string;
+  embedded?: boolean;
+}) {
+  return IS_DEMO || !api.getFacts ? (
+    <DemoTrends embedded={embedded} />
+  ) : (
+    <LiveComparison requestedId={documentId} embedded={embedded} />
+  );
 }
 
 const demoConfig = {
@@ -29,12 +39,14 @@ function DemoTrends({ embedded = false }: { embedded?: boolean }) {
   const { data } = useSuspenseQuery(trendsQuery(DEFAULT_DOCUMENT_ID));
   return (
     <div className={embedded ? "min-w-0 space-y-5 p-5" : "page-layout space-y-6"}>
-      {!embedded && (      <PageHeader
-        eyebrow="Analysis"
-        title="Compare reports"
-        description="Northwind Holdings (demo issuer) · five-year series, £ millions."
-        actions={<DemoBadge />}
-      />)}
+      {!embedded && (
+        <PageHeader
+          eyebrow="Analysis"
+          title="Compare reports"
+          description="Northwind Holdings (demo issuer) · five-year series, £ millions."
+          actions={<DemoBadge />}
+        />
+      )}
       <section className="rounded-md border bg-card p-5">
         <ChartContainer config={demoConfig} className="h-72 w-full">
           <BarChart data={data}>
@@ -60,7 +72,13 @@ function formatReported(value: number) {
   return new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(value);
 }
 
-function LiveComparison({ requestedId, embedded = false }: { requestedId?: string; embedded?: boolean }) {
+function LiveComparison({
+  requestedId,
+  embedded = false,
+}: {
+  requestedId?: string;
+  embedded?: boolean;
+}) {
   const navigate = useNavigate();
   const documents = useSuspenseQuery(documentsQuery());
   const ready = documents.data.filter((doc) => doc.status === "ready");
@@ -80,7 +98,10 @@ function LiveComparison({ requestedId, embedded = false }: { requestedId?: strin
   const factQueries = useQueries({
     queries: selected.map((id) => ({
       queryKey: ["facts", id],
-      queryFn: () => { if (!api.getFacts) throw new Error("Facts unavailable"); return api.getFacts(id); },
+      queryFn: () => {
+        if (!api.getFacts) throw new Error("Facts unavailable");
+        return api.getFacts(id);
+      },
     })),
   });
   const labels = [
@@ -110,11 +131,13 @@ function LiveComparison({ requestedId, embedded = false }: { requestedId?: strin
 
   return (
     <div className={embedded ? "min-w-0 space-y-5 p-5" : "page-layout space-y-6"}>
-      {!embedded && (      <PageHeader
-        eyebrow="Analysis"
-        title="Compare reports"
-        description="Compare one reported metric across processed reports. Values come only from parsed table facts."
-      />)}
+      {!embedded && (
+        <PageHeader
+          eyebrow="Analysis"
+          title="Compare reports"
+          description="Compare one reported metric across processed reports. Values come only from parsed table facts."
+        />
+      )}
       <div className="grid gap-6 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
         <section className="space-y-3">
           <label className="block text-sm">

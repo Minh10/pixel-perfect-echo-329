@@ -147,7 +147,10 @@ function WorkspaceReady({ docId }: { docId: string }) {
 
   const citationQuery = useQuery({
     queryKey: ["citation", chunkParam],
-    queryFn: () => { if (!api.getCitation || !chunkParam) throw new Error("Citation unavailable"); return api.getCitation(chunkParam); },
+    queryFn: () => {
+      if (!api.getCitation || !chunkParam) throw new Error("Citation unavailable");
+      return api.getCitation(chunkParam);
+    },
     enabled: Boolean(chunkParam && api.getCitation),
   });
   const citation = citationQuery.data ?? null;
@@ -183,17 +186,43 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const toolContent = () => (
     <>
       <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
-        <p className="text-sm font-semibold">{tools.find(item => item.id === tool)?.label}</p>
+        <p className="text-sm font-semibold">{tools.find((item) => item.id === tool)?.label}</p>
       </div>
-      {tool === "evidence" ? <>
-        <CitedExcerpt citation={citation} error={citationQuery.error} pending={citationQuery.isFetching} />
-        <EvidenceInspector evidence={evidence} pages={pages} selected={selected} filter={filter} onFilter={setFilter} onSelect={select} />
-      </> : <>
-        {citation && <details className="border-b px-4 py-3"><summary className="cursor-pointer text-sm font-medium">Selected source excerpt · p. {citation.pages[0]}</summary><CitedExcerpt citation={citation} error={citationQuery.error} pending={citationQuery.isFetching} /></details>}
-        {tool === "ask" && <AnalysisPanel key={docId} documentId={docId} embedded />}
-        {tool === "charts" && <ChartChecksPanel key={docId} documentId={docId} embedded />}
-        {tool === "compare" && <ComparisonPanel key={docId} documentId={docId} embedded />}
-      </>}
+      {tool === "evidence" ? (
+        <>
+          <CitedExcerpt
+            citation={citation}
+            error={citationQuery.error}
+            pending={citationQuery.isFetching}
+          />
+          <EvidenceInspector
+            evidence={evidence}
+            pages={pages}
+            selected={selected}
+            filter={filter}
+            onFilter={setFilter}
+            onSelect={select}
+          />
+        </>
+      ) : (
+        <>
+          {citation && (
+            <details className="border-b px-4 py-3">
+              <summary className="cursor-pointer text-sm font-medium">
+                Selected source excerpt · p. {citation.pages[0]}
+              </summary>
+              <CitedExcerpt
+                citation={citation}
+                error={citationQuery.error}
+                pending={citationQuery.isFetching}
+              />
+            </details>
+          )}
+          {tool === "ask" && <AnalysisPanel key={docId} documentId={docId} embedded />}
+          {tool === "charts" && <ChartChecksPanel key={docId} documentId={docId} embedded />}
+          {tool === "compare" && <ComparisonPanel key={docId} documentId={docId} embedded />}
+        </>
+      )}
     </>
   );
   const select = (id: string | null) => {
@@ -341,16 +370,37 @@ function WorkspaceReady({ docId }: { docId: string }) {
           </div>
         </div>
       </div>
-      <nav aria-label="PDF workspace tools" className="flex shrink-0 flex-wrap gap-1 border-b bg-card px-4 py-2">
-        {tools.map(item => <Button key={item.id} size="sm" variant={tool === item.id ? "secondary" : "ghost"} aria-pressed={tool === item.id} onClick={() => {
-          setShowInspector(true);
-          void navigate({ search: s => ({ ...s, tool: item.id }), replace: true });
-        }}><item.icon className="size-4" />{item.label}</Button>)}
+      <nav
+        aria-label="PDF workspace tools"
+        className="flex shrink-0 flex-wrap gap-1 border-b bg-card px-4 py-2"
+      >
+        {tools.map((item) => (
+          <Button
+            key={item.id}
+            size="sm"
+            variant={tool === item.id ? "secondary" : "ghost"}
+            aria-pressed={tool === item.id}
+            onClick={() => {
+              setShowInspector(true);
+              void navigate({ search: (s) => ({ ...s, tool: item.id }), replace: true });
+            }}
+          >
+            <item.icon className="size-4" />
+            {item.label}
+          </Button>
+        ))}
       </nav>
       {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
         <details className="shrink-0 border-b bg-warning-soft px-4 py-2 text-xs text-warning">
-          <summary className="flex cursor-pointer items-center gap-2"><ChevronDown className="size-3" />{doc.warnings.length} document notices · extraction may be incomplete</summary>
-          <ul className="mt-2 max-h-28 list-inside list-disc overflow-auto space-y-1">{doc.warnings.map((warning,index) => <li key={index}>{warning}</li>)}</ul>
+          <summary className="flex cursor-pointer items-center gap-2">
+            <ChevronDown className="size-3" />
+            {doc.warnings.length} document notices · extraction may be incomplete
+          </summary>
+          <ul className="mt-2 max-h-28 list-inside list-disc overflow-auto space-y-1">
+            {doc.warnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
         </details>
       )}
 
@@ -392,9 +442,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
             <>
               <ResizableHandle withHandle aria-label="Resize evidence inspector" />
               <ResizablePanel id="inspector" defaultSize="42%" minSize="300px" maxSize="60%">
-                <aside className="h-full overflow-y-auto bg-card">
-                  {toolContent()}
-                </aside>
+                <aside className="h-full overflow-y-auto bg-card">{toolContent()}</aside>
               </ResizablePanel>
             </>
           )}
@@ -422,9 +470,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           )}
         </main>
         {showInspector && (
-          <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
-            {toolContent()}
-          </aside>
+          <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">{toolContent()}</aside>
         )}
       </div>
     </div>

@@ -13,9 +13,21 @@ import { visualDiscrepancy } from "@/lib/fact-comparison";
 import { IS_DEMO, api, documentsQuery, evidenceQuery, pagesQuery } from "@/lib/api/service";
 import type { ChartInterpretation, Evidence, PageBlock, TableCheck } from "@/lib/api/types";
 
-export function ChartChecksPanel({ documentId, embedded = false }: { documentId?: string; embedded?: boolean }) {
+export function ChartChecksPanel({
+  documentId,
+  embedded = false,
+}: {
+  documentId?: string;
+  embedded?: boolean;
+}) {
   if (IS_DEMO || !api.getFacts || !api.searchEvidence) {
-    if (embedded) return <p className="border-l-2 border-primary bg-primary-soft p-4 text-sm text-muted-foreground">Public sample only. Live analysis requires an activated demo session; no AI result is generated.</p>;
+    if (embedded)
+      return (
+        <p className="border-l-2 border-primary bg-primary-soft p-4 text-sm text-muted-foreground">
+          Public sample only. Live analysis requires an activated demo session; no AI result is
+          generated.
+        </p>
+      );
     return (
       <PendingModule
         eyebrow="Analysis"
@@ -28,7 +40,13 @@ export function ChartChecksPanel({ documentId, embedded = false }: { documentId?
   return <AuditWorkspace requestedId={documentId} embedded={embedded} />;
 }
 
-function AuditWorkspace({ requestedId, embedded = false }: { requestedId?: string; embedded?: boolean }) {
+function AuditWorkspace({
+  requestedId,
+  embedded = false,
+}: {
+  requestedId?: string;
+  embedded?: boolean;
+}) {
   const documents = useQuery(documentsQuery());
   const ready = (documents.data ?? []).filter((doc) => doc.status === "ready");
   const [documentId, setDocumentId] = useState<string>(requestedId ?? "");
@@ -44,12 +62,18 @@ function AuditWorkspace({ requestedId, embedded = false }: { requestedId?: strin
   const crop = figure ? figureBlock(pages.data ?? [], figure) : null;
   const facts = useQuery({
     queryKey: ["facts", selectedId],
-    queryFn: () => { if (!api.getFacts) throw new Error("Facts unavailable"); return api.getFacts(selectedId); },
+    queryFn: () => {
+      if (!api.getFacts) throw new Error("Facts unavailable");
+      return api.getFacts(selectedId);
+    },
     enabled: Boolean(selectedId && api.getFacts),
   });
   const interpretation = useQuery({
     queryKey: ["interpretation", selectedId, figure?.blockId],
-    queryFn: () => { if (!api.getFigureInterpretation || !figure) throw new Error("Chart unavailable"); return api.getFigureInterpretation(selectedId, figure.blockId); },
+    queryFn: () => {
+      if (!api.getFigureInterpretation || !figure) throw new Error("Chart unavailable");
+      return api.getFigureInterpretation(selectedId, figure.blockId);
+    },
     enabled: Boolean(selectedId && figure && api.getFigureInterpretation),
     retry: false,
   });
@@ -57,7 +81,10 @@ function AuditWorkspace({ requestedId, embedded = false }: { requestedId?: strin
   const [zoom, setZoom] = useState(1);
   const [selectedCheck, setSelectedCheck] = useState<string | null>(null);
   const interpret = useMutation({
-    mutationFn: () => { if (!api.interpretFigure || !figure) throw new Error("Chart unavailable"); return api.interpretFigure(selectedId, figure.blockId); },
+    mutationFn: () => {
+      if (!api.interpretFigure || !figure) throw new Error("Chart unavailable");
+      return api.interpretFigure(selectedId, figure.blockId);
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(["interpretation", selectedId, figure?.blockId], data);
     },
@@ -78,41 +105,44 @@ function AuditWorkspace({ requestedId, embedded = false }: { requestedId?: strin
 
   return (
     <div className={embedded ? "min-w-0 space-y-5 p-5" : "page-layout space-y-8"}>
-      {!embedded && (      <PageHeader
-        eyebrow="Visual analysis"
-        title="Check charts"
-        description="Compare a chart reading with the reported table facts from the same document."
-      />)}
-      {!embedded && <div className="grid gap-6 border-b pb-6 lg:grid-cols-[minmax(0,1.4fr)_auto] lg:items-end">
-        <label className="block max-w-xl text-sm">
-          <span className="text-xs text-muted-foreground">Processed report</span>
-          <select
-            className="mt-1 h-10 w-full rounded-md border bg-card px-3"
-            value={selectedId}
-            onChange={(event) => {
-              setDocumentId(event.target.value);
-              setBlockId("");
-              setSelectedCheck(null);
-            }}
-          >
-            {ready.map((doc) => (
-              <option key={doc.id} value={doc.id}>
-                {doc.title}
-              </option>
-            ))}
-          </select>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {[document?.issuer, document?.period, document?.type].filter(Boolean).join(" · ") ||
-              "Issuer and period are taken from the processed report."}
+      {!embedded && (
+        <PageHeader
+          eyebrow="Visual analysis"
+          title="Check charts"
+          description="Compare a chart reading with the reported table facts from the same document."
+        />
+      )}
+      {!embedded && (
+        <div className="grid gap-6 border-b pb-6 lg:grid-cols-[minmax(0,1.4fr)_auto] lg:items-end">
+          <label className="block max-w-xl text-sm">
+            <span className="text-xs text-muted-foreground">Processed report</span>
+            <select
+              className="mt-1 h-10 w-full rounded-md border bg-card px-3"
+              value={selectedId}
+              onChange={(event) => {
+                setDocumentId(event.target.value);
+                setBlockId("");
+                setSelectedCheck(null);
+              }}
+            >
+              {ready.map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  {doc.title}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {[document?.issuer, document?.period, document?.type].filter(Boolean).join(" · ") ||
+                "Issuer and period are taken from the processed report."}
+            </p>
+          </label>
+          <p className="text-xs text-muted-foreground">
+            {reading
+              ? `Model ${reading.provider} · ${reading.model}`
+              : "This chart has no saved analysis yet."}
           </p>
-        </label>
-        <p className="text-xs text-muted-foreground">
-          {reading
-            ? `Model ${reading.provider} · ${reading.model}`
-            : "This chart has no saved analysis yet."}
-        </p>
-      </div>
-      }
+        </div>
+      )}
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">
         <Kpi label="Compared values" value={reading ? counts.compared : "—"} />
         <Kpi label="Matches" value={reading ? counts.matched : "—"} />
@@ -458,7 +488,10 @@ function EvidenceSearch({ documentIds }: { documentIds: string[] }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState("operating profit");
   const search = useMutation({
-    mutationFn: () => { if (!api.searchEvidence) throw new Error("Search unavailable"); return api.searchEvidence(query, documentIds); },
+    mutationFn: () => {
+      if (!api.searchEvidence) throw new Error("Search unavailable");
+      return api.searchEvidence(query, documentIds);
+    },
   });
   return (
     <section className="space-y-3">
@@ -499,7 +532,7 @@ function EvidenceSearch({ documentIds }: { documentIds: string[] }) {
                   navigate({
                     to: "/intelligence",
                     search: {
-                            tool: "charts",
+                      tool: "charts",
                       doc: hit.chunk.documentId,
                       ...(region ? { page: region.page } : {}),
                       ...(region?.workspaceEvidenceId ? { ev: region.workspaceEvidenceId } : {}),
@@ -546,7 +579,7 @@ function SourceLink({
         navigate({
           to: "/intelligence",
           search: {
-                            tool: "charts",
+            tool: "charts",
             doc: documentId,
             page,
             ...(evidenceId ? { ev: evidenceId } : {}),

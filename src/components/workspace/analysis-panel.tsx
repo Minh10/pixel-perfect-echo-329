@@ -24,9 +24,21 @@ const KIND_TAG: Record<QACitation["evidenceKind"], string> = {
   window: "narrative",
 };
 
-export function AnalysisPanel({ documentId, embedded = false }: { documentId?: string; embedded?: boolean }) {
+export function AnalysisPanel({
+  documentId,
+  embedded = false,
+}: {
+  documentId?: string;
+  embedded?: boolean;
+}) {
   if (IS_DEMO || !api.ask) {
-    if (embedded) return <p className="border-l-2 border-primary bg-primary-soft p-4 text-sm text-muted-foreground">Public sample only. Live analysis requires an activated demo session; no AI result is generated.</p>;
+    if (embedded)
+      return (
+        <p className="border-l-2 border-primary bg-primary-soft p-4 text-sm text-muted-foreground">
+          Public sample only. Live analysis requires an activated demo session; no AI result is
+          generated.
+        </p>
+      );
     return (
       <PendingModule
         eyebrow="Analysis"
@@ -39,14 +51,23 @@ export function AnalysisPanel({ documentId, embedded = false }: { documentId?: s
   return <AnalysisWorkspace requestedId={documentId} embedded={embedded} />;
 }
 
-function AnalysisWorkspace({ requestedId, embedded = false }: { requestedId?: string; embedded?: boolean }) {
+function AnalysisWorkspace({
+  requestedId,
+  embedded = false,
+}: {
+  requestedId?: string;
+  embedded?: boolean;
+}) {
   const navigate = useNavigate();
   const documents = useQuery(documentsQuery());
   const ready = (documents.data ?? []).filter((doc) => doc.status === "ready");
   const [question, setQuestion] = useState("");
   const [selected, setSelected] = useState<string[]>(requestedId ? [requestedId] : []);
   const mutation = useMutation({
-    mutationFn: (body: { question: string; documentIds?: string[] }) => { if (!api.ask) throw new Error("Questions unavailable"); return api.ask(body); },
+    mutationFn: (body: { question: string; documentIds?: string[] }) => {
+      if (!api.ask) throw new Error("Questions unavailable");
+      return api.ask(body);
+    },
   });
 
   const submit = (event: FormEvent) => {
@@ -68,11 +89,13 @@ function AnalysisWorkspace({ requestedId, embedded = false }: { requestedId?: st
 
   return (
     <div className={embedded ? "min-w-0 space-y-5 p-5" : "page-layout space-y-6"}>
-      {!embedded && (      <PageHeader
-        eyebrow="Analysis"
-        title="Ask a question"
-        description="Answers cite source passages, tables and charts. If evidence is insufficient, no supported answer is given."
-      />)}
+      {!embedded && (
+        <PageHeader
+          eyebrow="Analysis"
+          title="Ask a question"
+          description="Answers cite source passages, tables and charts. If evidence is insufficient, no supported answer is given."
+        />
+      )}
       {selected.length > 0 && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Selected reports: </span>
@@ -222,7 +245,7 @@ function AnalysisWorkspace({ requestedId, embedded = false }: { requestedId?: st
                       navigate({
                         to: "/intelligence",
                         search: {
-                            tool: "ask",
+                          tool: "ask",
                           doc: citation.chunk.documentId,
                           ...(typeof page === "number" ? { page } : {}),
                           ...(region?.workspaceEvidenceId

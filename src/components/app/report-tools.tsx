@@ -28,7 +28,17 @@ export function ReportTools({
         >
           <Link
             to="/intelligence"
-            search={{ doc: documentId, tool: item.to === "/analysis" ? "ask" : item.to === "/audit" ? "charts" : item.to === "/trends" ? "compare" : "evidence" }}
+            search={{
+              doc: documentId,
+              tool:
+                item.to === "/analysis"
+                  ? "ask"
+                  : item.to === "/audit"
+                    ? "charts"
+                    : item.to === "/trends"
+                      ? "compare"
+                      : "evidence",
+            }}
             aria-current={pathname === item.to ? "page" : undefined}
           >
             <item.icon className="size-4" />
