@@ -33,7 +33,7 @@ Durable, atomic Lovable Cloud counters apply across server instances, fail close
 - 10 live entry attempts/minute globally.
 - 120 proxied requests/minute globally and 60/minute per signed session.
 - 2 work-creating POSTs/minute and 20/day globally, including QA, retrieval, interpretation, indexing and reprocessing. Failed/invalid requests consume the reserved budget too.
-- 3 PDF uploads/day globally; one unencrypted PDF per upload, maximum 10 MiB and 30 pages. JSON maximum 16 KiB, questions/queries maximum 2,000 characters, at most four report IDs and retrieval depth five.
+- 10 PDF uploads per UTC day globally; resets at 00:00 UTC using a new daily bucket, without resetting or deleting historical counts. One unencrypted PDF per upload, maximum 10 MiB and 30 pages. JSON maximum 16 KiB, questions/queries maximum 2,000 characters, at most four report IDs and retrieval depth five. A quota rejection explicitly states the limit and UTC reset time, not that the backend is unavailable.
 - Image DPI 36–150; fixed HTTPS upstream origin and strict path/method/query guards.
 
 These are custom application limits, not a built-in platform limiter. Global ceilings are stronger than an IP quota for this shared demo and do not trust client-supplied IP headers. Counters use UTC minutes/days. There is no automatic counter cleanup yet; session/counter records contain no user identities, tokens or document contents.
@@ -70,6 +70,18 @@ Copy the newly printed HTTPS origin into `FINAUDIT_BACKEND_URL` in Lovable Secre
 **Published acceptance was performed on 2026-11-02.** See the actual results below; unit tests alone are not the basis for these live results.
 
 ## Disable immediately after the demo
+
+## Upload quota fix acceptance — 2026-11-02
+
+- Published application revision `3a4ce45` raises only the global upload allowance from 3 to 10 per UTC day; the atomic guard, existing historical counts and all other session/request/work/PDF/backend controls remain unchanged.
+- Read-only pre-test check: `uploads:2026-11-02` used 3, leaving 7 under the new allowance. No counters were reset or deleted.
+- Official URL browser check: anonymous documents 401; admin/admin issued Secure/HttpOnly/SameSite=Strict cookie; server status enabled/entered true; live upload control and nine existing documents displayed.
+- Exactly one small fictional PDF uploaded through the official UI: HTTP 202 (not 429), worker Ready, one Docling page and page image HTTP 200. No QA/VLM requests were initiated; worker-internal model usage was not measured.
+- Read-only post-test counters: uploads 4/10 (6 remaining); work 12/20 (8 remaining). Other visitors may consume the shared budget subsequently.
+- All 75 Vitest tests pass, including the concrete 10-upload allowance, seven remaining after three used, rejection of the next upload and UTC bucket rollover. Lint: zero errors, six existing warnings. Host-managed production build: OK. Separate typecheck and fresh GitHub CI: NOT RUN; not claimed as passed.
+- At exhaustion the existing upload error display receives “Daily PDF upload limit (10) reached; resets at 00:00 UTC.” Other files may still be rejected for encryption, exceeding 10 MiB or 30 pages, work/rate caps or upstream controls. The existing Windows tunnel was not changed.
+
+## Disable immediately after the demo (steps)
 
 1. Run the owner-verified Windows command `scripts/emergency-stop.ps1` immediately after the demonstration to block model calls. This command was reported tested by Cursor, not executed from Lovable. Do not restart the current tunnel during the demonstration. Stopping cloudflared afterward is optional additional disconnection; queued jobs require the worker stop mechanism.
 2. Set `FINAUDIT_TEMPORARY_DEMO_ENABLED=false` in Lovable Secrets and republish. All demo sessions then fail closed; public sample remains available.

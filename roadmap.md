@@ -1,5 +1,8 @@
 # Existing FINAUDIT AI demonstration
 
+- [x] Raise global PDF allowance to 10 per UTC day, preserve atomic counters and other guards; 75 tests pass, including seven remaining after three used and UTC rollover.
+- [x] Publish quota fix (3a4ce45) to the official URL; signed entry, live upload control, one fictional PDF HTTP 202 → Ready and page image 200 verified. Counter read 4/10 uploads, 12/20 work; no direct counter mutation. Lint zero errors/six warnings and host build OK. Separate typecheck and remote CI not run.
+
 - [x] Preserve the existing app, synchronized main b9eb94a, public sample and accepted intake; no source/UI/backend rewrite or new branch/project.
 - [x] Recheck three named secrets, authenticated tunnel 200 / anonymous 401, guard table and actual atomic RPC reservation.
 - [x] Record owner/Cursor verification of 40-call cap, emergency stop, concurrency, retries, timeout and token limit; do not restart Windows tunnel.
