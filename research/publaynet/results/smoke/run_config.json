@@ -1,0 +1,89 @@
+{
+ "args": {
+  "val_json": "C:\\Users\\Lenovo\\data\\publaynet\\val.json",
+  "image_dir": "C:\\Users\\Lenovo\\data\\publaynet\\val",
+  "model_dir": "C:\\Users\\Lenovo\\.cache\\huggingface\\hub\\models--docling-project--docling-layout-heron\\snapshots\\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8",
+  "out": "research\\publaynet\\results\\smoke",
+  "n": "20",
+  "seed": "20261101",
+  "iou": "0.5",
+  "score_threshold": "0.3",
+  "ap_score_floor": "0.01",
+  "device": "cpu",
+  "threads": "4",
+  "warmup": "2"
+ },
+ "versions": {
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "docling": "2.145.0",
+  "docling-core": "2.105.0",
+  "docling-ibm-models": "4.0.4",
+  "transformers": "5.22.1",
+  "torch": "2.15.0",
+  "torchvision": "0.29.2",
+  "pillow": "13.0.0",
+  "numpy": "2.4.6",
+  "pycocotools": "2.0.11"
+ },
+ "git_commit": "895b703d521c43fdd61dda8bdfd69044c8fb5ab4",
+ "model_config_id2label": {
+  "0": "caption",
+  "1": "footnote",
+  "2": "formula",
+  "3": "list_item",
+  "4": "page_footer",
+  "5": "page_header",
+  "6": "picture",
+  "7": "section_header",
+  "8": "table",
+  "9": "text",
+  "10": "title",
+  "11": "document_index",
+  "12": "code",
+  "13": "checkbox_selected",
+  "14": "checkbox_unselected",
+  "15": "form",
+  "16": "key_value_region"
+ },
+ "model_files_sha256": {
+  ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+  "config.json": "fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d",
+  "docling_heron_400.png": "e7f78610372b32a7938e480d2c7fa1c3037ee170bd82282a5bd026232f6e6f9e",
+  "model.safetensors": "00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c",
+  "preprocessor_config.json": "cd38cd59999e7a95d68e487fbe5132df3d4e5c32a0836add57e6126ba0c4eaf1",
+  "README.md": "175700839bc7808eac6af1d0c23e4f483606ab2276fe01122f4093e61a1a65b6"
+ },
+ "label_mapping": {
+  "table": [
+   "table"
+  ],
+  "figure": [
+   "picture"
+  ],
+  "title": [
+   "title",
+   "section_header"
+  ],
+  "text": [
+   "text",
+   "caption",
+   "footnote",
+   "formula"
+  ]
+ },
+ "not_evaluated": {
+  "list": "PubLayNet boxes whole lists; Docling boxes list items (granularity mismatch)"
+ },
+ "ignored_prediction_labels": {
+  "list_item": 610,
+  "page_header": 501,
+  "page_footer": 338,
+  "code": 39,
+  "checkbox_unselected": 34,
+  "key_value_region": 462,
+  "form": 34,
+  "checkbox_selected": 2,
+  "document_index": 1
+ }
+}

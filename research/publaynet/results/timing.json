@@ -1,0 +1,23 @@
+{
+ "model_init_ms": 22889.3,
+ "warmup_images": 2,
+ "preprocess_ms": {
+  "n": 200,
+  "mean": 19.49,
+  "p50": 6.98,
+  "p95": 42.97
+ },
+ "inference_ms": {
+  "n": 200,
+  "mean": 1838.74,
+  "p50": 708.41,
+  "p95": 3419.74
+ },
+ "postprocess_ms": {
+  "n": 200,
+  "mean": 2.98,
+  "p50": 1.27,
+  "p95": 4.41
+ },
+ "note": "preprocess = RGB conversion + HF image processor; inference = model forward under inference_mode; postprocess = post_process_object_detection; JPEG decoding and model loading excluded"
+}

@@ -3,7 +3,7 @@
   "info": {
     "title": "FINAUDIT AI API",
     "description": "Financial PDF ingestion, layout-aware parsing, evidence provenance, layout-aware retrieval and evidence-grounded QA. Answers are validated against cited evidence; this is not financial auditing.",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "paths": {
     "/api/v1/health": {

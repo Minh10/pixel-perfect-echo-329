@@ -1,0 +1,37 @@
+{
+  "status": "RUN",
+  "git_commit_of_harness": "895b703d521c43fdd61dda8bdfd69044c8fb5ab4",
+  "versions": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "docling": "2.145.0",
+    "docling-core": "2.105.0",
+    "docling-ibm-models": "4.0.4",
+    "transformers": "5.22.1",
+    "torch": "2.15.0",
+    "torchvision": "0.29.2",
+    "pillow": "13.0.0",
+    "numpy": "2.4.6",
+    "pycocotools": "2.0.11",
+    "pyarrow": "26.0.0",
+    "huggingface-hub": "1.33.0"
+  },
+  "note": "numpy on this machine is 2.4.6. requirements.txt pins 2.5.4. The scored run used the installed 2.4.6. pyarrow was used only to read the validation parquet shards.",
+  "model": {
+    "repo_id": "docling-project/docling-layout-heron",
+    "docling_spec_revision": "main",
+    "resolved_sha": "8f39ad3c0b4c58e9c2d2c84a38465abf757272d8",
+    "resolved_how": "local Hugging Face ref refs/main, confirmed by a HEAD request to huggingface.co which returned the same X-Repo-Commit",
+    "safetensors_sha256": "00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c",
+    "config_sha256": "fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d"
+  },
+  "dataset": {
+    "source": "huggingface.co/datasets/creative-graphic-design/PubLayNet",
+    "revision": "4bfc1ae32abdad8953c0b81e5cdf236f1745de50",
+    "split": "validation",
+    "ibm_dax": "dax-cdn.cdn.appdomain.cloud did not resolve (curl exit 6). The training shards were not downloaded.",
+    "val_json_sha256": "aeff1d25eba29c30f0d64d50f9b4f055a77fa23c93ccedcc2632098f54844161",
+    "details": "provenance.json"
+  },
+  "previous_commit": "895b703 recorded network denials from a different environment and did not run this evaluation."
+}

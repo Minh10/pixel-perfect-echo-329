@@ -1,7 +1,8 @@
 # Local development stack: API + background worker(s) + Qdrant, sharing one data volume.
 #   docker compose up --build
 #   API:   http://localhost:8000/api/v1/health      OpenAPI docs: http://localhost:8000/docs
-# Ports are bound to 127.0.0.1 only: the API has no authentication yet and must stay private.
+# Ports are bound to 127.0.0.1 only. The document API is unauthenticated unless
+# FINAUDIT_API_TOKEN is set. Do not publish port 8000 on a public interface.
 services:
   qdrant:
     image: qdrant/qdrant:v1.15.1

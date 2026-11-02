@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     docling_artifacts_path: Path | None = None
 
     cors_origins: list[str] = ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"]
+    # When set, every /api/v1 route except /health requires Authorization: Bearer <token>.
+    # Leave unset for the local loopback demo. Set it before any non-loopback deployment.
+    api_token: str | None = None
 
     worker_poll_interval_s: float = 1.0
     job_heartbeat_interval_s: float = 5.0
