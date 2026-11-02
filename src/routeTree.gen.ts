@@ -15,6 +15,8 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as EvaluationRouteImport } from './routes/evaluation'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as ApiDocumentServiceSplatRouteImport } from './routes/api/document-service/$'
 
@@ -48,6 +50,16 @@ const IntelligenceRoute = IntelligenceRouteImport.update({
   path: '/intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrendsRoute = TrendsRouteImport.update({
   id: '/trends',
   path: '/trends',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/documents': typeof DocumentsRoute
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
@@ -76,6 +90,8 @@ export interface FileRoutesByTo {
   '/documents': typeof DocumentsRoute
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
@@ -87,6 +103,8 @@ export interface FileRoutesById {
   '/documents': typeof DocumentsRoute
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
@@ -99,6 +117,8 @@ export interface FileRouteTypes {
     | '/documents'
     | '/evaluation'
     | '/intelligence'
+    | '/login'
+    | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +129,8 @@ export interface FileRouteTypes {
     | '/documents'
     | '/evaluation'
     | '/intelligence'
+    | '/login'
+    | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
   id:
@@ -119,6 +141,8 @@ export interface FileRouteTypes {
     | '/documents'
     | '/evaluation'
     | '/intelligence'
+    | '/login'
+    | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
   fileRoutesById: FileRoutesById
@@ -130,6 +154,8 @@ export interface RootRouteChildren {
   DocumentsRoute: typeof DocumentsRoute
   EvaluationRoute: typeof EvaluationRoute
   IntelligenceRoute: typeof IntelligenceRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TrendsRoute: typeof TrendsRoute
   ApiDocumentServiceSplatRoute: typeof ApiDocumentServiceSplatRoute
 }
@@ -178,6 +204,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trends': {
       id: '/trends'
       path: '/trends'
@@ -202,6 +242,8 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentsRoute: DocumentsRoute,
   EvaluationRoute: EvaluationRoute,
   IntelligenceRoute: IntelligenceRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TrendsRoute: TrendsRoute,
   ApiDocumentServiceSplatRoute: ApiDocumentServiceSplatRoute,
 }
