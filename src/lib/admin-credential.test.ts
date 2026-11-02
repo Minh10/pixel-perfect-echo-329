@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
-
-const password = z.string().min(12).max(256);
+import { adminPassword as password } from "./admin-credential";
 describe("administrator password requirement", () => {
   it("rejects the public admin default", () => {
     expect(password.safeParse("admin").success).toBe(false);
