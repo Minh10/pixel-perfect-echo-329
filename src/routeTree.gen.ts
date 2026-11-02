@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as ApiDocumentServiceSplatRouteImport } from './routes/api/document-service/$'
+import { Route as ApiPublicDemoSessionRouteImport } from './routes/api/public/demo-session'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +71,11 @@ const ApiDocumentServiceSplatRoute = ApiDocumentServiceSplatRouteImport.update({
   path: '/api/document-service/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDemoSessionRoute = ApiPublicDemoSessionRouteImport.update({
+  id: '/api/public/demo-session',
+  path: '/api/public/demo-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
+  '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
+  '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
+  '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
+    | '/api/public/demo-session'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
+    | '/api/public/demo-session'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/trends'
     | '/api/document-service/$'
+    | '/api/public/demo-session'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TrendsRoute: typeof TrendsRoute
   ApiDocumentServiceSplatRoute: typeof ApiDocumentServiceSplatRoute
+  ApiPublicDemoSessionRoute: typeof ApiPublicDemoSessionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDocumentServiceSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo-session': {
+      id: '/api/public/demo-session'
+      path: '/api/public/demo-session'
+      fullPath: '/api/public/demo-session'
+      preLoaderRoute: typeof ApiPublicDemoSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TrendsRoute: TrendsRoute,
   ApiDocumentServiceSplatRoute: ApiDocumentServiceSplatRoute,
+  ApiPublicDemoSessionRoute: ApiPublicDemoSessionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
