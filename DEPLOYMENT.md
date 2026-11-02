@@ -71,6 +71,18 @@ Copy the newly printed HTTPS origin into `FINAUDIT_BACKEND_URL` in Lovable Secre
 
 ## Disable immediately after the demo
 
+## Upload quota fix acceptance — 2026-11-02
+
+- Published application revision `3a4ce45` raises only the global upload allowance from 3 to 10 per UTC day; the atomic guard, existing historical counts and all other session/request/work/PDF/backend controls remain unchanged.
+- Read-only pre-test check: `uploads:2026-11-02` used 3, leaving 7 under the new allowance. No counters were reset or deleted.
+- Official URL browser check: anonymous documents 401; admin/admin issued Secure/HttpOnly/SameSite=Strict cookie; server status enabled/entered true; live upload control and nine existing documents displayed.
+- Exactly one small fictional PDF uploaded through the official UI: HTTP 202 (not 429), worker Ready, one Docling page and page image HTTP 200. No QA/VLM requests were initiated; worker-internal model usage was not measured.
+- Read-only post-test counters: uploads 4/10 (6 remaining); work 12/20 (8 remaining). Other visitors may consume the shared budget subsequently.
+- All 75 Vitest tests pass, including the concrete 10-upload allowance, seven remaining after three used, rejection of the next upload and UTC bucket rollover. Lint: zero errors, six existing warnings. Host-managed production build: OK. Separate typecheck and fresh GitHub CI: NOT RUN; not claimed as passed.
+- At exhaustion the existing upload error display receives “Daily PDF upload limit (10) reached; resets at 00:00 UTC.” Other files may still be rejected for encryption, exceeding 10 MiB or 30 pages, work/rate caps or upstream controls. The existing Windows tunnel was not changed.
+
+## Disable immediately after the demo (steps)
+
 1. Run the owner-verified Windows command `scripts/emergency-stop.ps1` immediately after the demonstration to block model calls. This command was reported tested by Cursor, not executed from Lovable. Do not restart the current tunnel during the demonstration. Stopping cloudflared afterward is optional additional disconnection; queued jobs require the worker stop mechanism.
 2. Set `FINAUDIT_TEMPORARY_DEMO_ENABLED=false` in Lovable Secrets and republish. All demo sessions then fail closed; public sample remains available.
 3. Exit demo to revoke the current cookie. Optionally rotate the shared FastAPI token on both Windows and Lovable privately before another demo.
