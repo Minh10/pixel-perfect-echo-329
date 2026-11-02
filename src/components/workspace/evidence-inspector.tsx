@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DemoBadge } from "@/components/app/states";
 import { BlockContent } from "@/components/workspace/document-page";
 import { cn } from "@/lib/utils";
-import { evidenceRows } from "@/lib/evidence-list";
+import { evidenceRows, readableExcerpt } from "@/lib/evidence-list";
 
 const CATEGORY_LABEL: Record<EvidenceCategory, string> = {
   metric: "Metric",
@@ -71,7 +71,7 @@ export function EvidenceInspector({
             </Button>
           </div>
           <blockquote className="border-l-2 border-evidence pl-3 text-sm text-foreground/80">
-            {selected.excerpt}
+            {readableExcerpt(selected)}
           </blockquote>
           {selectedBlock && (selectedBlock.table || selectedBlock.figure) ? (
             <div className="mt-4">
