@@ -10,6 +10,11 @@ import {
   Plus,
   PanelLeft,
   PanelRight,
+  ListFilter,
+  MessageSquareText,
+  ShieldCheck,
+  TrendingUp,
+  ChevronDown,
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -17,7 +22,9 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { PdfIntake } from "@/components/app/pdf-intake";
-import { ReportTools } from "@/components/app/report-tools";
+import { AnalysisPanel } from "@/components/workspace/analysis-panel";
+import { ChartChecksPanel } from "@/components/workspace/audit-panel";
+import { ComparisonPanel } from "@/components/workspace/trends-panel";
 import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
 import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
@@ -36,12 +43,14 @@ import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
 import { ErrorState, WorkspaceSkeleton } from "@/components/app/states";
+import { selectWorkspaceDocument } from "@/lib/workspace-selection";
 
 const search = z.object({
   doc: z.string().optional(),
   page: z.number().int().min(1).optional(),
   ev: z.string().optional(),
   chunk: z.string().optional(),
+  tool: z.enum(["evidence", "ask", "charts", "compare"]).optional(),
 });
 
 export const Route = createFileRoute("/intelligence")({
@@ -49,26 +58,26 @@ export const Route = createFileRoute("/intelligence")({
   loaderDeps: ({ search }) => ({ doc: search.doc }),
   loader: async ({ context, deps }) => {
     const docs = await context.queryClient.ensureQueryData(documentsQuery());
-    const docId =
-      deps.doc ?? DEFAULT_DOCUMENT_ID ?? docs.find((doc) => doc.status === "ready")?.id ?? null;
-    if (!docId) return { docId: null as string | null };
+    const selection = selectWorkspaceDocument(deps.doc, IS_DEMO, DEFAULT_DOCUMENT_ID, docs);
+    const { docId } = selection;
+    if (!docId) return selection;
     await Promise.all([
       context.queryClient.ensureQueryData(documentQuery(docId)),
       context.queryClient.ensureQueryData(pagesQuery(docId)),
       context.queryClient.ensureQueryData(evidenceQuery(docId)),
     ]);
-    return { docId };
+    return selection;
   },
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Read report — FINAUDIT AI" },
+      { title: "Report workspace — FINAUDIT AI" },
       {
         name: "description",
         content: "Inspect financial report pages, tables and charts with linked evidence.",
       },
-      { property: "og:title", content: "Read report — FINAUDIT AI" },
+      { property: "og:title", content: "Report workspace — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Inspect financial report pages, tables and charts with linked evidence.",
@@ -95,7 +104,22 @@ export const Route = createFileRoute("/intelligence")({
 });
 
 function Workspace() {
-  const { docId } = Route.useLoaderData();
+  const { docId, awaitingLiveSession } = Route.useLoaderData();
+  if (awaitingLiveSession)
+    return (
+      <div className="page-layout space-y-4">
+        <h1 className="text-2xl font-semibold">Live report workspace</h1>
+        <p className="text-sm text-muted-foreground">
+          Checking live access. If no demo session is active, activate the demo to open this PDF.
+        </p>
+        <Button asChild>
+          <Link to="/login">Activate live demo</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/documents">Back to documents</Link>
+        </Button>
+      </div>
+    );
   if (!docId) {
     return (
       <div className="page-layout">
@@ -107,7 +131,7 @@ function Workspace() {
 }
 
 function WorkspaceReady({ docId }: { docId: string }) {
-  const { page: pageParam, ev: evParam, chunk: chunkParam } = Route.useSearch();
+  const { page: pageParam, ev: evParam, chunk: chunkParam, tool = "evidence" } = Route.useSearch();
   const queryClient = useQueryClient();
   const navigate = Route.useNavigate();
   const { data: doc } = useSuspenseQuery(documentQuery(docId));
@@ -121,6 +145,18 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const [zoom, setZoom] = useState(1);
   const [showPages, setShowPages] = useState(true);
   const [showInspector, setShowInspector] = useState(true);
+  const [desktop, setDesktop] = useState(false);
+  const [visitedTools, setVisitedTools] = useState<string[]>([tool]);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    setVisitedTools((current) => (current.includes(tool) ? current : [...current, tool]));
+  }, [tool]);
 
   const previousStatus = useRef(doc.status);
   const retriedEmptyPages = useRef(false);
@@ -139,7 +175,10 @@ function WorkspaceReady({ docId }: { docId: string }) {
 
   const citationQuery = useQuery({
     queryKey: ["citation", chunkParam],
-    queryFn: () => api.getCitation!(chunkParam!),
+    queryFn: () => {
+      if (!api.getCitation || !chunkParam) throw new Error("Citation unavailable");
+      return api.getCitation(chunkParam);
+    },
     enabled: Boolean(chunkParam && api.getCitation),
   });
   const citation = citationQuery.data ?? null;
@@ -166,6 +205,63 @@ function WorkspaceReady({ docId }: { docId: string }) {
   );
 
   const goTo = (n: number) => navigate({ search: (s) => ({ ...s, page: n }), replace: true });
+  const tools = [
+    { id: "evidence", label: "Evidence", icon: ListFilter },
+    { id: "ask", label: "Ask PDF", icon: MessageSquareText },
+    { id: "charts", label: "Chart checks", icon: ShieldCheck },
+    { id: "compare", label: "Statistics & trends", icon: TrendingUp },
+  ] as const;
+  const toolContent = () => (
+    <>
+      <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
+        <p className="text-sm font-semibold">{tools.find((item) => item.id === tool)?.label}</p>
+      </div>
+      <div hidden={tool !== "evidence"}>
+        <CitedExcerpt
+          citation={citation}
+          error={citationQuery.error}
+          pending={citationQuery.isFetching}
+        />
+        <EvidenceInspector
+          evidence={evidence}
+          pages={pages}
+          selected={selected}
+          filter={filter}
+          onFilter={setFilter}
+          onSelect={select}
+        />
+      </div>
+      <div hidden={tool === "evidence"}>
+        {citation && (
+          <details className="border-b px-4 py-3">
+            <summary className="cursor-pointer text-sm font-medium">
+              Selected source excerpt · p. {citation.pages[0]}
+            </summary>
+            <CitedExcerpt
+              citation={citation}
+              error={citationQuery.error}
+              pending={citationQuery.isFetching}
+            />
+          </details>
+        )}
+        {visitedTools.includes("ask") && (
+          <div hidden={tool !== "ask"}>
+            <AnalysisPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+        {visitedTools.includes("charts") && (
+          <div hidden={tool !== "charts"}>
+            <ChartChecksPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+        {visitedTools.includes("compare") && (
+          <div hidden={tool !== "compare"}>
+            <ComparisonPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+      </div>
+    </>
+  );
   const select = (id: string | null) => {
     setSelectedId(id);
     const ev = evidence.find((e) => e.id === id);
@@ -217,9 +313,6 @@ function WorkspaceReady({ docId }: { docId: string }) {
               .join(" · ")}
             {!IS_DEMO && doc.parser ? ` · ${doc.parser.name}` : ""}
           </p>
-          <div className="mt-2">
-            <ReportTools documentId={doc.id} sample={IS_DEMO} />
-          </div>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <div className="flex shrink-0 items-center gap-1">
@@ -314,17 +407,45 @@ function WorkspaceReady({ docId }: { docId: string }) {
           </div>
         </div>
       </div>
+      <nav
+        aria-label="PDF workspace tools"
+        className="flex shrink-0 flex-wrap gap-1 border-b bg-card px-4 py-2"
+      >
+        {tools.map((item) => (
+          <Button
+            key={item.id}
+            size="sm"
+            variant={tool === item.id ? "secondary" : "ghost"}
+            aria-pressed={tool === item.id}
+            onClick={() => {
+              setShowInspector(true);
+              void navigate({ search: (s) => ({ ...s, tool: item.id }), replace: true });
+            }}
+          >
+            <item.icon className="size-4" />
+            {item.label}
+          </Button>
+        ))}
+      </nav>
       {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
-        <p className="border-b bg-warning-soft px-4 py-2 text-xs text-warning">
-          {doc.warnings.join(" ")}
-        </p>
+        <details className="shrink-0 border-b bg-warning-soft px-4 py-2 text-xs text-warning">
+          <summary className="flex cursor-pointer items-center gap-2">
+            <ChevronDown className="size-3" />
+            {doc.warnings.length} document notices · extraction may be incomplete
+          </summary>
+          <ul className="mt-2 max-h-28 list-inside list-disc overflow-auto space-y-1">
+            {doc.warnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </details>
       )}
 
       <div className="hidden min-h-0 flex-1 lg:block">
         <ResizablePanelGroup orientation="horizontal" id="document-workspace">
           {showPages && (
             <>
-              <ResizablePanel id="pages" defaultSize="17%" minSize="140px" maxSize="25%">
+              <ResizablePanel id="pages" defaultSize="13%" minSize="110px" maxSize="22%">
                 <aside className="h-full overflow-y-auto bg-card">
                   <PageNavigator
                     pages={pages}
@@ -337,7 +458,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
               <ResizableHandle withHandle aria-label="Resize page navigator" />
             </>
           )}
-          <ResizablePanel id="document" minSize="35%">
+          <ResizablePanel id="document" minSize="30%">
             <main className="h-full overflow-auto bg-canvas px-6 py-8">
               {page && (
                 <DocumentPageView
@@ -357,22 +478,8 @@ function WorkspaceReady({ docId }: { docId: string }) {
           {showInspector && (
             <>
               <ResizableHandle withHandle aria-label="Resize evidence inspector" />
-              <ResizablePanel id="inspector" defaultSize="29%" minSize="280px" maxSize="40%">
-                <aside className="h-full overflow-y-auto bg-card">
-                  <CitedExcerpt
-                    citation={citation}
-                    error={citationQuery.error}
-                    pending={citationQuery.isFetching}
-                  />
-                  <EvidenceInspector
-                    evidence={evidence}
-                    pages={pages}
-                    selected={selected}
-                    filter={filter}
-                    onFilter={setFilter}
-                    onSelect={select}
-                  />
-                </aside>
+              <ResizablePanel id="inspector" defaultSize="42%" minSize="300px" maxSize="60%">
+                <aside className="h-full overflow-y-auto bg-card">{desktop && toolContent()}</aside>
               </ResizablePanel>
             </>
           )}
@@ -401,19 +508,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
         </main>
         {showInspector && (
           <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
-            <CitedExcerpt
-              citation={citation}
-              error={citationQuery.error}
-              pending={citationQuery.isFetching}
-            />
-            <EvidenceInspector
-              evidence={evidence}
-              pages={pages}
-              selected={selected}
-              filter={filter}
-              onFilter={setFilter}
-              onSelect={select}
-            />
+            {!desktop && toolContent()}
           </aside>
         )}
       </div>
