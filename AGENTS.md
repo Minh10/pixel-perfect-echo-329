@@ -15,11 +15,13 @@
 
 - All data access goes through `src/lib/api/service.ts` (`FinAuditService` interface + queryOptions); swap the demo implementation for a FastAPI HTTP client there — UI never imports demo data directly.
 - Lovable Cloud provides secure server-side communication; FastAPI and Docling remain the document-processing backend because the accepted processing architecture must be preserved.
-- All live browser requests use the same-origin document-service proxy; upstream credentials are read only inside server handlers, and private access fails closed without an explicitly authorized account.
+- All live browser requests use the same-origin document-service proxy; upstream credentials are read only inside server handlers. Default owner access remains fail-closed; an explicit server-only temporary demo switch permits a validated signed demo cookie with durable revocation and atomic budgets, never a Cloud identity.
 - Owner sign-in uses server-side Cloud authentication and host-only Secure HttpOnly SameSite cookies for all report resources; the browser never receives the owner's session tokens from sign-in responses.
-- Public sample routes remain ungated; optional demo entry is isolated browser-only presentation state, never consumed by server authentication or the proxy, because publicly guessable demo credentials grant no private access.
+- Public sample routes remain ungated. Browser-only sample entry never authorizes requests; temporary live entry is separately validated server-side and remains publicly guessable, so activation requires verified upstream cost caps.
 - Generated Cloud integration files retain semantic and security ESLint checks but not the app's Prettier rule because their generator controls formatting.
-- Keep proxy mode opt-in and the login-free sample demo as default until service configuration and private access are complete; this prevents an unavailable backend from blocking the accepted preview.
+- Select live service only in browser effects after a server-verified enabled demo session; SSR always uses the public sample, preventing shared global live configuration from leaking between server requests.
+- Temporary demo counters and revocation use service-role-only Cloud tables and atomic RPCs; never use in-memory rate limiting, and fail closed on guard failure.
+- Inspect bounded multipart PDF bytes with pdf-lib before forwarding temporary uploads; this enforces page limits without changing FastAPI/Docling processing.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.
 

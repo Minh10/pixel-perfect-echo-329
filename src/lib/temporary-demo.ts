@@ -22,7 +22,7 @@ function encode(bytes: Uint8Array): string {
     .replaceAll("/", "_")
     .replace(/=+$/, "");
 }
-function decode(value: string): Uint8Array {
+function decode(value: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(atob(value.replaceAll("-", "+").replaceAll("_", "/")), (c) =>
     c.charCodeAt(0),
   );

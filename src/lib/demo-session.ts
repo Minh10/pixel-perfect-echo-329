@@ -2,6 +2,7 @@ import { createServerOnlyFn } from "@tanstack/react-start";
 import { configuredBackend } from "./api/proxy-policy";
 import { acceptsDemoEntry } from "./demo-entry";
 import { demoGuard } from "./demo-guard";
+import { boundedBody } from "./api/demo-request";
 import {
   DEMO_COOKIE,
   DEMO_TTL,
@@ -51,7 +52,7 @@ export const handleDemoSession = createServerOnlyFn(
         return reply(429, { error: "Too many demo entries. Try later." });
       if (!request.headers.get("content-type")?.startsWith("application/json"))
         return reply(415, { error: "JSON required." });
-      const text = await request.text();
+      const text = new TextDecoder().decode(await boundedBody(request, 256));
       if (text.length > 256) return reply(413, { error: "Entry too large." });
       const data = JSON.parse(text);
       if (!acceptsDemoEntry(data.username, data.password))

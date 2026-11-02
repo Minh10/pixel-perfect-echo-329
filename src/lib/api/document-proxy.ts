@@ -28,7 +28,7 @@ export const proxyDocumentRequest = createServerOnlyFn(
     if (!allowedProxyPath(request.method, path))
       return failure(404, "not_found", "Document endpoint not found.");
     let demo = false;
-    let body: Uint8Array | undefined;
+    let body: Uint8Array<ArrayBuffer> | undefined;
     if (config.demoEnabled === "true") {
       const id = await verifyDemoSession(demoCookie(request), config.demoSecret);
       if (!id)
@@ -191,6 +191,6 @@ export function validDocumentQuery(key: string, value: string): boolean {
     return /^[0-9]{2,3}$/.test(value) && Number(value) >= 36 && Number(value) <= 150;
   if (key === "page") return /^[1-9][0-9]{0,4}$/.test(value);
   if (key === "parser") return ["auto", "docling", "pymupdf"].includes(value);
-  if (key === "category") return ["table", "figure", "text"].includes(value);
+  if (key === "category") return ["table", "figure", "disclosure"].includes(value);
   return false;
 }

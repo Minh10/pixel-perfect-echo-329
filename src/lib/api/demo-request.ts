@@ -27,7 +27,7 @@ const retrieve = z
     rerank: z.literal(false).optional(),
   })
   .strict();
-export async function boundedBody(request: Request, max: number): Promise<Uint8Array> {
+export async function boundedBody(request: Request, max: number): Promise<Uint8Array<ArrayBuffer>> {
   const reader = request.body?.getReader();
   if (!reader) return new Uint8Array();
   const chunks: Uint8Array[] = [];
@@ -53,7 +53,7 @@ export async function boundedBody(request: Request, max: number): Promise<Uint8A
 export async function validateDemoBody(
   request: Request,
   path: string,
-): Promise<Uint8Array | undefined> {
+): Promise<Uint8Array<ArrayBuffer> | undefined> {
   if (request.method === "GET") return undefined;
   const upload = path === "api/v1/documents" && request.method === "POST";
   const bytes = await boundedBody(request, upload ? MAX_PDF_BYTES + 16 * 1024 : MAX_JSON_BYTES);
