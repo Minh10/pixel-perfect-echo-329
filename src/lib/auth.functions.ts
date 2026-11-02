@@ -7,9 +7,7 @@ import { adminPassword } from "./admin-credential";
 
 export const signIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z
-      .object({ email: z.string().email().max(254), password: adminPassword })
-      .parse(input),
+    z.object({ email: z.string().email().max(254), password: adminPassword }).parse(input),
   )
   .handler(async ({ data }) => {
     setResponseHeader("Cache-Control", "private, no-store");
