@@ -28,7 +28,8 @@ def environment(metric, period, value):
     }
     store = SimpleNamespace(facts=lambda ids: {f["factId"]: f for f in facts if f["factId"] in ids})
     pipeline = QAPipeline(SimpleNamespace(qa_claim_support_min=0.5), store, None, None, [])
-    quote = f"{fact['rowLabel']}: {period} = {fact['cellText']}"
+    # Copy a real substring rather than reconstructing dot leaders/adjacent columns.
+    quote = f"{period} = {fact['cellText']}"
     plan = {
         "status": "answered", "answer": f"{metric} for {period} was {fact['cellText']} million dollars.",
         "citations": [{"evidence_id": "E1", "quote": quote}],
