@@ -62,7 +62,7 @@ function DemoEntry() {
                   return;
                 }
                 setPassword("");
-                await navigate({ to: "/", replace: true, reloadDocument: true });
+                await navigate({ to: "/documents", replace: true, reloadDocument: true });
                 return;
               }
             } catch {
