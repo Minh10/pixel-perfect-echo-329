@@ -43,6 +43,7 @@ import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
 import { ErrorState, WorkspaceSkeleton } from "@/components/app/states";
+import { selectWorkspaceDocument } from "@/lib/workspace-selection";
 
 const search = z.object({
   doc: z.string().optional(),
@@ -57,15 +58,15 @@ export const Route = createFileRoute("/intelligence")({
   loaderDeps: ({ search }) => ({ doc: search.doc }),
   loader: async ({ context, deps }) => {
     const docs = await context.queryClient.ensureQueryData(documentsQuery());
-    const docId =
-      deps.doc ?? DEFAULT_DOCUMENT_ID ?? docs.find((doc) => doc.status === "ready")?.id ?? null;
-    if (!docId) return { docId: null as string | null };
+    const selection = selectWorkspaceDocument(deps.doc, IS_DEMO, DEFAULT_DOCUMENT_ID, docs);
+    const { docId } = selection;
+    if (!docId) return selection;
     await Promise.all([
       context.queryClient.ensureQueryData(documentQuery(docId)),
       context.queryClient.ensureQueryData(pagesQuery(docId)),
       context.queryClient.ensureQueryData(evidenceQuery(docId)),
     ]);
-    return { docId };
+    return selection;
   },
   head: () => ({
     meta: [
@@ -103,7 +104,13 @@ export const Route = createFileRoute("/intelligence")({
 });
 
 function Workspace() {
-  const { docId } = Route.useLoaderData();
+  const { docId, awaitingLiveSession } = Route.useLoaderData();
+  if (awaitingLiveSession) return <div className="page-layout space-y-4">
+    <h1 className="text-2xl font-semibold">Live report workspace</h1>
+    <p className="text-sm text-muted-foreground">Checking live access. If no demo session is active, activate the demo to open this PDF.</p>
+    <Button asChild><Link to="/login">Activate live demo</Link></Button>
+    <Button asChild variant="outline"><Link to="/documents">Back to documents</Link></Button>
+  </div>;
   if (!docId) {
     return (
       <div className="page-layout">
