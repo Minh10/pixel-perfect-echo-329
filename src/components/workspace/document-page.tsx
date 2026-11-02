@@ -36,7 +36,7 @@ export function DocumentPageView({
   const [failedImage, setFailedImage] = useState<string | null>(null);
   useEffect(() => {
     const parent = root.current?.parentElement;
-    if (!parent) return;
+    if (!parent) return undefined;
     const observer = new ResizeObserver(() =>
       setSize({ width: parent.clientWidth, height: parent.clientHeight }),
     );
