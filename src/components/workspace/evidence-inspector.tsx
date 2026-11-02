@@ -1,11 +1,13 @@
-import { X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { X, ScanLine } from "lucide-react";
 import type { DocumentPage, Evidence, EvidenceCategory } from "@/lib/api/types";
-import { IS_DEMO } from "@/lib/api/service";
+import { IS_DEMO, api } from "@/lib/api/service";
 import { Button } from "@/components/ui/button";
 import { DemoBadge } from "@/components/app/states";
 import { BlockContent } from "@/components/workspace/document-page";
 import { cn } from "@/lib/utils";
-import { evidenceRows, readableExcerpt } from "@/lib/evidence-list";
+import { readableExcerpt } from "@/lib/evidence-list";
 
 const CATEGORY_LABEL: Record<EvidenceCategory, string> = {
   metric: "Metric",
@@ -36,10 +38,25 @@ export function EvidenceInspector({
   onFilter,
   onSelect,
 }: Props) {
+  const detail = useRef<HTMLElement>(null);
+  const reading = useMutation({
+    mutationFn: () => {
+      const docId = selected?.provenance?.documentId;
+      if (IS_DEMO || !docId || !selected || !api.interpretFigure)
+        throw new Error("Live chart reading unavailable");
+      return api.interpretFigure(docId, selected.blockId);
+    },
+  });
+  useEffect(() => {
+    detail.current?.focus({ preventScroll: true });
+    detail.current?.scrollIntoView({ block: "nearest" });
+  }, [selected?.id]);
   const filtered = filter === "all" ? evidence : evidence.filter((e) => e.category === filter);
   const related = selected ? evidence.filter((e) => selected.related.includes(e.id)) : [];
   const selectedBlock = selected
-    ? pages.flatMap((page) => page.blocks).find((block) => block.id === selected.blockId)
+    ? pages
+        .find((page) => page.number === selected.page)
+        ?.blocks.find((block) => block.id === selected.blockId)
     : undefined;
   // Only show filters that have something behind them.
   const filters = FILTERS.filter(
@@ -50,7 +67,10 @@ export function EvidenceInspector({
     <div className="flex min-h-0 h-full flex-col">
       {selected ? (
         <section
-          className="border-b border-l-2 border-l-evidence bg-evidence-soft/40 p-4"
+          ref={detail}
+          tabIndex={-1}
+          key={selected.id}
+          className="border-b border-l-2 border-l-primary p-5 outline-none"
           aria-label="Selected evidence"
         >
           <div className="mb-3 flex items-start justify-between gap-2">
@@ -73,11 +93,46 @@ export function EvidenceInspector({
           <blockquote className="border-l-2 border-evidence pl-3 text-sm text-foreground/80">
             {readableExcerpt(selected)}
           </blockquote>
-          {selectedBlock && (selectedBlock.table || selectedBlock.figure) ? (
-            <div className="mt-4">
+          {selectedBlock && (selectedBlock.table || selectedBlock.figure || selectedBlock.chart) ? (
+            <div className="mt-4 overflow-x-auto">
               <BlockContent block={selectedBlock} />
             </div>
           ) : null}
+          {selectedBlock?.table && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {selectedBlock.table.rows.length} extracted rows ·{" "}
+              {selectedBlock.table.columns.length} columns
+            </p>
+          )}
+          {!IS_DEMO && selectedBlock?.figure && selected.provenance && api.interpretFigure && (
+            <div className="mt-4 space-y-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={reading.isPending}
+                onClick={() => reading.mutate()}
+              >
+                <ScanLine className="size-4" />
+                {reading.isPending ? "Reading…" : "Read chart"}
+              </Button>
+              {reading.isError && (
+                <p role="alert" className="text-xs text-destructive">
+                  {reading.error.message}
+                </p>
+              )}
+              {reading.data?.blockId === selected.blockId && (
+                <div className="space-y-2 text-sm">
+                  <p>{reading.data.summary || reading.data.title}</p>
+                  <p className="text-xs text-muted-foreground">{reading.data.caveat}</p>
+                  {reading.data.points.map((point, index) => (
+                    <p key={index} className="text-xs">
+                      {point.label}: {point.value} · visual estimate
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {selected.extracted && (
             <dl className="mt-4 divide-y rounded-sm border">
               {selected.extracted.map((f) => (
@@ -145,9 +200,9 @@ export function EvidenceInspector({
         </section>
       ) : (
         <section className="border-b p-4">
-          <p className="text-sm text-muted-foreground">
-            Click an item to jump to it on the page. Items on the current page are listed first.
-            {IS_DEMO ? " Illustrative extraction only." : " Values are not verified facts."}
+          <p className="text-sm font-medium">Source evidence</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Select a region to inspect its source on the PDF.
           </p>
         </section>
       )}
@@ -174,44 +229,55 @@ export function EvidenceInspector({
         {filtered.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No evidence in this category.</li>
         )}
-        {evidenceRows(filtered, currentPage).map((row) => {
-          const e = row.kind === "item" ? row.evidence : row.first;
-          const label =
-            row.kind === "group"
-              ? row.count > 1
-                ? `${row.count} figures on page ${row.page}`
-                : `Figure on page ${row.page}`
-              : e.label;
-          const excerpt =
-            row.kind === "group" ? "No caption detected · open the page to view" : row.excerpt;
-          return (
-            <li key={row.kind === "group" ? `g-${row.page}` : e.id}>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => onSelect(e.id)}
-                className={cn(
-                  "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted",
-                  selected?.id === e.id && "bg-evidence-soft/60",
-                  e.page === currentPage && "border-l-2 border-l-primary",
-                )}
+        {Array.from(new Set(filtered.map((item) => item.page)))
+          .sort((a, b) => (a === currentPage ? -1 : b === currentPage ? 1 : a - b))
+          .map((pageNumber) => (
+            <li key={pageNumber}>
+              <details
+                open={pageNumber === currentPage || pageNumber === selected?.page}
+                className="border-b"
               >
-                <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
-                  p.{e.page}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xs font-medium">{label}</span>
-                  <span className="block truncate text-[11px] text-muted-foreground">
-                    {excerpt}
+                <summary className="cursor-pointer px-4 py-3 text-xs font-medium">
+                  Page {pageNumber}
+                  {pageNumber === currentPage ? " · current" : ""}
+                  <span className="ml-2 text-muted-foreground">
+                    {filtered.filter((item) => item.page === pageNumber).length} regions
                   </span>
-                </span>
-                <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
-                  {CATEGORY_LABEL[e.category]}
-                </span>
-              </Button>
+                </summary>
+                <ul>
+                  {[...filtered.filter((item) => item.page === pageNumber)]
+                    .sort((a, b) => a.category.localeCompare(b.category))
+                    .map((e) => (
+                      <li key={e.id}>
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => onSelect(e.id)}
+                          className={cn(
+                            "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 px-4 py-3 text-left transition-colors hover:bg-muted",
+                            selected?.id === e.id && "bg-evidence-soft/60",
+                            e.page === currentPage && "border-l-2 border-l-primary",
+                          )}
+                        >
+                          <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
+                            p.{e.page}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-xs font-medium">{e.label}</span>
+                            <span className="block truncate text-[11px] text-muted-foreground">
+                              {readableExcerpt(e)}
+                            </span>
+                          </span>
+                          <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
+                            {CATEGORY_LABEL[e.category]}
+                          </span>
+                        </Button>
+                      </li>
+                    ))}
+                </ul>
+              </details>
             </li>
-          );
-        })}
+          ))}
       </ul>
     </div>
   );

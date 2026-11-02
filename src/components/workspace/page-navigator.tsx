@@ -29,6 +29,7 @@ export function PageNavigator({
             key={p.number}
             type="button"
             onClick={() => onSelect(p.number)}
+            aria-label={`Go to page ${p.number}`}
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex h-auto w-full items-center gap-3 rounded-sm p-1.5 text-left transition-colors hover:bg-muted",

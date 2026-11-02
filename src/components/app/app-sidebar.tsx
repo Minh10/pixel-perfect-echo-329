@@ -27,9 +27,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
+      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4 group-data-[collapsible=icon]:px-2">
         <Link to="/" className="flex items-center gap-2.5 overflow-hidden">
-          <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
+          <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground group-data-[collapsible=icon]:size-7">
             FA
           </span>
           <span className="truncate text-sm font-semibold text-foreground group-data-[collapsible=icon]:hidden">

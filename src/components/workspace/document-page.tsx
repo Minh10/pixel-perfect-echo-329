@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import { pdfDisplayWidth, type PdfFit } from "@/lib/pdf-view";
 import type { DocumentPage, Evidence, NormalizedBBox, PageBlock } from "@/lib/api/types";
 import { API_URL, apiAsset } from "@/lib/api/http-service";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,7 @@ interface Props {
   selectedId: string | null;
   showHighlights: boolean;
   zoom: number;
+  fit?: PdfFit;
   onSelect: (id: string) => void;
   documentTitle: string;
   focus?: NormalizedBBox[];
@@ -23,10 +26,34 @@ export function DocumentPageView({
   selectedId,
   showHighlights,
   zoom,
+  fit = "width",
   onSelect,
   documentTitle,
   focus,
 }: Props) {
+  const root = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 800, height: 800 });
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  useEffect(() => {
+    const parent = root.current?.parentElement;
+    if (!parent) return;
+    const observer = new ResizeObserver(() =>
+      setSize({ width: parent.clientWidth, height: parent.clientHeight }),
+    );
+    observer.observe(parent);
+    setSize({ width: parent.clientWidth, height: parent.clientHeight });
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() =>
+      root.current
+        ?.querySelector('[aria-pressed="true"]')
+        ?.scrollIntoView({ block: "nearest", inline: "nearest" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [selectedId, page.number]);
+  const aspect = page.width && page.height ? page.width / page.height : 210 / 297;
+  const displayWidth = pdfDisplayWidth(fit, size.width, size.height, aspect, zoom);
   const byBlock = new Map(
     evidence.filter((e) => e.page === page.number).map((e) => [e.blockId, e]),
   );
@@ -39,40 +66,44 @@ export function DocumentPageView({
     page.height > 0;
 
   if (live && page.imageUrl && page.width && page.height) {
-    const extracted = page.blocks.filter(
-      (block) =>
-        (block.kind === "table" && block.table) || (block.kind === "figure" && block.figure),
-    );
     return (
-      <div className="mx-auto w-full space-y-6" style={{ maxWidth: 720 * zoom }}>
+      <div ref={root} className="pdf-sheet mx-auto" style={{ width: displayWidth }}>
         <article
           className="relative w-full origin-top bg-paper shadow-page"
           style={{ aspectRatio: `${page.width} / ${page.height}` }}
           aria-label={`Page ${page.number}`}
         >
           <span className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
-          <img
-            key={page.imageUrl}
-            src={apiAsset(`${page.imageUrl}?dpi=110`)}
-            alt={`Page ${page.number} of ${documentTitle}`}
-            decoding="async"
-            className="absolute inset-0 h-full w-full"
-          />
+          {failedImage === page.imageUrl ? (
+            <div className="absolute inset-0 flex items-center justify-center p-8 text-sm text-muted-foreground">
+              Page image unavailable. Try reopening this report.
+            </div>
+          ) : (
+            <img
+              key={page.imageUrl}
+              src={apiAsset(`${page.imageUrl}?dpi=110`)}
+              alt={`Page ${page.number} of ${documentTitle}`}
+              decoding="async"
+              onError={() => setFailedImage(page.imageUrl ?? null)}
+              className="absolute inset-0 h-full w-full"
+            />
+          )}
           {page.blocks.map((block) => {
             const ev = byBlock.get(block.id);
             const box = block.bboxNormalized;
             if (!ev || !box) return null;
             const selected = selectedId === ev.id;
             return (
-              <button
+              <Button
                 key={block.id}
+                variant="ghost"
                 type="button"
                 onClick={() => onSelect(ev.id)}
                 aria-pressed={selected}
                 aria-label={`Evidence: ${ev.label}`}
                 title={ev.label}
                 className={cn(
-                  "absolute rounded-[2px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                  "absolute h-auto min-h-0 p-0 rounded-[2px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                   showHighlights &&
                     "border border-evidence/80 bg-evidence-soft/35 hover:bg-evidence-soft/70",
                   !showHighlights && "hover:bg-evidence-soft/40",
@@ -106,85 +137,59 @@ export function DocumentPageView({
           {page.section ? ` · ${page.section}` : ""}
           {page.hasTextLayer === false ? " · no text layer" : ""}
         </p>
-        {extracted.length > 0 && (
-          <section
-            className="space-y-4 rounded-md border bg-card p-4"
-            aria-label="Extracted regions"
-          >
-            <h2 className="text-sm font-semibold">Extracted on this page</h2>
-            {extracted.map((block) => {
-              const ev = byBlock.get(block.id);
-              return (
-                <div key={block.id} className="border-t pt-4 first:border-t-0 first:pt-0">
-                  {ev ? (
-                    <Button
-                      variant="ghost"
-                      type="button"
-                      onClick={() => onSelect(ev.id)}
-                      aria-pressed={selectedId === ev.id}
-                      className="mb-2 h-auto px-0 text-xs font-medium text-evidence hover:bg-transparent hover:text-evidence"
-                    >
-                      {ev.label}
-                    </Button>
-                  ) : null}
-                  <BlockContent block={block} />
-                </div>
-              );
-            })}
-          </section>
-        )}
       </div>
     );
   }
 
   return (
-    <article
-      className="mx-auto aspect-[1/1.3] w-full origin-top bg-paper p-[7%] text-[0.8125rem] leading-relaxed shadow-page transition-transform"
-      style={{ maxWidth: 720 * zoom }}
-      aria-label={`Page ${page.number}`}
-    >
-      <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b pb-2 font-mono text-[10px] text-muted-foreground">
-        <span className="truncate">{documentTitle}</span>
-        <span>{page.section}</span>
-      </div>
-      <div className="space-y-4">
-        {page.blocks.map((block) => {
-          const ev = byBlock.get(block.id);
-          const content = <BlockContent block={block} />;
-          if (!ev) return <div key={block.id}>{content}</div>;
-          const selected = selectedId === ev.id;
-          return (
-            <Button
-              variant="ghost"
-              key={block.id}
-              type="button"
-              onClick={() => onSelect(ev.id)}
-              aria-pressed={selected}
-              aria-label={`Evidence: ${ev.label}`}
-              className={cn(
-                "group relative h-auto whitespace-normal -mx-2 block w-[calc(100%+1rem)] rounded-sm px-2 py-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                showHighlights && "bg-evidence-soft/60 hover:bg-evidence-soft",
-                !showHighlights && "hover:bg-muted",
-                selected && "bg-evidence-soft ring-2 ring-evidence hover:bg-evidence-soft",
-              )}
-            >
-              {showHighlights && (
-                <span
-                  className={cn(
-                    "absolute -left-3 top-1 bottom-1 w-0.5 rounded-full bg-evidence/50",
-                    selected && "bg-evidence",
-                  )}
-                />
-              )}
-              {content}
-            </Button>
-          );
-        })}
-      </div>
-      <div className="mt-10 text-center font-mono text-[10px] text-muted-foreground">
-        {page.number} / {totalPages}
-      </div>
-    </article>
+    <div ref={root} className="pdf-sheet mx-auto" style={{ width: displayWidth }}>
+      <article
+        className="min-h-full aspect-[210/297] w-full origin-top bg-paper p-[7%] text-[0.9375rem] leading-relaxed shadow-page"
+        aria-label={`Page ${page.number}`}
+      >
+        <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b pb-2 font-mono text-[10px] text-muted-foreground">
+          <span className="truncate">{documentTitle}</span>
+          <span>{page.section}</span>
+        </div>
+        <div className="space-y-4">
+          {page.blocks.map((block) => {
+            const ev = byBlock.get(block.id);
+            const content = <BlockContent block={block} />;
+            if (!ev) return <div key={block.id}>{content}</div>;
+            const selected = selectedId === ev.id;
+            return (
+              <Button
+                variant="ghost"
+                key={block.id}
+                type="button"
+                onClick={() => onSelect(ev.id)}
+                aria-pressed={selected}
+                aria-label={`Evidence: ${ev.label}`}
+                className={cn(
+                  "group relative h-auto whitespace-normal -mx-2 block w-[calc(100%+1rem)] rounded-sm px-2 py-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                  showHighlights && "bg-evidence-soft/60 hover:bg-evidence-soft",
+                  !showHighlights && "hover:bg-muted",
+                  selected && "bg-evidence-soft ring-2 ring-evidence hover:bg-evidence-soft",
+                )}
+              >
+                {showHighlights && (
+                  <span
+                    className={cn(
+                      "absolute -left-3 top-1 bottom-1 w-0.5 rounded-full bg-evidence/50",
+                      selected && "bg-evidence",
+                    )}
+                  />
+                )}
+                {content}
+              </Button>
+            );
+          })}
+        </div>
+        <div className="mt-10 text-center font-mono text-[10px] text-muted-foreground">
+          {page.number} / {totalPages}
+        </div>
+      </article>
+    </div>
   );
 }
 
@@ -194,36 +199,38 @@ export function BlockContent({ block }: { block: PageBlock }) {
   if (block.kind === "paragraph") return <p className="text-foreground/85">{block.text}</p>;
   if (block.kind === "table" && block.table) {
     return (
-      <table className="w-full border-collapse tabular text-[0.75rem]">
-        <thead>
-          <tr className="border-b-2 border-primary">
-            {block.table.columns.map((c, i) => (
-              <th
-                scope="col"
-                key={i}
-                className={cn("py-1.5 font-semibold", i === 0 ? "text-left" : "text-right")}
-              >
-                {c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {block.table.rows.map((r, rowIndex) => (
-            <tr
-              key={`${rowIndex}-${r.label}`}
-              className={cn("border-b border-border/70", r.emphasis && "font-semibold")}
-            >
-              <td className="py-1.5">{r.label}</td>
-              {r.values.map((v, i) => (
-                <td key={i} className="py-1.5 text-right font-mono">
-                  {v}
-                </td>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse tabular text-[0.75rem]">
+          <thead>
+            <tr className="border-b-2 border-primary">
+              {block.table.columns.map((c, i) => (
+                <th
+                  scope="col"
+                  key={i}
+                  className={cn("py-1.5 font-semibold", i === 0 ? "text-left" : "text-right")}
+                >
+                  {c}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {block.table.rows.map((r, rowIndex) => (
+              <tr
+                key={`${rowIndex}-${r.label}`}
+                className={cn("border-b border-border/70", r.emphasis && "font-semibold")}
+              >
+                <td className="py-1.5">{r.label}</td>
+                {r.values.map((v, i) => (
+                  <td key={i} className="py-1.5 text-right font-mono">
+                    {v}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   }
   if (block.kind === "figure" && block.figure) {
@@ -243,7 +250,7 @@ export function BlockContent({ block }: { block: PageBlock }) {
     );
   }
   if (block.kind === "chart" && block.chart) {
-    const max = Math.max(...block.chart.series.map((s) => s.value));
+    const max = Math.max(1, ...block.chart.series.map((s) => Math.abs(s.value)));
     return (
       <figure>
         <figcaption className="mb-3 text-xs font-semibold">{block.chart.title}</figcaption>
