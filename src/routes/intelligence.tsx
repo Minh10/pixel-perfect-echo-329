@@ -105,12 +105,21 @@ export const Route = createFileRoute("/intelligence")({
 
 function Workspace() {
   const { docId, awaitingLiveSession } = Route.useLoaderData();
-  if (awaitingLiveSession) return <div className="page-layout space-y-4">
-    <h1 className="text-2xl font-semibold">Live report workspace</h1>
-    <p className="text-sm text-muted-foreground">Checking live access. If no demo session is active, activate the demo to open this PDF.</p>
-    <Button asChild><Link to="/login">Activate live demo</Link></Button>
-    <Button asChild variant="outline"><Link to="/documents">Back to documents</Link></Button>
-  </div>;
+  if (awaitingLiveSession)
+    return (
+      <div className="page-layout space-y-4">
+        <h1 className="text-2xl font-semibold">Live report workspace</h1>
+        <p className="text-sm text-muted-foreground">
+          Checking live access. If no demo session is active, activate the demo to open this PDF.
+        </p>
+        <Button asChild>
+          <Link to="/login">Activate live demo</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/documents">Back to documents</Link>
+        </Button>
+      </div>
+    );
   if (!docId) {
     return (
       <div className="page-layout">

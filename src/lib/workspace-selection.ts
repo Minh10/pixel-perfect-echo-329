@@ -5,10 +5,14 @@ export function selectWorkspaceDocument(
   defaultId: string | null,
   documents: { id: string; status: string }[],
 ): { docId: string | null; awaitingLiveSession: boolean } {
-  if (sample && requested && !documents.some(document => document.id === requested))
+  if (sample && requested && !documents.some((document) => document.id === requested))
     return { docId: null, awaitingLiveSession: true };
   return {
-    docId: requested ?? defaultId ?? documents.find(document => document.status === "ready")?.id ?? null,
+    docId:
+      requested ??
+      defaultId ??
+      documents.find((document) => document.status === "ready")?.id ??
+      null,
     awaitingLiveSession: false,
   };
 }
