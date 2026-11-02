@@ -216,8 +216,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
     },
     enabled: Boolean(chunkParam && api.getCitation),
   });
-  const citation = citationQuery.data?.chunkId === chunkParam && citationQuery.data.documentId === docId
-    ? citationQuery.data
+  const loadedCitation = citationQuery.data;
+  const citation = loadedCitation && loadedCitation.chunkId === chunkParam && loadedCitation.documentId === docId
+    ? loadedCitation
     : null;
   const current = Math.min(pageParam ?? 1, Math.max(pages.length, 1));
   const page = pages.find((p) => p.number === current);
