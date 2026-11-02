@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/http-service";
 import { DEFAULT_DOCUMENT_ID, IS_DEMO, api } from "@/lib/api/service";
 import type { DocumentType, UploadMeta } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { useLiveStatus } from "@/lib/live-status";
 
 const DOCUMENT_TYPES: DocumentType[] = [
   "Annual Report",
@@ -20,22 +21,30 @@ const DOCUMENT_TYPES: DocumentType[] = [
 ];
 
 export function PdfIntake() {
-  if (IS_DEMO || !api.uploadDocument) return <SampleStart />;
+  const live = useLiveStatus();
+  if (IS_DEMO || !api.uploadDocument) return <SampleStart canActivate={live.enabled} />;
   return <LiveIntake />;
 }
 
-function SampleStart() {
+function SampleStart({ canActivate }: { canActivate: boolean }) {
   return (
     <section className="rounded-md border bg-card p-5 sm:p-6">
       <p className="eyebrow">Start</p>
-      <h2 className="mt-2 text-xl font-semibold">Open the sample report</h2>
+      <h2 className="mt-2 text-xl font-semibold">
+        {canActivate ? "Activate the live demo to upload a PDF" : "Open the sample report"}
+      </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        This published preview is not connected to the document service, so a new PDF cannot be
-        processed here. The sample annual report is ready to inspect, including its pages, tables,
-        and charts.
+        {canActivate
+          ? "The document service is connected. Enter admin / admin to start a one-hour live session, then drop a financial PDF here. Until then you are viewing the sample."
+          : "This published preview is not connected to the document service, so a new PDF cannot be processed here. The sample annual report is ready to inspect, including its pages, tables, and charts."}
       </p>
-      <div className="mt-4">
-        <Button asChild>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {canActivate && (
+          <Button asChild>
+            <Link to="/login">Activate live demo</Link>
+          </Button>
+        )}
+        <Button asChild variant={canActivate ? "outline" : "default"}>
           <Link to="/intelligence" search={{ doc: DEFAULT_DOCUMENT_ID ?? undefined }}>
             Open sample report
           </Link>

@@ -16,9 +16,10 @@ import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { setDemoEntry, useDemoEntry } from "@/lib/demo-entry";
+import { entryState, useLiveStatus } from "@/lib/live-status";
 
 export function AppHeader() {
-  const demoEntered = useDemoEntry();
+  const entry = entryState(useLiveStatus(), useDemoEntry());
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = NAV_ITEMS.find((i) =>
@@ -48,22 +49,31 @@ export function AppHeader() {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {IS_DEMO && <DemoBadge />}
-        {demoEntered || !IS_DEMO ? (
+        {entry === "live" || entry === "sample-entered" ? (
           <Button
             variant="ghost"
             size="sm"
             onClick={async () => {
-              const response = await fetch("/api/public/demo-session", {
-                method: "DELETE",
-                credentials: "same-origin",
-              });
-              if (!response.ok) return;
+              if (entry === "live") {
+                const response = await fetch("/api/public/demo-session", {
+                  method: "DELETE",
+                  credentials: "same-origin",
+                });
+                if (!response.ok) return;
+              }
               setDemoEntry(false);
               await navigate({ to: "/", replace: true, reloadDocument: true });
             }}
           >
             <LogOut />
             Exit demo
+          </Button>
+        ) : entry === "activate" ? (
+          <Button asChild size="sm">
+            <Link to="/login">
+              <LogIn />
+              Activate live demo
+            </Link>
           </Button>
         ) : (
           <Button asChild variant="ghost" size="sm">
