@@ -168,7 +168,11 @@ function AnalysisWorkspace({
       </form>
 
       {mutation.isError && (
-        <AnalysisError error={mutation.error} documentId={requestedId} onRetry={() => mutation.reset()} />
+        <AnalysisError
+          error={mutation.error}
+          documentId={requestedId}
+          onRetry={() => mutation.reset()}
+        />
       )}
 
       {result?.status === "abstained" && (
@@ -318,7 +322,15 @@ function AnswerFooter({ result }: { result: QAResponse }) {
   );
 }
 
-function AnalysisError({ error, onRetry, documentId }: { error: unknown; onRetry: () => void; documentId?: string | undefined }) {
+function AnalysisError({
+  error,
+  onRetry,
+  documentId,
+}: {
+  error: unknown;
+  onRetry: () => void;
+  documentId?: string | undefined;
+}) {
   const unavailable =
     error instanceof ApiError && (error.status === 503 || error.code === "llm_unavailable");
   return (
@@ -337,7 +349,9 @@ function AnalysisError({ error, onRetry, documentId }: { error: unknown; onRetry
         onRetry={onRetry}
       />
       <Button asChild variant="outline" size="sm">
-        <Link to="/intelligence" search={{doc:documentId,tool:"evidence"}}>Inspect source evidence</Link>
+        <Link to="/intelligence" search={{ doc: documentId, tool: "evidence" }}>
+          Inspect source evidence
+        </Link>
       </Button>
     </div>
   );

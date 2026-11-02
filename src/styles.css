@@ -180,7 +180,10 @@
   }
 }
 @media (max-width: 639px) {
-  .report-inspector { min-height: calc(100svh - 3.5rem); scroll-margin-top: 3.5rem; }
+  .report-inspector {
+    min-height: calc(100svh - 3.5rem);
+    scroll-margin-top: 3.5rem;
+  }
   .app-header[data-report-workspace="true"] [data-slot="breadcrumb"] {
     min-width: 0;
     overflow: hidden;
