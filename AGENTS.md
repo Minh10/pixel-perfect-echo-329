@@ -17,7 +17,7 @@
 - Lovable Cloud provides secure server-side communication; FastAPI and Docling remain the document-processing backend because the accepted processing architecture must be preserved.
 - All live browser requests use the same-origin document-service proxy; upstream credentials are read only inside server handlers, and private access fails closed without an explicitly authorized account.
 - Owner sign-in uses server-side Cloud authentication and host-only Secure HttpOnly SameSite cookies for all report resources; the browser never receives the owner's session tokens from sign-in responses.
-- Public demo routes remain ungated with no account UI or session polling; legacy account URLs redirect to Overview, while existing server-side authentication checks remain intact because demo mode grants no private access.
+- Public sample routes remain ungated; optional demo entry is isolated browser-only presentation state, never consumed by server authentication or the proxy, because publicly guessable demo credentials grant no private access.
 - Generated Cloud integration files retain semantic and security ESLint checks but not the app's Prettier rule because their generator controls formatting.
 - Keep proxy mode opt-in and the login-free sample demo as default until service configuration and private access are complete; this prevents an unavailable backend from blocking the accepted preview.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.

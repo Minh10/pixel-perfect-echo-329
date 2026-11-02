@@ -16,7 +16,9 @@ The frontend now ignores `VITE_FINAUDIT_API_URL`; a browser must never bypass th
 
 ### Public demo and private access activation
 
-The website opens directly into the existing public Overview and sample workspace. There are no login, signup, administrator or account-management controls. Legacy `/login` and `/reset-password` URLs redirect to Overview. The header does not query or renew an owner session. Proxy mode remains off.
+The website opens directly into the existing public Overview and sample workspace. Optional **Demo entry** at `/login` accepts the publicly guessable `admin` / `admin` combination and opens the existing sample report; **Exit demo** clears only a tab-local sample-entry flag and returns to Overview. Visitors can continue without entry. There is no signup, account creation or account-management UI; `/reset-password` still redirects to Overview. The header does not query or renew an owner session. Proxy mode remains off.
+
+**This is NOT secure authentication.** Demo entry writes no auth cookies, creates no Cloud identity, calls no real login function and never grants access to private documents, the privileged proxy or paid OpenAI operations. Its browser-only presentation state is never read by server authorization. It is available only in sample mode; it is not a substitute for live access control. Do not treat `admin/admin` as a private credential or save it as a server secret.
 
 Single-user demo mode describes the visible sample experience only. It does not identify anonymous visitors as the owner, provision an account, mint a privileged session or bypass any server check. Private paid PDF/OpenAI operations remain unavailable.
 

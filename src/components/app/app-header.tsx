@@ -12,8 +12,14 @@ import {
 import { NAV_ITEMS } from "./nav";
 import { IS_DEMO } from "@/lib/api/service";
 import { DemoBadge } from "./states";
+import { Button } from "@/components/ui/button";
+import { LogIn, LogOut } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { setDemoEntry, useDemoEntry } from "@/lib/demo-entry";
 
 export function AppHeader() {
+  const demoEntered = useDemoEntry();
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const current = NAV_ITEMS.find((i) =>
     i.to === "/" ? pathname === "/" : pathname.startsWith(i.to),
@@ -34,13 +40,36 @@ export function AppHeader() {
             <BreadcrumbSeparator className="hidden sm:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="truncate font-medium">
-                {current?.title ?? "Not found"}
+                {current?.title ?? (pathname === "/login" ? "Demo entry" : "Not found")}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="flex shrink-0 items-center gap-3">{IS_DEMO && <DemoBadge />}</div>
+      <div className="flex shrink-0 items-center gap-3">
+        {IS_DEMO && <DemoBadge />}
+        {IS_DEMO &&
+          (demoEntered ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                setDemoEntry(false);
+                await navigate({ to: "/", replace: true, reloadDocument: true });
+              }}
+            >
+              <LogOut />
+              Exit demo
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/login">
+                <LogIn />
+                Demo entry
+              </Link>
+            </Button>
+          ))}
+      </div>
     </header>
   );
 }
