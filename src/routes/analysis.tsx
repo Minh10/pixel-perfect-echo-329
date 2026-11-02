@@ -102,7 +102,10 @@ function AnalysisWorkspace() {
       {selected.length > 0 && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Selected reports: </span>
-          {ready.filter((doc) => selected.includes(doc.id)).map((doc) => doc.title).join(" · ")}
+          {ready
+            .filter((doc) => selected.includes(doc.id))
+            .map((doc) => doc.title)
+            .join(" · ")}
         </p>
       )}
       <form onSubmit={submit} className="space-y-4">
