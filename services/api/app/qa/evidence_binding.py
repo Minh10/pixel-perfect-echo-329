@@ -186,7 +186,7 @@ def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: s
         # Period is part of identity; equal amounts in different columns are not interchangeable.
         period_matches = [f for f in matched if all(c["ok"] for c in _period_ok(f.get("period") or {}, claim.period, question))]
         matched = period_matches or matched
-        if len({_fact_identity(f) for f in matched}) == 1:
+        if all(f.get("factId") and f.get("tableId") for f in matched) and len({_fact_identity(f) for f in matched}) == 1:
             matched = [sorted(matched, key=lambda f: str(f.get("factId") or ""))[0]]
     if len(matched) != 1:
         why = ("value not found in this table" if not by_value else

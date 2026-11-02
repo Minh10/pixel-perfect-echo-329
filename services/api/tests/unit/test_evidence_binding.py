@@ -112,6 +112,7 @@ def test_berkshire_repeated_total_binds_same_period_unit_and_scope() -> None:
     rows = [fact(row, "$ 4,603", "4603", year=2025, ptype="quarterly", label="First Quarter 2025", fid="a"),
             fact(row, "$ 4,603", "4603", year=2025, ptype="quarterly", label="First Quarter 2025",
                  group="Net earnings includes:", fid="b")]
+    rows = [dict(f, documentId="berkshire", tableId="p1-b008") for f in rows]
     checks, bound = bind_table(claim("$ 4,603", row, "First Quarter 2025", row), rows,
                                "What were net earnings for First Quarter 2025?")
     assert not failed(checks), checks

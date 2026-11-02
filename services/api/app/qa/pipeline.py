@@ -24,7 +24,6 @@ from decimal import Decimal
 from app.config import Settings
 from app.financial.vocabulary import canonical_metrics
 from app.financial.numbers import parse_amount, scan_numeric_tokens
-from app.evaluation.metrics import numbers_in, parse_number
 from app.indexing.store import ChunkStore
 from app.qa import calculator as calc
 from app.qa.evidence import chunk_ref, ranked, route_documents
