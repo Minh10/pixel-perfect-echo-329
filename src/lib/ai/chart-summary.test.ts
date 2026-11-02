@@ -34,7 +34,7 @@ describe("Gateway chart batch", () => {
     ).toBe(3);
     expect(completed.mock.calls).toEqual([[1], [2], [3]]);
   });
-  it("bounds the additional gateway allowance to 40 per UTC day", () => {
-    expect(MAX_GATEWAY_CHART_CALLS).toBe(40);
+  it("bounds the additional gateway allowance to 200 per UTC day", () => {
+    expect(MAX_GATEWAY_CHART_CALLS).toBe(200);
   });
 });

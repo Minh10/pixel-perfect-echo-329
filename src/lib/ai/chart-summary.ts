@@ -1,4 +1,4 @@
-export const MAX_GATEWAY_CHART_CALLS = 40;
+export const MAX_GATEWAY_CHART_CALLS = 200;
 export type ChartSummaryEvent =
   | { type: "text"; text: string }
   | { type: "reasoning"; text: string }
