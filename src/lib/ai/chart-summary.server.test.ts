@@ -59,6 +59,26 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 describe("signed Gateway chart endpoint", () => {
+  it("starts AI after consuming POST JSON without cloning a used request body", async () => {
+    gateway.mockImplementation((incoming: Request) => {
+      expect(incoming.body).toBeNull();
+      expect(incoming.bodyUsed).toBe(false);
+      return {
+        getRunId: () => undefined,
+        result: {
+          text: Promise.resolve("Synthetic chart summary"),
+          fullStream: (async function* () {
+            yield { type: "text-delta", text: "Synthetic chart summary" };
+            yield { type: "finish", finishReason: "stop" };
+          })(),
+        },
+      };
+    });
+    const response = await handleChartSummary(await request());
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('"type":"done","summary":"Synthetic chart summary"');
+    expect(gateway).toHaveBeenCalledTimes(1);
+  });
   it("rejects anonymous requests before storage or AI", async () => {
     expect(
       (await handleChartSummary(new Request("https://app.example/api/chart-summary"))).status,
