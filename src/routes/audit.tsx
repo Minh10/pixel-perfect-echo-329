@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Minus, Plus, ShieldCheck } from "lucide-react";
 import { PendingModule } from "@/components/app/pending-module";
+import { ChartBatchPanel } from "@/components/app/chart-batch-panel";
 import { ReviewStatus } from "@/components/app/review-status";
 import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -149,6 +150,16 @@ function AuditWorkspace() {
           description="This report has no extracted figure. Upload a PDF that contains a chart or diagram."
         />
       )}
+      <ChartBatchPanel
+        documentId={selectedId}
+        figures={figures}
+        facts={facts.data ?? []}
+        activeBlockId={figure?.blockId}
+        onOpen={(id) => {
+          setBlockId(id);
+          setSelectedCheck(null);
+        }}
+      />
       {figure && (
         <section className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <article className="min-w-0">
