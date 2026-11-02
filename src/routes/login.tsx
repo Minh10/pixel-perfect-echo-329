@@ -11,12 +11,12 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Private sign-in — FINAUDIT AI" },
+      { title: "Administrator sign-in — FINAUDIT AI" },
       {
         name: "description",
         content: "Authorized account access to the private FINAUDIT AI workspace.",
       },
-      { property: "og:title", content: "Private sign-in — FINAUDIT AI" },
+      { property: "og:title", content: "Administrator sign-in — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Authorized account access to the private FINAUDIT AI workspace.",
@@ -41,9 +41,9 @@ function Login() {
     <div className="page-layout">
       <section className="mx-auto mt-12 max-w-sm space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Private sign-in</h1>
+          <h1 className="text-2xl font-semibold">Administrator sign-in</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            FINAUDIT AI · Authorized account only
+            FINAUDIT AI · Private document processing
           </p>
         </div>
         <form
@@ -87,6 +87,7 @@ function Login() {
               type="password"
               autoComplete="current-password"
               required
+              minLength={12}
               maxLength={256}
               value={password}
               onChange={(e) => setPassword(e.target.value)}

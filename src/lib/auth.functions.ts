@@ -7,7 +7,7 @@ import { AUTH_COOKIE, REFRESH_COOKIE, isOwner, sameOrigin } from "./auth-policy"
 export const signIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
-      .object({ email: z.string().email().max(254), password: z.string().min(1).max(256) })
+      .object({ email: z.string().email().max(254), password: z.string().min(12).max(256) })
       .parse(input),
   )
   .handler(async ({ data }) => {

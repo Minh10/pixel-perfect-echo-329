@@ -37,7 +37,9 @@ export function AppHeader() {
         const result = await refresh();
         queries.setQueryData(["owner-session"], result);
       } catch {
-        queries.setQueryData(["owner-session"], { signedIn: false, email: "" });
+        // A transient refresh failure must not present a successful login as lost.
+        // Every private resource is still revalidated by the server.
+        console.warn("Session renewal unavailable; private requests remain protected.");
       }
     };
     void renew();
@@ -66,7 +68,7 @@ export function AppHeader() {
               <BreadcrumbPage className="truncate font-medium">
                 {current?.title ??
                   (pathname === "/login"
-                    ? "Private sign-in"
+                    ? "Administrator sign-in"
                     : pathname === "/reset-password"
                       ? "Reset password"
                       : "Not found")}
@@ -86,7 +88,7 @@ export function AppHeader() {
               await queries.cancelQueries();
               queries.clear();
               await logout();
-              await navigate({ to: "/login", replace: true });
+              await navigate({ to: "/", replace: true });
             }}
           >
             <LogOut />
@@ -96,7 +98,7 @@ export function AppHeader() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/login">
               <LogIn />
-              Sign in
+              Admin sign-in
             </Link>
           </Button>
         )}
