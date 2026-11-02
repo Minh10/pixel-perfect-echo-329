@@ -6,10 +6,11 @@ import { PendingModule } from "@/components/app/pending-module";
 import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { groundedRequest, supportedQuestions } from "@/lib/ask-grounding";
 import { ApiError, apiAsset } from "@/lib/api/http-service";
 import { IS_DEMO, api, documentsQuery } from "@/lib/api/service";
-import type { QACitation, QAResponse, ValueKind } from "@/lib/api/types";
+import type { QACitation, QARequest, QAResponse, ValueKind } from "@/lib/api/types";
 
 const VALUE_KIND: Record<ValueKind, string> = {
   reported: "Reported",
@@ -48,7 +49,9 @@ export function AnalysisPanel({
       />
     );
   }
-  return <AnalysisWorkspace requestedId={documentId} embedded={embedded} />;
+  return (
+    <AnalysisWorkspace key={documentId ?? "library"} requestedId={documentId} embedded={embedded} />
+  );
 }
 
 function AnalysisWorkspace({
@@ -63,8 +66,16 @@ function AnalysisWorkspace({
   const ready = (documents.data ?? []).filter((doc) => doc.status === "ready");
   const [question, setQuestion] = useState("");
   const [selected, setSelected] = useState<string[]>(requestedId ? [requestedId] : []);
+  const facts = useQuery({
+    queryKey: ["facts", requestedId],
+    queryFn: () => (requestedId && api.getFacts ? api.getFacts(requestedId) : Promise.resolve([])),
+    enabled: Boolean(requestedId && api.getFacts),
+    staleTime: 300_000,
+    retry: false,
+  });
+  const suggestions = requestedId ? supportedQuestions(facts.data ?? [], requestedId) : [];
   const mutation = useMutation({
-    mutationFn: (body: { question: string; documentIds?: string[] }) => {
+    mutationFn: (body: QARequest) => {
       if (!api.ask) throw new Error("Questions unavailable");
       return api.ask(body);
     },
@@ -73,13 +84,12 @@ function AnalysisWorkspace({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const text = question.trim();
-    if (!text || mutation.isPending) return;
-    mutation.mutate(
-      selected.length > 0 ? { question: text, documentIds: selected } : { question: text },
-    );
+    if (text.length < 3 || mutation.isPending) return;
+    mutation.mutate(groundedRequest(text, selected, requestedId));
   };
 
   const toggle = (id: string) => {
+    if (id === requestedId) return;
     setSelected((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     );
@@ -107,17 +117,40 @@ function AnalysisWorkspace({
       )}
       <form onSubmit={submit} className="space-y-4">
         <div className="flex flex-col gap-2 @md:flex-row">
-          <Input
+          <Textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="Ask about a reported figure, period, or change"
             aria-label="Financial question"
+            maxLength={2000}
+            rows={3}
+            className="min-w-0 resize-y"
             disabled={mutation.isPending}
           />
-          <Button type="submit" disabled={mutation.isPending || question.trim().length === 0}>
+          <Button type="submit" disabled={mutation.isPending || question.trim().length < 3}>
             {mutation.isPending ? "Asking…" : "Ask"}
           </Button>
         </div>
+        {suggestions.length > 0 && (
+          <div className="space-y-1 border-l-2 border-primary pl-3">
+            <p className="text-xs font-medium text-muted-foreground">From this report</p>
+            {suggestions.map((suggestion) => (
+              <Button
+                key={suggestion}
+                type="button"
+                variant="link"
+                disabled={mutation.isPending}
+                className="h-auto w-full justify-start whitespace-normal px-0 py-1 text-left text-xs"
+                onClick={() => {
+                  setQuestion(suggestion);
+                  mutation.reset();
+                }}
+              >
+                {suggestion}
+              </Button>
+            ))}
+          </div>
+        )}
         <details className="border-y py-3" open={requestedId ? undefined : true}>
           <summary className="cursor-pointer text-sm font-medium">
             {selected.length > 0
@@ -151,7 +184,7 @@ function AnalysisWorkspace({
                       className="mt-1"
                       checked={selected.includes(doc.id)}
                       onChange={() => toggle(doc.id)}
-                      disabled={mutation.isPending}
+                      disabled={mutation.isPending || doc.id === requestedId}
                     />
                     <span>
                       <span className="font-medium">{doc.title}</span>
@@ -166,6 +199,11 @@ function AnalysisWorkspace({
           </fieldset>
         </details>
       </form>
+      {mutation.isPending && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Checking the selected reports and supporting sources…
+        </p>
+      )}
 
       {mutation.isError && (
         <AnalysisError
@@ -178,15 +216,35 @@ function AnalysisWorkspace({
       {result?.status === "abstained" && (
         <div className="space-y-4">
           <EmptyState
-            title="No supported answer"
-            description={result.abstention?.detail || "The service abstained."}
+            title={
+              result.abstention?.reason === "validation_failed"
+                ? "Answer could not be verified"
+                : "No supported answer"
+            }
+            description={
+              result.abstention?.reason === "validation_failed"
+                ? "Relevant passages were found, but the proposed answer did not pass source checks. No unverified answer is shown."
+                : result.abstention?.detail || "The service abstained."
+            }
           />
+          {result.abstention?.reason === "validation_failed" && (
+            <details className="text-xs text-muted-foreground">
+              <summary className="cursor-pointer">Source-check details</summary>
+              <p className="mt-2 break-words">{result.abstention.detail}</p>
+            </details>
+          )}
+          <Button asChild variant="outline" size="sm">
+            <Link to="/intelligence" search={{ doc: requestedId, tool: "evidence" }}>
+              Inspect report evidence
+            </Link>
+          </Button>
           <AnswerFooter result={result} />
         </div>
       )}
 
       {result?.status === "answered" && (
         <article className="space-y-6 rounded-md border bg-card p-5">
+          <h3 className="text-sm font-semibold break-words">{result.question}</h3>
           {result.answer && <p className="text-sm leading-relaxed">{result.answer}</p>}
           {result.value && (
             <p className="text-sm">
@@ -199,43 +257,52 @@ function AnalysisWorkspace({
               </span>
             </p>
           )}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger className="text-sm font-medium">
-              How this was calculated
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3 space-y-3">
-              {result.operands.map((operand) => (
-                <p key={operand.id} className="text-sm">
-                  <span className="font-medium">{operand.label}</span>
-                  <span className="font-mono"> = {operand.quote}</span>
-                  <span className="text-muted-foreground"> [{operand.evidenceId}]</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {KIND_TAG[operand.evidenceKind]}
-                  </span>
-                  <span className="ml-2 text-xs text-primary">{VALUE_KIND[operand.valueKind]}</span>
-                  {(operand.rowLabel || operand.period) && (
-                    <span className="block text-xs text-muted-foreground">
-                      Source row “{operand.rowLabel ?? "?"}”
-                      {operand.period ? ` · period ${operand.period}` : ""}
-                      {operand.periodType && operand.periodType !== "unknown"
-                        ? ` (${operand.periodType.replace(/_/g, " ")})`
-                        : ""}
-                      {operand.binding === "fact" ? " · bound to table cell" : ""}
+          {(result.operands.length > 0 || result.calculations.length > 0) && (
+            <Collapsible>
+              <CollapsibleTrigger className="text-sm font-medium">
+                How this was calculated
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-3 space-y-3">
+                {result.operands.map((operand) => (
+                  <p key={operand.id} className="text-sm">
+                    <span className="font-medium">{operand.label}</span>
+                    <span className="font-mono"> = {operand.quote}</span>
+                    <span className="text-muted-foreground"> [{operand.evidenceId}]</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {KIND_TAG[operand.evidenceKind]}
                     </span>
-                  )}
-                </p>
-              ))}
-              {result.calculations.map((step) => (
-                <p key={step.id} className="font-mono text-xs">
-                  {step.description}: {step.op}({step.inputs.map((input) => input.value).join(", ")}
-                  ) = {step.result}
-                </p>
-              ))}
-              {result.operands.length === 0 && result.calculations.length === 0 && (
-                <p className="text-sm text-muted-foreground">No calculation steps were returned.</p>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
+                    <span className="ml-2 text-xs text-primary">
+                      {VALUE_KIND[operand.valueKind]}
+                    </span>
+                    {(operand.rowLabel || operand.period) && (
+                      <span className="block text-xs text-muted-foreground">
+                        Source row “{operand.rowLabel ?? "?"}”
+                        {operand.period ? ` · period ${operand.period}` : ""}
+                        {operand.periodType && operand.periodType !== "unknown"
+                          ? ` (${operand.periodType.replace(/_/g, " ")})`
+                          : ""}
+                        {operand.binding === "fact" ? " · bound to table cell" : ""}
+                      </span>
+                    )}
+                  </p>
+                ))}
+                {result.calculations.map((step) => (
+                  <p key={step.id} className="font-mono text-xs">
+                    {step.description}: {step.op}(
+                    {step.inputs.map((input) => input.value).join(", ")}) = {step.result}
+                  </p>
+                ))}
+                {result.operands.length === 0 && result.calculations.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No calculation steps were returned.
+                  </p>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+          <h4 className="text-xs font-semibold uppercase text-muted-foreground">
+            Sources · {result.citations.length}
+          </h4>
           <ul className="space-y-3">
             {result.citations.map((citation) => {
               const region = citation.chunk.regions[0];
@@ -272,7 +339,9 @@ function AnalysisWorkspace({
                         .filter(Boolean)
                         .join(" · ")}
                     </span>
-                    {citation.quote && <span className="mt-1 block text-sm">{citation.quote}</span>}
+                    <span className="mt-1 block whitespace-pre-wrap break-words text-sm">
+                      {citation.quote || citation.chunk.content}
+                    </span>
                     {citation.chunk.table?.units && (
                       <span className="mt-1 block font-mono text-[11px] text-muted-foreground">
                         Units: {citation.chunk.table.units}
