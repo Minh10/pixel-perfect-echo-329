@@ -147,6 +147,8 @@
 .report-inspector {
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .report-toolbar button[aria-pressed="true"] {
   color: var(--primary);
@@ -178,6 +180,10 @@
   }
 }
 @media (max-width: 639px) {
+  .report-inspector {
+    min-height: calc(100svh - 3.5rem);
+    scroll-margin-top: 3.5rem;
+  }
   .app-header[data-report-workspace="true"] [data-slot="breadcrumb"] {
     min-width: 0;
     overflow: hidden;

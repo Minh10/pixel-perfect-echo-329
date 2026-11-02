@@ -88,7 +88,7 @@ function AnalysisWorkspace({
   const result = mutation.isSuccess ? mutation.data : null;
 
   return (
-    <div className={embedded ? "min-w-0 space-y-5 p-5" : "page-layout space-y-6"}>
+    <div className={embedded ? "@container min-w-0 space-y-5 p-5" : "page-layout space-y-6"}>
       {!embedded && (
         <PageHeader
           eyebrow="Analysis"
@@ -106,7 +106,7 @@ function AnalysisWorkspace({
         </p>
       )}
       <form onSubmit={submit} className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 @md:flex-row">
           <Input
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
@@ -142,7 +142,7 @@ function AnalysisWorkspace({
                 No processed documents are available yet.
               </p>
             )}
-            <ul className="grid gap-2 sm:grid-cols-2">
+            <ul className="grid gap-2 @lg:grid-cols-2">
               {ready.map((doc) => (
                 <li key={doc.id}>
                   <label className="flex items-start gap-2 text-sm">
@@ -168,7 +168,11 @@ function AnalysisWorkspace({
       </form>
 
       {mutation.isError && (
-        <AnalysisError error={mutation.error} onRetry={() => mutation.reset()} />
+        <AnalysisError
+          error={mutation.error}
+          documentId={requestedId}
+          onRetry={() => mutation.reset()}
+        />
       )}
 
       {result?.status === "abstained" && (
@@ -238,9 +242,11 @@ function AnalysisWorkspace({
               const page = region?.page ?? citation.chunk.pages[0];
               return (
                 <li key={`${citation.evidenceId}-${citation.chunk.chunkId}`}>
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
-                    className="w-full rounded-md border px-3 py-3 text-left hover:bg-primary-soft/40"
+                    className="block h-auto w-full whitespace-normal rounded-md border px-3 py-3 text-left hover:bg-primary-soft/40"
+                    aria-label={`View source on page ${page ?? "unknown"}`}
                     onClick={() =>
                       navigate({
                         to: "/intelligence",
@@ -279,7 +285,7 @@ function AnalysisWorkspace({
                         className="mt-2 max-h-32 max-w-full"
                       />
                     )}
-                  </button>
+                  </Button>
                 </li>
               );
             })}
@@ -316,7 +322,15 @@ function AnswerFooter({ result }: { result: QAResponse }) {
   );
 }
 
-function AnalysisError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+function AnalysisError({
+  error,
+  onRetry,
+  documentId,
+}: {
+  error: unknown;
+  onRetry: () => void;
+  documentId?: string | undefined;
+}) {
   const unavailable =
     error instanceof ApiError && (error.status === 503 || error.code === "llm_unavailable");
   return (
@@ -324,20 +338,20 @@ function AnalysisError({ error, onRetry }: { error: unknown; onRetry: () => void
       <ErrorState
         title={
           unavailable
-            ? "Question answering is not configured on this server"
+            ? "Question service temporarily unavailable"
             : "The question could not be answered"
         }
         message={
-          unavailable
-            ? "No answer was generated. Connect a model provider on the server, or inspect the source documents directly."
-            : error instanceof Error
-              ? error.message
-              : "The analysis service returned an error. No answer was generated."
+          error instanceof Error
+            ? error.message
+            : "The analysis service returned an error. No answer was generated."
         }
         onRetry={onRetry}
       />
       <Button asChild variant="outline" size="sm">
-        <Link to="/intelligence">Inspect source evidence</Link>
+        <Link to="/intelligence" search={{ doc: documentId, tool: "evidence" }}>
+          Inspect source evidence
+        </Link>
       </Button>
     </div>
   );
