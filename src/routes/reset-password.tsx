@@ -31,13 +31,15 @@ function ResetPassword() {
     const hash = new URLSearchParams(window.location.hash.slice(1));
     setRecovery(hash.get("type") === "recovery");
     let cleanup: (() => void) | undefined;
+    let cancelled = false;
     void import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (cancelled) return;
       const { data } = supabase.auth.onAuthStateChange((event) => {
         if (event === "PASSWORD_RECOVERY") setRecovery(true);
       });
       cleanup = () => data.subscription.unsubscribe();
     });
-    return () => cleanup?.();
+    return () => { cancelled = true; cleanup?.(); };
   }, []);
   return (
     <div className="page-layout">
@@ -72,6 +74,8 @@ function ResetPassword() {
                   setPassword("");
                   setConfirmation("");
                   setMessage("Password updated. Sign in with your new password.");
+                } catch {
+                  setMessage("Password reset is unavailable. Please try again.");
                 } finally {
                   setBusy(false);
                 }

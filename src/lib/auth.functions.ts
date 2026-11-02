@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest, getCookie, setResponseHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { authClient, readOwnerSession, saveAuthCookies, clearAuthCookies } from "./auth-session";
-import { AUTH_COOKIE, isOwner, sameOrigin } from "./auth-policy";
+import { AUTH_COOKIE, REFRESH_COOKIE, isOwner, sameOrigin } from "./auth-policy";
 
 export const signIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
@@ -49,10 +49,16 @@ export const refreshOwnerSession = createServerFn({ method: "POST" }).handler(as
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
   if (!sameOrigin(getRequest())) return { success: false };
   const token = getCookie(AUTH_COOKIE);
+  const refreshToken = getCookie(REFRESH_COOKIE);
   try {
-    if (token) await authClient().auth.admin.signOut(token, "global");
+    const client = authClient();
+    if (token) await client.auth.admin.signOut(token, "global");
+    else if (refreshToken) {
+      const { data } = await client.auth.refreshSession({ refresh_token: refreshToken });
+      if (data.session) await client.auth.signOut();
+    }
   } catch {
-    /* Always clear the browser session even if the provider is unavailable. */
+    console.warn("Provider logout unavailable; local private session was cleared.");
   } finally {
     clearAuthCookies();
   }
