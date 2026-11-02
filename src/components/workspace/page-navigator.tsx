@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { DocumentPage, Evidence } from "@/lib/api/types";
 import { API_URL, apiAsset } from "@/lib/api/http-service";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ export function PageNavigator({
   evidence: Evidence[];
   onSelect: (n: number) => void;
 }) {
+  // A failed thumbnail falls back to the drawn placeholder instead of a broken icon.
+  const [failed, setFailed] = useState<Set<number>>(() => new Set());
   return (
     <nav aria-label="Pages" className="space-y-1 p-3">
       <p className="eyebrow px-1 pb-2">Pages · {pages.length}</p>
@@ -39,10 +42,13 @@ export function PageNavigator({
                 active && "border-primary ring-1 ring-primary",
               )}
             >
-              {p.imageUrl && API_URL ? (
+              {p.imageUrl && API_URL && !failed.has(p.number) ? (
                 <img
                   src={apiAsset(`${p.imageUrl}?dpi=40`)}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setFailed((s) => new Set(s).add(p.number))}
                   className="h-full w-full object-cover object-top"
                 />
               ) : (
