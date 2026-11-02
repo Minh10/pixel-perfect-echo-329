@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { createResponsesCall } from "./responses.server";
 import { MAX_GATEWAY_CHART_CALLS, type ChartSummaryEvent } from "./chart-summary";
-import { demoConfigured, demoCookie, demoSameOrigin, verifyDemoSession } from "../temporary-demo";
+import {
+  MAX_DAILY_WORK_REQUESTS,
+  demoConfigured,
+  demoCookie,
+  demoSameOrigin,
+  verifyDemoSession,
+} from "../temporary-demo";
 import { demoGuard } from "../demo-guard";
 import { proxyDocumentRequest } from "../api/document-proxy";
 import { configuredBackend } from "../api/proxy-policy";

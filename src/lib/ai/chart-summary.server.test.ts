@@ -123,10 +123,10 @@ describe("signed Gateway chart endpoint", () => {
     );
     expect(gateway).not.toHaveBeenCalled();
   });
-  it("preserves existing 20 daily and 2 per minute work caps", async () => {
+  it("preserves 40 daily and 2 per minute work caps", async () => {
     guard.consume.mockImplementation(async (bucket: string) => !bucket.startsWith("work-minute:"));
     expect((await handleChartSummary(await request())).status).toBe(429);
-    expect(guard.consume).toHaveBeenCalledWith(expect.stringMatching(/^work:/), 20);
+    expect(guard.consume).toHaveBeenCalledWith(expect.stringMatching(/^work:/), 40);
     expect(guard.consume).toHaveBeenCalledWith(expect.stringMatching(/^work-minute:/), 2);
     expect(gateway).not.toHaveBeenCalled();
   });

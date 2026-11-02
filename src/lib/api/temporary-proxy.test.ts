@@ -187,7 +187,7 @@ it("reserves global daily work/upload budgets and per-minute request caps", asyn
     true,
   );
   expect(calls.some(([bucket, limit]) => bucket.startsWith("session:") && limit === 60)).toBe(true);
-  expect(calls.some(([bucket, limit]) => bucket.startsWith("work:") && limit === 20)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("work:") && limit === 40)).toBe(true);
   expect(calls.some(([bucket, limit]) => bucket.startsWith("work-minute:") && limit === 2)).toBe(
     true,
   );
