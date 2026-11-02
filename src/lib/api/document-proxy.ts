@@ -29,7 +29,8 @@ export const proxyDocumentRequest = createServerOnlyFn(
     const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : cookieToken;
     if (!token) return failure(401, "unauthorized", "Sign in to access private reports.");
     const backend = configuredBackend(config.backendUrl);
-    if (!config.authorizedUserId || !config.authUrl || !config.authKey) return failure(403, "forbidden", "Private access is not configured.");
+    if (!config.authorizedUserId || !config.authUrl || !config.authKey)
+      return failure(403, "forbidden", "Private access is not configured.");
     if (request.method !== "GET") {
       const origin = request.headers.get("Origin");
       if (!origin || origin !== new URL(request.url).origin)
@@ -54,7 +55,12 @@ export const proxyDocumentRequest = createServerOnlyFn(
         return failure(401, "unauthorized", "Sign in to access private reports.");
       if (!authorizedUser(data.user.id, config.authorizedUserId))
         return failure(403, "forbidden", "This account is not authorized.");
-      if (!backend || !config.backendToken) return failure(503, "backend_unavailable", "The document service is not connected. Use the sample preview.");
+      if (!backend || !config.backendToken)
+        return failure(
+          503,
+          "backend_unavailable",
+          "The document service is not connected. Use the sample preview.",
+        );
       const target = new URL(path, backend);
       const incoming = new URL(request.url);
       for (const [key, value] of incoming.searchParams) {

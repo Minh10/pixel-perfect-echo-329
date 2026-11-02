@@ -26,11 +26,19 @@ export function AppHeader() {
   const logout = useServerFn(signOut);
   const queries = useQueryClient();
   const navigate = useNavigate();
-  const { data: session } = useQuery({ queryKey: ["owner-session"], queryFn: () => getSession(), retry: false });
+  const { data: session } = useQuery({
+    queryKey: ["owner-session"],
+    queryFn: () => getSession(),
+    retry: false,
+  });
   useEffect(() => {
     const renew = async () => {
-      try { const result = await refresh(); queries.setQueryData(["owner-session"], result); }
-      catch { queries.setQueryData(["owner-session"], { signedIn: false, email: "" }); }
+      try {
+        const result = await refresh();
+        queries.setQueryData(["owner-session"], result);
+      } catch {
+        queries.setQueryData(["owner-session"], { signedIn: false, email: "" });
+      }
     };
     void renew();
     const timer = window.setInterval(() => void renew(), 60_000);
@@ -56,7 +64,12 @@ export function AppHeader() {
             <BreadcrumbSeparator className="hidden sm:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="truncate font-medium">
-                {current?.title ?? (pathname === "/login" ? "Private sign-in" : pathname === "/reset-password" ? "Reset password" : "Not found")}
+                {current?.title ??
+                  (pathname === "/login"
+                    ? "Private sign-in"
+                    : pathname === "/reset-password"
+                      ? "Reset password"
+                      : "Not found")}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -64,10 +77,29 @@ export function AppHeader() {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {IS_DEMO && <DemoBadge />}
-        {session?.signedIn ? <Button variant="ghost" size="sm" title={session.email} onClick={async () => {
-          await queries.cancelQueries(); queries.clear(); await logout();
-          await navigate({ to: "/login", replace: true });
-        }}><LogOut />Sign out</Button> : <Button asChild variant="ghost" size="sm"><Link to="/login"><LogIn />Sign in</Link></Button>}
+        {session?.signedIn ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            title={session.email}
+            onClick={async () => {
+              await queries.cancelQueries();
+              queries.clear();
+              await logout();
+              await navigate({ to: "/login", replace: true });
+            }}
+          >
+            <LogOut />
+            Sign out
+          </Button>
+        ) : (
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/login">
+              <LogIn />
+              Sign in
+            </Link>
+          </Button>
+        )}
       </div>
     </header>
   );

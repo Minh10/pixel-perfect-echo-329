@@ -16,6 +16,8 @@
 - All data access goes through `src/lib/api/service.ts` (`FinAuditService` interface + queryOptions); swap the demo implementation for a FastAPI HTTP client there — UI never imports demo data directly.
 - Lovable Cloud provides secure server-side communication; FastAPI and Docling remain the document-processing backend because the accepted processing architecture must be preserved.
 - All live browser requests use the same-origin document-service proxy; upstream credentials are read only inside server handlers, and private access fails closed without an explicitly authorized account.
+- Owner sign-in uses server-side Cloud authentication and host-only Secure HttpOnly SameSite cookies for all report resources; the browser never receives the owner's session tokens from sign-in responses.
+- Generated Cloud integration files retain semantic and security ESLint checks but not the app's Prettier rule because their generator controls formatting.
 - Keep proxy mode opt-in and the login-free sample demo as default until service configuration and private access are complete; this prevents an unavailable backend from blocking the accepted preview.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.

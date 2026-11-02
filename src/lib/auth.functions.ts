@@ -5,12 +5,21 @@ import { authClient, readOwnerSession, saveAuthCookies, clearAuthCookies } from 
 import { AUTH_COOKIE, isOwner, sameOrigin } from "./auth-policy";
 
 export const signIn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ email: z.string().email().max(254), password: z.string().min(1).max(256) }).parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({ email: z.string().email().max(254), password: z.string().min(1).max(256) })
+      .parse(input),
+  )
   .handler(async ({ data }) => {
     setResponseHeader("Cache-Control", "private, no-store");
-    if (!sameOrigin(getRequest())) return { success: false, message: "Request origin is not allowed." };
+    if (!sameOrigin(getRequest()))
+      return { success: false, message: "Request origin is not allowed." };
     const owner = process.env["FINAUDIT_AUTHORIZED_USER_ID"];
-    if (!owner) return { success: false, message: "Private sign-in is not configured yet. The sample preview remains available." };
+    if (!owner)
+      return {
+        success: false,
+        message: "Private sign-in is not configured yet. The sample preview remains available.",
+      };
     try {
       const client = authClient();
       const { data: result, error } = await client.auth.signInWithPassword(data);
@@ -21,7 +30,9 @@ export const signIn = createServerFn({ method: "POST" })
       }
       saveAuthCookies(result.session);
       return { success: true, message: "" };
-    } catch { return { success: false, message: "Sign-in is temporarily unavailable." }; }
+    } catch {
+      return { success: false, message: "Sign-in is temporarily unavailable." };
+    }
   });
 
 export const ownerSession = createServerFn({ method: "GET" }).handler(async () => {
@@ -38,6 +49,12 @@ export const refreshOwnerSession = createServerFn({ method: "POST" }).handler(as
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
   if (!sameOrigin(getRequest())) return { success: false };
   const token = getCookie(AUTH_COOKIE);
-  try { if (token) await authClient().auth.admin.signOut(token, "global"); } catch { /* Always clear the browser session even if the provider is unavailable. */ } finally { clearAuthCookies(); }
+  try {
+    if (token) await authClient().auth.admin.signOut(token, "global");
+  } catch {
+    /* Always clear the browser session even if the provider is unavailable. */
+  } finally {
+    clearAuthCookies();
+  }
   return { success: true };
 });

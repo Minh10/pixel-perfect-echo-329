@@ -1,6 +1,11 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
-import { getCookie, setCookie, deleteCookie, setResponseHeader } from "@tanstack/react-start/server";
+import {
+  getCookie,
+  setCookie,
+  deleteCookie,
+  setResponseHeader,
+} from "@tanstack/react-start/server";
 import type { Session } from "@supabase/supabase-js";
 import { AUTH_COOKIE, REFRESH_COOKIE, AUTH_COOKIE_OPTIONS, isOwner } from "./auth-policy";
 
@@ -10,12 +15,15 @@ export const authClient = createServerOnlyFn(() => {
   if (!url || !key) throw new Error("Sign-in is unavailable.");
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: (input, init) => {
-      const headers = new Headers(init?.headers);
-      if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
-      headers.set("apikey", key);
-      return fetch(input, { ...init, headers });
-    } },
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`)
+          headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
   });
 });
 
@@ -25,8 +33,14 @@ export const clearAuthCookies = createServerOnlyFn(() => {
 });
 
 export const saveAuthCookies = createServerOnlyFn((session: Session) => {
-  setCookie(AUTH_COOKIE, session.access_token, { ...AUTH_COOKIE_OPTIONS, maxAge: session.expires_in });
-  setCookie(REFRESH_COOKIE, session.refresh_token, { ...AUTH_COOKIE_OPTIONS, maxAge: 60 * 60 * 24 * 7 });
+  setCookie(AUTH_COOKIE, session.access_token, {
+    ...AUTH_COOKIE_OPTIONS,
+    maxAge: session.expires_in,
+  });
+  setCookie(REFRESH_COOKIE, session.refresh_token, {
+    ...AUTH_COOKIE_OPTIONS,
+    maxAge: 60 * 60 * 24 * 7,
+  });
   setResponseHeader("Cache-Control", "private, no-store");
 });
 
