@@ -216,10 +216,16 @@ function AnalysisWorkspace({
       {result?.status === "abstained" && (
         <div className="space-y-4">
           <EmptyState
-            title={result.abstention?.reason === "validation_failed" ? "Answer could not be verified" : "No supported answer"}
-            description={result.abstention?.reason === "validation_failed"
-              ? "Relevant passages were found, but the proposed answer did not pass source checks. No unverified answer is shown."
-              : result.abstention?.detail || "The service abstained."}
+            title={
+              result.abstention?.reason === "validation_failed"
+                ? "Answer could not be verified"
+                : "No supported answer"
+            }
+            description={
+              result.abstention?.reason === "validation_failed"
+                ? "Relevant passages were found, but the proposed answer did not pass source checks. No unverified answer is shown."
+                : result.abstention?.detail || "The service abstained."
+            }
           />
           {result.abstention?.reason === "validation_failed" && (
             <details className="text-xs text-muted-foreground">
@@ -228,7 +234,9 @@ function AnalysisWorkspace({
             </details>
           )}
           <Button asChild variant="outline" size="sm">
-            <Link to="/intelligence" search={{ doc: requestedId, tool: "evidence" }}>Inspect report evidence</Link>
+            <Link to="/intelligence" search={{ doc: requestedId, tool: "evidence" }}>
+              Inspect report evidence
+            </Link>
           </Button>
           <AnswerFooter result={result} />
         </div>
