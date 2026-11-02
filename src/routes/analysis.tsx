@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { ReportTools } from "@/components/app/report-tools";
 import { ApiError, apiAsset } from "@/lib/api/http-service";
 import { IS_DEMO, api, documentsQuery } from "@/lib/api/service";
 import type { QACitation, QAResponse, ValueKind } from "@/lib/api/types";
@@ -33,12 +34,12 @@ export const Route = createFileRoute("/analysis")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "AI Analysis — FINAUDIT AI" },
+      { title: "Ask a question — FINAUDIT AI" },
       {
         name: "description",
         content: "Evidence-grounded questions and answers over financial reports.",
       },
-      { property: "og:title", content: "AI Analysis — FINAUDIT AI" },
+      { property: "og:title", content: "Ask a question — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Evidence-grounded questions and answers over financial reports.",
@@ -53,7 +54,7 @@ function AnalysisPage() {
     return (
       <PendingModule
         eyebrow="Analysis"
-        title="AI Analysis"
+        title="Ask a question"
         description="Ask questions about a report and receive answers cited to specific pages, tables and charts."
         icon={<MessageSquareText className="size-5" />}
       />
@@ -94,9 +95,19 @@ function AnalysisWorkspace() {
     <div className="page-layout space-y-6">
       <PageHeader
         eyebrow="Analysis"
-        title="AI Analysis"
-        description="Ask a question about processed financial documents. Answers are cited to retrieved text, tables and figures, or the service abstains."
+        title="Ask a question"
+        description="Answers cite source passages, tables and charts. If evidence is insufficient, no supported answer is given."
       />
+      <ReportTools documentId={requestedId ?? selected[0]} />
+      {selected.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Selected reports: </span>
+          {ready
+            .filter((doc) => selected.includes(doc.id))
+            .map((doc) => doc.title)
+            .join(" · ")}
+        </p>
+      )}
       <form onSubmit={submit} className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
@@ -110,46 +121,53 @@ function AnalysisWorkspace() {
             {mutation.isPending ? "Asking…" : "Ask"}
           </Button>
         </div>
-        <fieldset className="space-y-2">
-          <legend className="text-xs text-muted-foreground">
-            {requestedId
-              ? "The open report is already selected. Type a question, or add another report."
-              : "Documents to search. Leave none selected and the server chooses from the company named in the question."}
-          </legend>
-          {documents.isError && (
-            <p className="text-sm text-destructive">
-              {documents.error instanceof Error
-                ? documents.error.message
-                : "Could not load documents."}
-            </p>
-          )}
-          {ready.length === 0 && !documents.isLoading && !documents.isError && (
-            <p className="text-sm text-muted-foreground">
-              No processed documents are available yet.
-            </p>
-          )}
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {ready.map((doc) => (
-              <li key={doc.id}>
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    checked={selected.includes(doc.id)}
-                    onChange={() => toggle(doc.id)}
-                    disabled={mutation.isPending}
-                  />
-                  <span>
-                    <span className="font-medium">{doc.title}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {[doc.issuer, doc.period].filter(Boolean).join(" · ")}
+        <details className="border-y py-3" open={requestedId ? undefined : true}>
+          <summary className="cursor-pointer text-sm font-medium">
+            {selected.length > 0
+              ? `Reports included · ${selected.length} selected`
+              : "Reports included · automatic selection"}
+          </summary>
+          <fieldset className="mt-3 space-y-2">
+            <legend className="text-xs text-muted-foreground">
+              {requestedId
+                ? "The open report is already selected. Type a question, or add another report."
+                : "No report selected: matching reports are chosen using the company named in your question."}
+            </legend>
+            {documents.isError && (
+              <p className="text-sm text-destructive">
+                {documents.error instanceof Error
+                  ? documents.error.message
+                  : "Could not load documents."}
+              </p>
+            )}
+            {ready.length === 0 && !documents.isLoading && !documents.isError && (
+              <p className="text-sm text-muted-foreground">
+                No processed documents are available yet.
+              </p>
+            )}
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {ready.map((doc) => (
+                <li key={doc.id}>
+                  <label className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={selected.includes(doc.id)}
+                      onChange={() => toggle(doc.id)}
+                      disabled={mutation.isPending}
+                    />
+                    <span>
+                      <span className="font-medium">{doc.title}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {[doc.issuer, doc.period].filter(Boolean).join(" · ")}
+                      </span>
                     </span>
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </fieldset>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+        </details>
       </form>
 
       {mutation.isError && (

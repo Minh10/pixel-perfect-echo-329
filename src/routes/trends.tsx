@@ -9,6 +9,8 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ReportTools } from "@/components/app/report-tools";
 import { DemoBadge, EmptyState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { compareReports } from "@/lib/fact-comparison";
 import { defaultTrendSelection } from "@/lib/report-selection";
@@ -25,10 +27,10 @@ export const Route = createFileRoute("/trends")({
       : context.queryClient.ensureQueryData(documentsQuery()),
   head: () => ({
     meta: [
-      { title: "Trends — FINAUDIT AI" },
+      { title: "Compare reports — FINAUDIT AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Trends — FINAUDIT AI" },
+      { property: "og:title", content: "Compare reports — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Compare reported financial values across processed reports.",
@@ -55,10 +57,11 @@ function DemoTrends() {
     <div className="page-layout space-y-6">
       <PageHeader
         eyebrow="Analysis"
-        title="Trends"
+        title="Compare reports"
         description="Northwind Holdings (demo issuer) · five-year series, £ millions."
         actions={<DemoBadge />}
       />
+      <ReportTools sample documentId={DEFAULT_DOCUMENT_ID ?? undefined} />
       <section className="rounded-md border bg-card p-5">
         <ChartContainer config={demoConfig} className="h-72 w-full">
           <BarChart data={data}>
@@ -137,14 +140,15 @@ function LiveComparison() {
     <div className="page-layout space-y-6">
       <PageHeader
         eyebrow="Analysis"
-        title="Trends"
+        title="Compare reports"
         description="Compare one reported metric across processed reports. Values come only from parsed table facts."
       />
+      <ReportTools documentId={requestedId ?? selected[0]} />
       <div className="grid gap-6 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
         <section className="space-y-3">
           <label className="block text-sm">
             <span className="text-xs text-muted-foreground">Find a report</span>
-            <input
+            <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="mt-1 h-9 w-full rounded-md border bg-card px-3"
@@ -152,7 +156,9 @@ function LiveComparison() {
             />
           </label>
           <fieldset className="max-h-72 space-y-1 overflow-auto pr-1">
-            <legend className="mb-2 text-xs text-muted-foreground">Processed reports</legend>
+            <legend className="mb-2 text-sm font-medium">
+              Reports · {selected.length} selected
+            </legend>
             {visible.map((doc) => (
               <label
                 key={doc.id}
@@ -184,23 +190,22 @@ function LiveComparison() {
           </fieldset>
         </section>
         <div className="min-w-0 space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {(labels.length ? labels : ["Revenue", "Operating profit"]).map((label) => (
-              <button
-                key={label}
-                type="button"
-                disabled={!labels.includes(label)}
-                className={`rounded-sm border px-3 py-1.5 text-sm ${
-                  activeMetric === label
-                    ? "border-foreground bg-foreground text-background"
-                    : "bg-card"
-                } disabled:opacity-40`}
-                onClick={() => setMetric(label)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <label className="block max-w-sm space-y-2 text-sm font-medium">
+            <span>Financial metric</span>
+            <select
+              className="h-10 w-full rounded-md border border-input bg-card px-3 font-normal"
+              value={activeMetric}
+              disabled={labels.length === 0}
+              onChange={(event) => setMetric(event.target.value)}
+            >
+              {labels.length === 0 && <option value="">No reported metrics</option>}
+              {labels.map((label) => (
+                <option key={label} value={label}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           {selected.length < 2 && (
             <EmptyState
               title="Two reports are required"

@@ -100,17 +100,24 @@ function Overview() {
         }
       />
       <PdfIntake />
-      <OverviewMetrics documents={docs} evidence={evidence} />
-      {!IS_DEMO && api.getFigureInterpretation && (
-        <StoredAnalyses
-          figures={evidenceIds.flatMap((documentId, index) =>
-            (evidenceResults[index]?.data ?? [])
-              .filter((item) => item.category === "figure")
-              .map((item) => ({ documentId, blockId: item.blockId })),
+      <details className="border-b pb-4">
+        <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+          Library statistics · {docs.length} reports
+        </summary>
+        <div className="mt-4">
+          <OverviewMetrics documents={docs} evidence={evidence} />
+          {!IS_DEMO && api.getFigureInterpretation && (
+            <StoredAnalyses
+              figures={evidenceIds.flatMap((documentId, index) =>
+                (evidenceResults[index]?.data ?? [])
+                  .filter((item) => item.category === "figure")
+                  .map((item) => ({ documentId, blockId: item.blockId })),
+              )}
+            />
           )}
-        />
-      )}
-      <OverviewPanels documents={docs} />
+          <OverviewPanels documents={docs} />
+        </div>
+      </details>
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>

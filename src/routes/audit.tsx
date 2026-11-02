@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Minus, Plus, ShieldCheck } from "lucide-react";
 import { PendingModule } from "@/components/app/pending-module";
 import { ChartBatchPanel } from "@/components/app/chart-batch-panel";
+import { ReportTools } from "@/components/app/report-tools";
 import { ReviewStatus } from "@/components/app/review-status";
 import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -20,10 +21,10 @@ export const Route = createFileRoute("/audit")({
   },
   head: () => ({
     meta: [
-      { title: "Consistency Audit — FINAUDIT AI" },
+      { title: "Check charts — FINAUDIT AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Consistency Audit — FINAUDIT AI" },
+      { property: "og:title", content: "Check charts — FINAUDIT AI" },
       {
         property: "og:description",
         content:
@@ -44,7 +45,7 @@ function AuditPage() {
     return (
       <PendingModule
         eyebrow="Analysis"
-        title="Consistency Audit"
+        title="Check charts"
         description="Cross-check figures stated in narrative text against tables and charts to flag potential inconsistencies."
         icon={<ShieldCheck className="size-5" />}
       />
@@ -106,9 +107,10 @@ function AuditWorkspace() {
     <div className="page-layout space-y-8">
       <PageHeader
         eyebrow="Visual analysis"
-        title="Consistency Audit"
+        title="Check charts"
         description="Compare a chart reading with the reported table facts from the same document."
       />
+      <ReportTools documentId={selectedId} />
       <div className="grid gap-6 border-b pb-6 lg:grid-cols-[minmax(0,1.4fr)_auto] lg:items-end">
         <label className="block max-w-xl text-sm">
           <span className="text-xs text-muted-foreground">Processed report</span>
@@ -135,7 +137,7 @@ function AuditWorkspace() {
         <p className="text-xs text-muted-foreground">
           {reading
             ? `Model ${reading.provider} · ${reading.model}`
-            : "No stored chart reading for this figure."}
+            : "This chart has no saved analysis yet."}
         </p>
       </div>
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">
