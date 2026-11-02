@@ -246,7 +246,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           onSelect={select}
         />
       </div>
-      <div hidden={tool === "evidence"}>
+      <div hidden={tool === "evidence"} className="@container">
         {citation && (
           <details className="border-b px-4 py-3">
             <summary className="cursor-pointer text-sm font-medium">
