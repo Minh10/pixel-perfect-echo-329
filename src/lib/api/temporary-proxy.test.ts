@@ -102,8 +102,8 @@ it("preserves legitimate multipart PDF upload bytes", async () => {
   expect(response.status).toBe(200);
   const outgoing = new Request("https://test.example", {
     method: "POST",
-    headers: fetch.mock.calls[0]?.[1]?.headers,
-    body: fetch.mock.calls[0]?.[1]?.body,
+    headers: new Headers(fetch.mock.calls[0]?.[1]?.headers),
+    body: fetch.mock.calls[0]?.[1]?.body ?? null,
   });
   const file = (await outgoing.formData()).get("file");
   expect(typeof file === "string" ? 0 : file?.size).toBeGreaterThan(0);
