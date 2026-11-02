@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { evidenceRows, readableExcerpt } from "./evidence-list";
 import type { Evidence } from "@/lib/api/types";
 
-const ev = (id: string, page: number, category: Evidence["category"], excerpt: string): Evidence => ({
+const ev = (
+  id: string,
+  page: number,
+  category: Evidence["category"],
+  excerpt: string,
+): Evidence => ({
   id,
   page,
   blockId: id,
@@ -22,7 +27,10 @@ describe("evidence list", () => {
 
   it("groups uncaptioned figures per page", () => {
     const fig = "Figure region (no caption detected; content not extracted)";
-    const rows = evidenceRows([ev("a", 10, "figure", fig), ev("b", 10, "figure", fig), ev("c", 10, "figure", fig)], 1);
+    const rows = evidenceRows(
+      [ev("a", 10, "figure", fig), ev("b", 10, "figure", fig), ev("c", 10, "figure", fig)],
+      1,
+    );
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ kind: "group", page: 10, count: 3 });
   });
