@@ -35,6 +35,33 @@ describe("document proxy fails closed", () => {
     upstream.mockRestore();
   });
   it.each([
+    ["POST", "api/v1/documents"],
+    ["POST", "api/v1/qa"],
+    ["POST", "api/v1/documents/report/blocks/chart/interpret"],
+    ["GET", "api/v1/documents/report/pages/1/image"],
+    ["GET", "api/v1/documents/report/blocks/chart/image"],
+    ["GET", "api/v1/documents/report/source"],
+  ])("denies anonymous %s %s in the public demo", async (method, path) => {
+    const upstream = vi.spyOn(globalThis, "fetch");
+    try {
+      const response = await proxyDocumentRequest(
+        new Request(`https://app.example/api/document-service/${path}`, { method }),
+        path,
+        {
+          backendUrl: "https://documents.example.org",
+          backendToken: "test-only-token",
+          authorizedUserId: "owner",
+          authUrl: "https://auth.example.org",
+          authKey: "test-only-key",
+        },
+      );
+      expect(response.status).toBe(401);
+      expect(upstream).not.toHaveBeenCalled();
+    } finally {
+      upstream.mockRestore();
+    }
+  });
+  it.each([
     "api/v1/documents/report/pages",
     "api/v1/documents/report/pages/1/image",
     "api/v1/documents/report/blocks/chart/image",
