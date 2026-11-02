@@ -54,8 +54,8 @@ export function AppHeader() {
               variant="ghost"
               size="sm"
               onClick={async () => {
-                setDemoEntry(false);
                 await navigate({ to: "/", replace: true });
+                setDemoEntry(false);
               }}
             >
               <LogOut />
