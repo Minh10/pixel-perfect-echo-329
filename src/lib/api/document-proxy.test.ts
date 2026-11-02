@@ -37,7 +37,7 @@ describe("document proxy fails closed", () => {
   it.each([
     ["POST", "api/v1/documents"],
     ["POST", "api/v1/qa"],
-    ["POST", "api/v1/documents/report/blocks/chart/interpret"],
+    ["POST", "api/v1/documents/report/figures/chart/interpret"],
     ["GET", "api/v1/documents/report/pages/1/image"],
     ["GET", "api/v1/documents/report/blocks/chart/image"],
     ["GET", "api/v1/documents/report/source"],
