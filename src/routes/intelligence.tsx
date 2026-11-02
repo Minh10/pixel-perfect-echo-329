@@ -255,8 +255,11 @@ function WorkspaceReady({ docId }: { docId: string }) {
     setShowInspector(true);
     void navigate({ search: (s) => ({ ...s, tool: next }), replace: true });
   };
+  const lastTool = useRef(tool);
   useEffect(() => {
-    if (!desktop) {
+    const changed = lastTool.current !== tool;
+    lastTool.current = tool;
+    if (!desktop && changed) {
       const frame = requestAnimationFrame(() => {
         document.querySelector<HTMLElement>('.report-inspector:not(:empty)')?.scrollIntoView({ block: "start" });
       });

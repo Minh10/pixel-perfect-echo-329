@@ -47,11 +47,11 @@ export function DocumentPageView({
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
       root.current
-        ?.querySelector('[aria-pressed="true"]')
+        ?.querySelector('[aria-pressed="true"], [data-cited-region]')
         ?.scrollIntoView({ block: "nearest", inline: "nearest" }),
     );
     return () => cancelAnimationFrame(frame);
-  }, [selectedId, page.number]);
+  }, [selectedId, page.number, focus]);
   const aspect = page.width && page.height ? page.width / page.height : 210 / 297;
   const displayWidth = pdfDisplayWidth(fit, size.width, size.height, aspect, zoom);
   const byBlock = new Map(
@@ -121,6 +121,7 @@ export function DocumentPageView({
           {focus?.map((box, index) => (
             <div
               key={`cite-${index}`}
+              data-cited-region
               className="pointer-events-none absolute z-20 rounded-[2px] ring-2 ring-primary"
               style={{
                 left: `${box.x * 100}%`,

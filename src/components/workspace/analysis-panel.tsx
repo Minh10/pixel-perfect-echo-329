@@ -331,8 +331,8 @@ function AnalysisError({ error, onRetry }: { error: unknown; onRetry: () => void
         }
         message={
           error instanceof Error
-              ? error.message
-              : "The analysis service returned an error. No answer was generated."
+            ? error.message
+            : "The analysis service returned an error. No answer was generated."
         }
         onRetry={onRetry}
       />
