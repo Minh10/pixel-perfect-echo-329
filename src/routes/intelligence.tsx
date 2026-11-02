@@ -477,7 +477,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
         <ResizablePanelGroup orientation="horizontal" id="document-workspace">
           {showPages && (
             <>
-              <ResizablePanel id="pages" defaultSize="13%" minSize="110px" maxSize="22%">
+              <ResizablePanel id="pages" defaultSize="15%" minSize="140px" maxSize="24%">
                 <aside className="h-full overflow-y-auto bg-card">
                   <PageNavigator
                     pages={pages}
