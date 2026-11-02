@@ -9,6 +9,7 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 
 # Secure backend preparation
 
+- [ ] Prepare bounded server-opt-in anonymous live demo without changing the sample default or publishing (blocked: confirmation of custom rate-limiting tradeoff; hosted FastAPI URL and verified abuse/cost controls not supplied).
 - [x] Remove public account UI and redirect legacy account pages to Overview; preserve demo notices and locked private requests. Verified public Overview/Documents/sample, legacy redirects and anonymous proxy 401 with no browser errors; 44 frontend tests pass, lint has zero errors/six existing warnings, automated compilation reports build OK. No standalone typecheck or production build was manually executed; hosted build status refers to an earlier commit.
 - [x] Simplify administrator sign-in while preserving public exploration, persistent cookies and disabled live processing (38 tests passed, full lint zero errors/six existing warnings, browser verified public Overview/Documents/sample and default-password rejection).
 
@@ -17,6 +18,6 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 - [x] Document exact connection settings and unresolved access requirements in DEPLOYMENT.md.
 - [x] Run proxy security and existing selection/routing tests; verify sample flow (18 tests passed, changed proxy/test files lint clean, preview build OK, sample opens and unconfigured proxy returns 503 with no browser errors).
 - [x] Implement single-account sign-in, password recovery, sign-out and authenticated report cookies; public sample unchanged.
-- [ ] Implement and verify non-interactive owner-only access before live activation (blocked: hosting-edge/private-network access configuration is not supplied; existing cookie-based proxy remains locked).
+- [ ] Verify the chosen live access policy before activation (blocked: server-enforced anonymous abuse/cost controls not configured; existing owner-authenticated proxy remains the default).
 - [x] Fix generated-file lint formatting failures without excluding semantic/security checks; full lint has zero errors and six existing warnings. Automated typecheck/build reports OK. Full frontend tests passed; production build was executed successfully by the investigation agent before final edits, not rerun after final edits.
-- [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, verified non-interactive owner-only access).
+- [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, verified bounded anonymous access and explicit deployment confirmation).
