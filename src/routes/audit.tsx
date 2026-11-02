@@ -20,6 +20,10 @@ export const Route = createFileRoute("/audit")({
   head: () => ({
     meta: [
       { title: "Consistency Audit — FINAUDIT AI" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Consistency Audit — FINAUDIT AI" },
+      { property: "og:description", content: "Inspect chart crops and compare them with reported table facts when a reading exists." },
       {
         name: "description",
         content:

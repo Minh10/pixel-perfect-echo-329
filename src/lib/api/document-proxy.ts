@@ -3,11 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 import { allowedProxyPath, authorizedUser, configuredBackend } from "./proxy-policy";
 
 interface ProxyConfig {
-  backendUrl?: string;
-  backendToken?: string;
-  authorizedUserId?: string;
-  authUrl?: string;
-  authKey?: string;
+  backendUrl?: string | undefined;
+  backendToken?: string | undefined;
+  authorizedUserId?: string | undefined;
+  authUrl?: string | undefined;
+  authKey?: string | undefined;
 }
 
 const failure = (status: number, code: string, message: string) => Response.json(
