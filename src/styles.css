@@ -127,6 +127,7 @@
   --shadow-control-hover: 0 3px 8px -3px color-mix(in oklab, var(--foreground) 18%, transparent);
   --motion-fast: 160ms;
   --motion-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --grid-ink: var(--primary);
 }
 
 @layer base {
@@ -184,6 +185,26 @@
     border-color var(--motion-fast) var(--motion-ease);
 }
 
+.pointer-grid {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  pointer-events: none;
+}
+
+@keyframes workspace-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 [data-pointer-surface]::after {
   content: "";
   position: absolute;
@@ -214,6 +235,30 @@
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .page-layout > * {
+    animation: workspace-arrive 380ms var(--motion-ease) both;
+  }
+  .page-layout > :nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .page-layout > :nth-child(3) {
+    animation-delay: 90ms;
+  }
+  .page-layout > :nth-child(4) {
+    animation-delay: 135ms;
+  }
+  .workstation-nav svg {
+    transition: transform 220ms var(--motion-ease);
+  }
+  .workstation-nav:hover svg {
+    transform: translateY(-1px) rotate(-7deg);
+  }
+  .intake-surface:hover > span:first-of-type svg {
+    transform: translateY(-3px);
+  }
+  .intake-surface svg {
+    transition: transform 220ms var(--motion-ease);
+  }
   [data-pointer-active]::after {
     opacity: 1;
   }
@@ -250,6 +295,9 @@
     transition-duration: 0.01ms !important;
   }
   [data-pointer-surface]::after {
+    display: none;
+  }
+  .pointer-grid {
     display: none;
   }
 }

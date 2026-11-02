@@ -1,5 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
+- [x] Add cursor-reactive background cells with fading trails and staggered entrance/icon motion. Verified at 1146×735: cells visible only on exposed background, fade clears, reduced motion hides effect, no runtime errors; 75 tests pass, lint zero errors/six existing warnings, host build OK. Backend unchanged; not published.
+
 - [x] Refine presentation with restrained pointer-following edge accents and hover motion, preserving backend and accepted intake.
 - [x] Verify sample navigation, document filtering, pointer feedback, reduced motion and 1280/390px layouts in the preview; 75 tests pass, lint zero errors/six existing warnings, host build OK. No uploads or paid calls; not published in this task.
 
