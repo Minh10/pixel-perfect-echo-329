@@ -106,15 +106,15 @@ function Overview() {
         </summary>
         <div className="mt-4">
           <OverviewMetrics documents={docs} evidence={evidence} />
-      {!IS_DEMO && api.getFigureInterpretation && (
-        <StoredAnalyses
-          figures={evidenceIds.flatMap((documentId, index) =>
-            (evidenceResults[index]?.data ?? [])
-              .filter((item) => item.category === "figure")
-              .map((item) => ({ documentId, blockId: item.blockId })),
+          {!IS_DEMO && api.getFigureInterpretation && (
+            <StoredAnalyses
+              figures={evidenceIds.flatMap((documentId, index) =>
+                (evidenceResults[index]?.data ?? [])
+                  .filter((item) => item.category === "figure")
+                  .map((item) => ({ documentId, blockId: item.blockId })),
+              )}
+            />
           )}
-        />
-      )}
           <OverviewPanels documents={docs} />
         </div>
       </details>

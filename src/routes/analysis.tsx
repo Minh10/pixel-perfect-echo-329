@@ -118,46 +118,46 @@ function AnalysisWorkspace() {
               ? `Reports included · ${selected.length} selected`
               : "Reports included · automatic selection"}
           </summary>
-        <fieldset className="mt-3 space-y-2">
-          <legend className="text-xs text-muted-foreground">
-            {requestedId
-              ? "The open report is already selected. Type a question, or add another report."
-              : "Documents to search. Leave none selected and the server chooses from the company named in the question."}
-          </legend>
-          {documents.isError && (
-            <p className="text-sm text-destructive">
-              {documents.error instanceof Error
-                ? documents.error.message
-                : "Could not load documents."}
-            </p>
-          )}
-          {ready.length === 0 && !documents.isLoading && !documents.isError && (
-            <p className="text-sm text-muted-foreground">
-              No processed documents are available yet.
-            </p>
-          )}
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {ready.map((doc) => (
-              <li key={doc.id}>
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    checked={selected.includes(doc.id)}
-                    onChange={() => toggle(doc.id)}
-                    disabled={mutation.isPending}
-                  />
-                  <span>
-                    <span className="font-medium">{doc.title}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {[doc.issuer, doc.period].filter(Boolean).join(" · ")}
+          <fieldset className="mt-3 space-y-2">
+            <legend className="text-xs text-muted-foreground">
+              {requestedId
+                ? "The open report is already selected. Type a question, or add another report."
+                : "Documents to search. Leave none selected and the server chooses from the company named in the question."}
+            </legend>
+            {documents.isError && (
+              <p className="text-sm text-destructive">
+                {documents.error instanceof Error
+                  ? documents.error.message
+                  : "Could not load documents."}
+              </p>
+            )}
+            {ready.length === 0 && !documents.isLoading && !documents.isError && (
+              <p className="text-sm text-muted-foreground">
+                No processed documents are available yet.
+              </p>
+            )}
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {ready.map((doc) => (
+                <li key={doc.id}>
+                  <label className="flex items-start gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={selected.includes(doc.id)}
+                      onChange={() => toggle(doc.id)}
+                      disabled={mutation.isPending}
+                    />
+                    <span>
+                      <span className="font-medium">{doc.title}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {[doc.issuer, doc.period].filter(Boolean).join(" · ")}
+                      </span>
                     </span>
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </fieldset>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
         </details>
       </form>
 

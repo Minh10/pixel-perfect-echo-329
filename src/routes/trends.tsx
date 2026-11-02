@@ -156,7 +156,9 @@ function LiveComparison() {
             />
           </label>
           <fieldset className="max-h-72 space-y-1 overflow-auto pr-1">
-            <legend className="mb-2 text-sm font-medium">Reports · {selected.length} selected</legend>
+            <legend className="mb-2 text-sm font-medium">
+              Reports · {selected.length} selected
+            </legend>
             {visible.map((doc) => (
               <label
                 key={doc.id}
@@ -197,7 +199,11 @@ function LiveComparison() {
               onChange={(event) => setMetric(event.target.value)}
             >
               {labels.length === 0 && <option value="">No reported metrics</option>}
-              {labels.map((label) => <option key={label} value={label}>{label}</option>)}
+              {labels.map((label) => (
+                <option key={label} value={label}>
+                  {label}
+                </option>
+              ))}
             </select>
           </label>
           {selected.length < 2 && (
