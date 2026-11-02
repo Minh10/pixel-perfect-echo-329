@@ -38,8 +38,8 @@ function DemoEntry() {
           <DemoBadge />
           <h1 className="text-2xl font-semibold">Demo entry</h1>
           <p className="text-sm text-muted-foreground">
-            Public sample only. Use admin / admin. Not secure authentication; no private reports
-            or paid processing access.
+            Public sample only. Use admin / admin. Not secure authentication; no private reports or
+            paid processing access.
           </p>
         </div>
         <form
@@ -62,16 +62,35 @@ function DemoEntry() {
         >
           <div className="space-y-2">
             <Label htmlFor="demo-username">Username</Label>
-            <Input id="demo-username" autoComplete="off" required maxLength={40}
-              value={username} onChange={(event) => setUsername(event.target.value)} />
+            <Input
+              id="demo-username"
+              autoComplete="off"
+              required
+              maxLength={40}
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="demo-password">Password</Label>
-            <Input id="demo-password" type="password" autoComplete="off" required maxLength={40}
-              value={password} onChange={(event) => setPassword(event.target.value)} />
+            <Input
+              id="demo-password"
+              type="password"
+              autoComplete="off"
+              required
+              maxLength={40}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
           </div>
-          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full">Enter sample demo</Button>
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+          <Button type="submit" className="w-full">
+            Enter sample demo
+          </Button>
         </form>
         <Button asChild variant="outline" className="w-full">
           <Link to="/">Continue without entry</Link>
