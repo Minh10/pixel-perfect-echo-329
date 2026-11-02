@@ -50,9 +50,12 @@ export function DocumentPageView({
           style={{ aspectRatio: `${page.width} / ${page.height}` }}
           aria-label={`Page ${page.number}`}
         >
+          <span className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
           <img
+            key={page.imageUrl}
             src={apiAsset(`${page.imageUrl}?dpi=110`)}
             alt={`Page ${page.number} of ${documentTitle}`}
+            decoding="async"
             className="absolute inset-0 h-full w-full"
           />
           {page.blocks.map((block) => {

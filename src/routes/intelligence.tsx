@@ -15,12 +15,22 @@ import {
   ShieldCheck,
   TrendingUp,
   ChevronDown,
+  SlidersHorizontal,
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+
+const HINT_KEY = "finaudit:workspace-hint-dismissed";
 import { PdfIntake } from "@/components/app/pdf-intake";
 import { AnalysisPanel } from "@/components/workspace/analysis-panel";
 import { ChartChecksPanel } from "@/components/workspace/audit-panel";
@@ -205,11 +215,15 @@ function WorkspaceReady({ docId }: { docId: string }) {
   );
 
   const goTo = (n: number) => navigate({ search: (s) => ({ ...s, page: n }), replace: true });
+  const [showHint, setShowHint] = useState(false);
+  useEffect(() => {
+    if (!window.localStorage.getItem(HINT_KEY)) setShowHint(true);
+  }, []);
   const tools = [
-    { id: "evidence", label: "Evidence", icon: ListFilter },
-    { id: "ask", label: "Ask PDF", icon: MessageSquareText },
-    { id: "charts", label: "Chart checks", icon: ShieldCheck },
-    { id: "compare", label: "Statistics & trends", icon: TrendingUp },
+    { id: "evidence", label: "Evidence", icon: ListFilter, hint: "What was found in the PDF" },
+    { id: "ask", label: "Ask", icon: MessageSquareText, hint: "Ask a question about this PDF" },
+    { id: "charts", label: "Charts", icon: ShieldCheck, hint: "Chart summaries and checks" },
+    { id: "compare", label: "Trends", icon: TrendingUp, hint: "Compare figures across years" },
   ] as const;
   const toolContent = () => (
     <>
@@ -227,6 +241,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           pages={pages}
           selected={selected}
           filter={filter}
+          currentPage={current}
           onFilter={setFilter}
           onSelect={select}
         />
@@ -342,38 +357,6 @@ function WorkspaceReady({ docId }: { docId: string }) {
               <ChevronRight className="size-4" />
             </Button>
           </div>
-          <div className="flex items-center gap-1 border-l pl-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={() => setZoom((z) => Math.max(0.7, +(z - 0.1).toFixed(1)))}
-              title="Zoom out"
-              aria-label="Zoom out"
-            >
-              <Minus className="size-4" />
-            </Button>
-            <span className="w-10 text-center font-mono text-xs tabular">
-              {Math.round(zoom * 100)}%
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              onClick={() => setZoom((z) => Math.min(1.5, +(z + 0.1).toFixed(1)))}
-              title="Zoom in"
-              aria-label="Zoom in"
-            >
-              <Plus className="size-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 border-l pl-3">
-            <Highlighter className="size-4 text-evidence" />
-            <Label htmlFor="hl" className="text-xs">
-              Highlights
-            </Label>
-            <Switch id="hl" checked={showHighlights} onCheckedChange={setShowHighlights} />
-          </div>
           {!IS_DEMO && (
             <Button asChild variant="outline" size="sm">
               <a href={sourceDocumentUrl(doc.id)} target="_blank" rel="noreferrer">
@@ -381,35 +364,61 @@ function WorkspaceReady({ docId }: { docId: string }) {
               </a>
             </Button>
           )}
-          <div className="flex shrink-0 items-center gap-1 border-l pl-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              title="Toggle page navigator"
-              aria-label="Toggle page navigator"
-              aria-pressed={showPages}
-              onClick={() => setShowPages((v) => !v)}
-            >
-              <PanelLeft />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              title="Toggle evidence inspector"
-              aria-label="Toggle evidence inspector"
-              aria-pressed={showInspector}
-              onClick={() => setShowInspector((v) => !v)}
-            >
-              <PanelRight />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <SlidersHorizontal /> View · {Math.round(zoom * 100)}%
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Zoom</DropdownMenuLabel>
+              <div className="flex items-center justify-between px-2 pb-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-7"
+                  onClick={() => setZoom((z) => Math.max(0.7, +(z - 0.1).toFixed(1)))}
+                  aria-label="Zoom out"
+                >
+                  <Minus className="size-4" />
+                </Button>
+                <span className="font-mono text-xs tabular">{Math.round(zoom * 100)}%</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-7"
+                  onClick={() => setZoom((z) => Math.min(1.5, +(z + 0.1).toFixed(1)))}
+                  aria-label="Zoom in"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={showHighlights}
+                onCheckedChange={(v) => setShowHighlights(Boolean(v))}
+              >
+                <Highlighter className="size-4 text-evidence" /> Highlight evidence
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={showPages}
+                onCheckedChange={(v) => setShowPages(Boolean(v))}
+              >
+                <PanelLeft className="size-4" /> Page list
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={showInspector}
+                onCheckedChange={(v) => setShowInspector(Boolean(v))}
+              >
+                <PanelRight className="size-4" /> Side panel
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <nav
         aria-label="PDF workspace tools"
-        className="flex shrink-0 flex-wrap gap-1 border-b bg-card px-4 py-2"
+        className="flex shrink-0 flex-wrap items-center gap-1 border-b bg-card px-4 py-2"
       >
         {tools.map((item) => (
           <Button
@@ -417,6 +426,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
             size="sm"
             variant={tool === item.id ? "secondary" : "ghost"}
             aria-pressed={tool === item.id}
+            title={item.hint}
             onClick={() => {
               setShowInspector(true);
               void navigate({ search: (s) => ({ ...s, tool: item.id }), replace: true });
@@ -426,19 +436,41 @@ function WorkspaceReady({ docId }: { docId: string }) {
             {item.label}
           </Button>
         ))}
+        <span className="ml-1 hidden text-xs text-muted-foreground md:inline">
+          {tools.find((item) => item.id === tool)?.hint}
+        </span>
+        {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
+          <details className="relative ml-auto text-xs">
+            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-sm bg-warning-soft px-2 py-1 text-warning">
+              <ChevronDown className="size-3" />
+              {doc.warnings.length} notices
+            </summary>
+            <ul className="absolute right-0 z-20 mt-1 max-h-60 w-80 list-inside list-disc space-y-1 overflow-auto rounded-sm border bg-popover p-3 text-popover-foreground shadow-md">
+              {doc.warnings.map((warning, index) => (
+                <li key={index}>{warning}</li>
+              ))}
+            </ul>
+          </details>
+        )}
       </nav>
-      {!IS_DEMO && doc.warnings && doc.warnings.length > 0 && (
-        <details className="shrink-0 border-b bg-warning-soft px-4 py-2 text-xs text-warning">
-          <summary className="flex cursor-pointer items-center gap-2">
-            <ChevronDown className="size-3" />
-            {doc.warnings.length} document notices · extraction may be incomplete
-          </summary>
-          <ul className="mt-2 max-h-28 list-inside list-disc overflow-auto space-y-1">
-            {doc.warnings.map((warning, index) => (
-              <li key={index}>{warning}</li>
-            ))}
-          </ul>
-        </details>
+      {showHint && (
+        <div className="flex shrink-0 items-center gap-3 border-b bg-primary-soft px-4 py-2 text-xs text-primary-deep">
+          <span className="font-medium">Quick start:</span>
+          <span>1. Pick a page on the left</span>
+          <span>2. Click a highlighted box or an evidence item</span>
+          <span>3. Use Ask to question the PDF</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto h-6 px-2 text-xs"
+            onClick={() => {
+              setShowHint(false);
+              window.localStorage.setItem(HINT_KEY, "1");
+            }}
+          >
+            Got it
+          </Button>
+        </div>
       )}
 
       <div className="hidden min-h-0 flex-1 lg:block">
