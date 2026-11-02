@@ -246,7 +246,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           onSelect={select}
         />
       </div>
-      <div hidden={tool === "evidence"}>
+      <div hidden={tool === "evidence"} className="@container">
         {citation && (
           <details className="border-b px-4 py-3">
             <summary className="cursor-pointer text-sm font-medium">
@@ -477,7 +477,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
         <ResizablePanelGroup orientation="horizontal" id="document-workspace">
           {showPages && (
             <>
-              <ResizablePanel id="pages" defaultSize="13%" minSize="110px" maxSize="22%">
+              <ResizablePanel id="pages" defaultSize="15%" minSize="140px" maxSize="24%">
                 <aside className="h-full overflow-y-auto bg-card">
                   <PageNavigator
                     pages={pages}

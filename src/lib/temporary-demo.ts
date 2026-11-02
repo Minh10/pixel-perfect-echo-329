@@ -4,6 +4,8 @@ export const DEMO_TTL = 60 * 60;
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 export const MAX_PDF_PAGES = 30;
 export const MAX_DAILY_PDF_UPLOADS = 10;
+/** Daily AI/processing actions (uploads, questions, chart reads); matches the backend 40-call model cap. */
+export const MAX_DAILY_WORK_REQUESTS = 40;
 export const MAX_JSON_BYTES = 16 * 1024;
 export interface TemporaryConfig {
   demoEnabled?: string | undefined;
