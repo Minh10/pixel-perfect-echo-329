@@ -16,9 +16,8 @@ export function PointerFeedback() {
     const move = (event: PointerEvent) => {
       if (motion.matches || !finePointer.matches || event.pointerType === "touch") return;
       const target = event.target;
-      const next = target instanceof Element
-        ? target.closest<HTMLElement>("[data-pointer-surface]")
-        : null;
+      const next =
+        target instanceof Element ? target.closest<HTMLElement>("[data-pointer-surface]") : null;
       if (next !== surface) {
         clear();
         surface = next;

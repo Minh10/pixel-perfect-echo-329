@@ -179,7 +179,8 @@
 [data-pointer-surface] {
   position: relative;
   isolation: isolate;
-  transition: background-color var(--motion-fast) var(--motion-ease),
+  transition:
+    background-color var(--motion-fast) var(--motion-ease),
     border-color var(--motion-fast) var(--motion-ease);
 }
 
@@ -200,7 +201,8 @@
 .workstation-nav,
 .action-link svg,
 .document-row {
-  transition: color var(--motion-fast) var(--motion-ease),
+  transition:
+    color var(--motion-fast) var(--motion-ease),
     background-color var(--motion-fast) var(--motion-ease),
     border-color var(--motion-fast) var(--motion-ease),
     box-shadow var(--motion-fast) var(--motion-ease),
