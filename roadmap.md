@@ -7,6 +7,6 @@
 - [x] Verify published UI entry, cookie flags, seven-document list, wrong-password/no-session 401, exit and durable revocation replay 401.
 - [x] Upload one small synthetic PDF through published intake; observe processing → ready, Docling page/table, rendered images and PDF download.
 - [x] Verify one real QA response/citation (usage: one model call), stored chart/crop/audit and aligned multi-report Trends.
-- [x] Run frontend lint and all 69 tests; document missing fresh host typecheck/build and remote CI signal rather than claim success.
+- [x] Run frontend lint and all 69 tests; verify host build OK; document missing separate typecheck and remote CI signal rather than claim success.
 - [x] Document results and immediate emergency-stop + switch false + republish shutdown.
 - [ ] Windows restart/persistence acceptance: NOT RUN; requires owner-operated Windows control and must not restart the current tunnel during demo.
