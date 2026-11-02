@@ -1,0 +1,253 @@
+{
+ "source": "huggingface.co/datasets/creative-graphic-design/PubLayNet",
+ "revision": "4bfc1ae32abdad8953c0b81e5cdf236f1745de50",
+ "split": "validation",
+ "ibm_dax": "dax-cdn.cdn.appdomain.cloud did not resolve (curl exit 6); training archive was not downloaded",
+ "n_images": 11245,
+ "n_annotations": 120744,
+ "dropped_nonpositive_boxes": [
+  {
+   "id": 3330821,
+   "image_id": 342203,
+   "category_id": 4,
+   "bbox": [
+    50.72999954223633,
+    89.6500015258789,
+    498.1400146484375,
+    0.0
+   ]
+  },
+  {
+   "id": 3348666,
+   "image_id": 343984,
+   "category_id": 4,
+   "bbox": [
+    308.6099853515625,
+    100.30999755859375,
+    240.10000610351562,
+    0.0
+   ]
+  },
+  {
+   "id": 3487179,
+   "image_id": 358258,
+   "category_id": 4,
+   "bbox": [
+    94.52999877929688,
+    284.82000732421875,
+    406.2099914550781,
+    0.0
+   ]
+  },
+  {
+   "id": 3492384,
+   "image_id": 358878,
+   "category_id": 4,
+   "bbox": [
+    50.72999954223633,
+    89.6500015258789,
+    498.1400146484375,
+    0.0
+   ]
+  },
+  {
+   "id": 3500835,
+   "image_id": 359799,
+   "category_id": 4,
+   "bbox": [
+    51.040000915527344,
+    151.80999755859375,
+    238.11000061035156,
+    0.0
+   ]
+  },
+  {
+   "id": 3502314,
+   "image_id": 359963,
+   "category_id": 4,
+   "bbox": [
+    51.040000915527344,
+    320.0199890136719,
+    493.239990234375,
+    0.0
+   ]
+  },
+  {
+   "id": 3507536,
+   "image_id": 360588,
+   "category_id": 4,
+   "bbox": [
+    51.040000915527344,
+    292.80999755859375,
+    493.239990234375,
+    0.0
+   ]
+  },
+  {
+   "id": 3508849,
+   "image_id": 360733,
+   "category_id": 4,
+   "bbox": [
+    51.040000915527344,
+    112.11000061035156,
+    493.239990234375,
+    0.0
+   ]
+  },
+  {
+   "id": 3610183,
+   "image_id": 370747,
+   "category_id": 4,
+   "bbox": [
+    306.1400146484375,
+    215.2899932861328,
+    246.89999389648438,
+    0.0
+   ]
+  },
+  {
+   "id": 3613737,
+   "image_id": 370999,
+   "category_id": 4,
+   "bbox": [
+    42.52000045776367,
+    74.9000015258789,
+    246.35000610351562,
+    0.0
+   ]
+  },
+  {
+   "id": 3626547,
+   "image_id": 372124,
+   "category_id": 4,
+   "bbox": [
+    308.6600036621094,
+    98.04000091552734,
+    240.1999969482422,
+    0.0
+   ]
+  },
+  {
+   "id": 3698592,
+   "image_id": 378988,
+   "category_id": 4,
+   "bbox": [
+    50.72999954223633,
+    416.20001220703125,
+    498.1400146484375,
+    0.0
+   ]
+  },
+  {
+   "id": 3754106,
+   "image_id": 384648,
+   "category_id": 4,
+   "bbox": [
+    164.41000366210938,
+    111.79000091552734,
+    510.57000732421875,
+    0.0
+   ]
+  },
+  {
+   "id": 3754343,
+   "image_id": 384696,
+   "category_id": 4,
+   "bbox": [
+    101.7300033569336,
+    111.18000030517578,
+    391.80999755859375,
+    0.0
+   ]
+  },
+  {
+   "id": 3920142,
+   "image_id": 402157,
+   "category_id": 4,
+   "bbox": [
+    308.6600036621094,
+    89.6500015258789,
+    240.1999969482422,
+    0.0
+   ]
+  },
+  {
+   "id": 3922087,
+   "image_id": 402346,
+   "category_id": 4,
+   "bbox": [
+    50.72999954223633,
+    423.20001220703125,
+    498.1300048828125,
+    0.0
+   ]
+  },
+  {
+   "id": 4024144,
+   "image_id": 411834,
+   "category_id": 4,
+   "bbox": [
+    286.29998779296875,
+    121.93000030517578,
+    70.87000274658203,
+    0.0
+   ]
+  }
+ ],
+ "category_counts": {
+  "text": 88625,
+  "title": 18801,
+  "list": 4239,
+  "table": 4752,
+  "figure": 4327
+ },
+ "val_json_sha256": "aeff1d25eba29c30f0d64d50f9b4f055a77fa23c93ccedcc2632098f54844161",
+ "extracted_images": 200,
+ "seed": 20261101,
+ "subset_sizes": [
+  20,
+  200
+ ],
+ "parquet": [
+  {
+   "file": "validation-00000-of-00008.parquet",
+   "bytes": 435229937,
+   "sha256": "0aeb5fc4ceb0dde77a47dc13a80e933c6312fa08732dcca87b9fb5065ee086d6"
+  },
+  {
+   "file": "validation-00001-of-00008.parquet",
+   "bytes": 443496662,
+   "sha256": "6debb1db23b926e7822ae9e3b7fa31c2fba7170da8c5c0ef2b8d38942a94994f"
+  },
+  {
+   "file": "validation-00002-of-00008.parquet",
+   "bytes": 428700400,
+   "sha256": "164747d02e24bc70d25c22781b49d8c5987986b869bd60dc46b920dd3f543b6f"
+  },
+  {
+   "file": "validation-00003-of-00008.parquet",
+   "bytes": 435942668,
+   "sha256": "fba28037d5bd501cfa2864a06a37791e5f07e02c95ce18a6ddd1c1b2b6feca3b"
+  },
+  {
+   "file": "validation-00004-of-00008.parquet",
+   "bytes": 423486779,
+   "sha256": "1c982ba14e453b8defeab74b70ee680976290ed67ece7d8d2dfe12f188bd0749"
+  },
+  {
+   "file": "validation-00005-of-00008.parquet",
+   "bytes": 450454842,
+   "sha256": "18478d3c0bf0b8b8f6f7bef15c5a228d78eb819edf5df599c67ad19dc935edaa"
+  },
+  {
+   "file": "validation-00006-of-00008.parquet",
+   "bytes": 414431535,
+   "sha256": "6de1ea557c6d3d002edb702925539378d012cf45bb32d0627dadb37722161b87"
+  },
+  {
+   "file": "validation-00007-of-00008.parquet",
+   "bytes": 409142578,
+   "sha256": "41181be483daa46dcb0bab7dab2399a653ce86bf50653a8a0a43c4e11ee8436a"
+  }
+ ]
+}

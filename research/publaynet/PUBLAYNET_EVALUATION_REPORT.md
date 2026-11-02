@@ -1,193 +1,137 @@
 # PubLayNet layout detection evaluation: FINAUDIT AI
 
-**Status: NOT RUN. No evaluation result exists.** The two required inputs could not be obtained in the
-environment where this work was done. The environment's network policy denied every host that serves them
-(HTTP 403 on CONNECT; recorded by the egress proxy):
+**Status: RUN** on this machine, 2 November 2026. The scored subset is 200 validation images, seed `20261101`. The numbers below are that subset. They are not a confidence interval for the full validation split, and they are not an end-to-end Docling score.
 
-| Input | Host(s) tried | Result |
+A 20-image smoke run used the same seed. On this Python 3.11 install those 20 images are a subset of the 200, and they are not the first 20 rows of the sorted 200. Smoke metrics are in `results/smoke/` and are not the reported result.
+
+## 1. Parser provenance
+
+The previous copy of this report said Docling had never processed a FINAUDIT document. That sentence mixed three different things.
+
+**Retrieval benchmark (14 filings).** `services/api/eval/ingest_corpus.py` defaults to `--parser pymupdf`. `audit/RETRIEVAL_REPRODUCIBILITY_REPORT.md` records that the reproduction used PyMuPDF because Docling weights were unreachable in that environment. `audit/AI_VALIDATION_REPORT.md` says the same for the real-filing results. Those 14 documents are not in the local demo database.
+
+**Synthetic demo documents on this machine.** `services/api/data/finaudit.sqlite3` (local, not committed) has six Ready documents. For every one, `documents.parser_json` is `{"name": "docling", "version": "2.145.0", ...}` and `warnings_json` is empty. Chunk rows use the same parser and version. An empty warning list means the PyMuPDF fallback did not run: `pipeline._parse` inserts that warning only when Docling raises `ParserUnavailable` under `auto`.
+
+The acceptance upload `doc_db4e313061b54d8eb9b85dd9701af9ca` (`annual_report_excerpt.pdf`, sha256 `3774531dd5e27bb8d6457211aaac3eb3e257b5993e3762cf1195c49e6483f338`) matches `demo/short-course-final/DEMO_GUIDE.md`:
+
+| Record | Value |
+|---|---|
+| Job | `job_4325bbbcea794c9abccdcc022831525e`, requested parser `auto` |
+| Started / finished | `2026-11-01T15:17:37.259141+00:00` / `2026-11-01T15:19:20.521301+00:00` |
+| Duration | 103.262 seconds (the guide's 103.3 seconds) |
+| Persisted parser | Docling 2.145.0, OCR off, table structure on |
+| `parse.json` evidence | 4 regions: two `disclosure`, one `table`, one `figure` |
+| `financial_facts` | 18 |
+| `docling.json` | A `DoclingDocument` (schema 1.10.0) with a table and a picture |
+
+The Docling JSON does not store the layout checkpoint SHA. Docling 2.145.0's default spec is `docling-project/docling-layout-heron`, revision `main`. This evaluation used the cached `main` snapshot `8f39ad3c0b4c58e9c2d2c84a38465abf757272d8`. That is the model the installed library requests. It is not a field recovered from the November 1 parse record.
+
+**Production setting.** `Settings.parser` defaults to `docling`. `pymupdf` is the explicit fallback and is also used for page inspection and image crops. `auto` tries Docling first.
+
+## 2. Model and label map
+
+Read from the cached snapshot and from `docling.datamodel.layout_model_specs.DOCLING_LAYOUT_HERON`.
+
+| Item | Value |
+|---|---|
+| Repository | `docling-project/docling-layout-heron` |
+| Spec revision | `main` (Docling does not pin a commit) |
+| Resolved commit | `8f39ad3c0b4c58e9c2d2c84a38465abf757272d8` |
+| `model.safetensors` SHA-256 | `00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c` |
+| `config.json` SHA-256 | `fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d` |
+| Architecture | `RTDetrV2ForObjectDetection` |
+| Score threshold | 0.3 |
+| Device / threads | CPU / 4 |
+
+`id2label` in that `config.json`, checked by `evaluate.py` before scoring:
+
+`caption`, `footnote`, `formula`, `list_item`, `page_footer`, `page_header`, `picture`, `section_header`, `table`, `text`, `title`, `document_index`, `code`, `checkbox_selected`, `checkbox_unselected`, `form`, `key_value_region`.
+
+Every label the mapping requires is present. The run did not refuse.
+
+Installed versions for the scored process are in `results/run_config.json` and `results/environment.json`. Python 3.11.9, docling 2.145.0, transformers 5.22.1, torch 2.15.0, pycocotools 2.0.11, numpy 2.4.6. `requirements.txt` pins numpy 2.5.4; the run used the installed 2.4.6 and did not upgrade it.
+
+## 3. Dataset
+
+`dax-cdn.cdn.appdomain.cloud` did not resolve (`curl` exit 6). The training archive was not downloaded. Hugging Face is reachable from this machine. The validation split of `creative-graphic-design/PubLayNet` at `4bfc1ae32abdad8953c0b81e5cdf236f1745de50` has 11,245 rows, the same count as that dataset card's validation split. Rows keep COCO `image_id`, `file_name` (`PMC*.jpg`), boxes, and category ids 1–5. The class-label index stored beside each box is `category_id - 1` (`0` text through `4` figure). That equality was checked for every annotation.
+
+`materialize_hf_validation.py` wrote `val.json` and the JPEGs for the sampled pages. `evaluate.py` then checked categories, box geometry, and JPEG size. Verification passed: `results/dataset_verification.json` has an empty problem list.
+
+Seventeen table boxes had height 0. The harness stops on a non-positive box, so those 17 were excluded and listed in `results/provenance.json`. Table count after exclusion is 4,752 in the full split. No box failed the outside-image check. `val.json` SHA-256 is `aeff1d25eba29c30f0d64d50f9b4f055a77fa23c93ccedcc2632098f54844161`. Parquet SHA-256 values are in the same provenance file.
+
+The subset is image records sorted by id, then `random.Random(20261101).sample`. It depends only on this `val.json`.
+
+## 4. What was scored
+
+The harness is unchanged in its matching and metrics. It runs the same processor, `AutoModelForObjectDetection`, `post_process_object_detection`, and 0.3 threshold as Docling's transformers engine. It does not run Docling cluster merging, cell assignment, OCR, or table-structure recognition.
+
+| PubLayNet | Docling labels | Role |
 |---|---|---|
-| Docling layout model weights + `config.json` (label map) | `huggingface.co`, `hf-mirror.com`, `modelscope.cn` | 403 policy denial |
-| PubLayNet validation images + COCO annotations | `dax-cdn.cdn.appdomain.cloud` (official IBM DAX), HF dataset mirrors (`huggingface.co`, `datasets-server.huggingface.co`), `zenodo.org` | 403 policy denial |
-| Either, via the allowed package indexes | `pypi.org` | Not published there. `layoutparser` is on PyPI, but it is a different detector whose weights come from Dropbox, so it would not evaluate FINAUDIT's model |
+| table | `table` | primary |
+| figure | `picture` | primary |
+| title | `title`, `section_header` | secondary, many-to-one |
+| text | `text`, `caption`, `footnote`, `formula` | secondary, many-to-one |
+| list | `list_item` | not scored |
 
-Consequences:
-- `publaynet_metrics.csv` and `publaynet_per_image_results.csv` contain only the column schema and a `NOT_RUN`
-  status.
-- There are no visualizations of real predictions.
-- **No precision, recall, F1, AP, timing or failure analysis is reported, and none is estimated.**
+Predictions whose labels are not in that map are neither true positives nor false positives. On these 200 pages the ignored counts were: `list_item` 5,616, `page_header` 4,781, `page_footer` 3,324, `key_value_region` 4,521, `form` 525, `checkbox_unselected` 346, `code` 326, `checkbox_selected` 50, `document_index` 20.
 
-Everything that does not depend on the blocked inputs is done and is reproducible:
-1. The exact model and configuration, read from the installed code.
-2. The class mapping.
-3. A complete evaluation harness that mirrors the production inference code.
-4. Offline tests of the harness logic.
+Precision, recall, and F1 use greedy one-to-one matching at IoU 0.5 on boxes with score ≥ 0.3. AP, AP50, and AP75 are `pycocotools` COCOeval on boxes kept at the 0.01 floor.
 
-**To unblock:** allow `huggingface.co` and `dax-cdn.cdn.appdomain.cloud` in the environment's network settings,
-or run it on a machine with that access. Then:
+## 5. Results (200 images)
 
-```bash
-bash research/publaynet/fetch_inputs.sh /data/publaynet            # val split + labels + model; records SHA-256 and model commit
-python research/publaynet/evaluate.py --val-json /data/publaynet/publaynet/val.json \
-    --image-dir /data/publaynet/publaynet/val --model-dir /data/publaynet/docling-layout-heron \
-    --out research/publaynet/results --n 200 --seed 20261101
+| Class | GT | Pred | TP | FP | FN | Precision | Recall | F1 | AP | AP50 | AP75 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Table | 92 | 94 | 91 | 3 | 1 | 0.968 | 0.989 | 0.978 | 0.996 | 0.997 | 0.997 |
+| Figure | 87 | 301 | 86 | 215 | 1 | 0.286 | 0.989 | 0.443 | 0.733 | 0.868 | 0.743 |
+| Title | 306 | 517 | 301 | 216 | 5 | 0.582 | 0.984 | 0.731 | 0.534 | 0.964 | 0.372 |
+| Text | 1531 | 2520 | 1500 | 1020 | 31 | 0.595 | 0.980 | 0.741 | 0.887 | 0.967 | 0.928 |
+
+Source: `results/publaynet_metrics.csv`. Per-image counts: `results/publaynet_per_image_results.csv`. The same table is copied to `publaynet_metrics.csv` at the directory root. The previous `NOT_RUN` schema rows are replaced.
+
+Timing (`results/timing.json`), warmup excluded, JPEG decode excluded:
+
+| Stage | Mean | p50 | p95 |
+|---|---:|---:|---:|
+| Model init (once) | 22.9 s | | |
+| Preprocess | 19.5 ms | 7.0 ms | 43.0 ms |
+| Inference | 1839 ms | 708 ms | 3420 ms |
+| Post-process | 3.0 ms | 1.3 ms | 4.4 ms |
+
+The process took 417 seconds from start to exit, including init, two warmup images, COCO evaluation, and the 24 drawings.
+
+Drawings are `results/visualizations/` (green ground truth, blue true positive, red false positive, orange miss). Two pages with figure false positives:
+
+- `018_PMC5987798_00006.jpg`: one ground-truth figure around the upper multi-panel graphic, and separate `picture` boxes on the brain panels below (15 false positives, 2 true positives, no table errors).
+- `006_PMC3425854_00006.jpg`: one ground-truth figure around the whole Kaplan–Meier group, plus `picture` boxes on individual plots (3 false positives, 1 true positive).
+
+Those pages show a granularity difference: one PubLayNet figure box versus several detector boxes. They do not account, by themselves, for every one of the 215 figure false positives.
+
+Title AP50 is 0.964 and AP75 is 0.372, so many title matches clear IoU 0.5 and miss IoU 0.75. Text AP75 stays high (0.928). Title and text are the secondary mappings, so part of that gap is the label definition in section 4.
+
+## 6. What the scores establish
+
+On this seeded slice of PubLayNet validation images, the raw heron detector finds almost all tables and figures at IoU 0.5. Table precision at the production threshold is high. Figure precision at that threshold is low, while figure AP is higher than the F1, which means some extra `picture` boxes are ranked below the matched ones but still above 0.3.
+
+The scores do not establish:
+
+- quality of Docling's merged clusters, reading order, or table-structure model;
+- behaviour on financial filings, 10-K tables, or the synthetic demo PDFs;
+- chart-to-text or the MATCH / POTENTIAL_DISCREPANCY checks;
+- that the November 1 demo parse used this exact checkpoint SHA (the parse record stores Docling 2.145.0, not the commit).
+
+PubLayNet JPEGs are not Docling's PDF render. Docling scales the layout image from the PDF; these files are the dataset's own JPEGs.
+
+No fine-tuning run was done. Nothing here shows that fine-tuning would raise figure precision. A later experiment would need a held-out comparison against this subset, this seed, and these thresholds. The panel-versus-whole-figure difference is also a definition mismatch, not only a weight problem.
+
+## 7. Commands
+
+From the repository root, with the API virtualenv (docling 2.145.0, torch 2.15.0, pycocotools 2.0.11, pyarrow):
+
+```text
+python research/publaynet/fetch_hf_validation.py C:/Users/Lenovo/data/publaynet-hf
+python research/publaynet/materialize_hf_validation.py --parquet-dir C:/Users/Lenovo/data/publaynet-hf/data --out C:/Users/Lenovo/data/publaynet --n 20 --n 200 --seed 20261101
+python research/publaynet/evaluate.py --val-json C:/Users/Lenovo/data/publaynet/val.json --image-dir C:/Users/Lenovo/data/publaynet/val --model-dir C:/Users/Lenovo/.cache/huggingface/hub/models--docling-project--docling-layout-heron/snapshots/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8 --out research/publaynet/results/smoke --n 20 --seed 20261101
+python research/publaynet/evaluate.py --val-json C:/Users/Lenovo/data/publaynet/val.json --image-dir C:/Users/Lenovo/data/publaynet/val --model-dir C:/Users/Lenovo/.cache/huggingface/hub/models--docling-project--docling-layout-heron/snapshots/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8 --out research/publaynet/results --n 200 --seed 20261101
 ```
 
-## 1. What FINAUDIT AI actually runs (verified from installed code)
-
-| Item | Value | Source |
-|---|---|---|
-| docling / docling-core / docling-ibm-models | 2.145.0 / 2.105.0 / 4.0.4 | `importlib.metadata` (`results/environment.json`) |
-| transformers / torch / torchvision | 5.22.1 / 2.15.0 / 0.29.2 | same |
-| FINAUDIT layout configuration | Docling **defaults**. `docling_parser.py` sets `PdfPipelineOptions` (OCR, table structure, picture classification, threads, device) but no `layout_options` | `services/api/app/processing/docling_parser.py` |
-| Default layout options class | `LayoutObjectDetectionOptions` (`LayoutOptions` is a deprecated alias that maps onto it) | `docling/models/stages/layout/layout_model.py` |
-| Layout model | `docling-project/docling-layout-heron` | `docling.datamodel.layout_model_specs.DOCLING_LAYOUT_HERON` |
-| Model revision | `"main"`, **not pinned by Docling**. The weights a run gets depend on the download date; `fetch_inputs.sh` resolves and records the commit SHA | same |
-| Engine | Transformers `AutoModelForObjectDetection` + the model's own `AutoImageProcessor` (an ONNX variant, `docling-layout-heron-onnx`, exists but is not the default) | `inference_engines/object_detection/transformers_engine.py` |
-| Score threshold | **0.3** (`TransformersObjectDetectionEngineOptions.score_threshold`) | same |
-| dtype / compile | auto / off | same |
-| Coordinate handling | `post_process_object_detection(target_sizes=[[h, w]])` returns pixel boxes in the input image frame. Docling then rescales them to PDF points with `page_width / image.width` | `layout_object_detection_model.py` lines 153–177 |
-| Label vocabulary | **Not verified.** Docling reads `id2label` from the model's `config.json` at load time and upper-cases it into `DocItemLabel` (it raises if a name is not a `DocItemLabel`). The file lives on huggingface.co | `layout_object_detection_model.py` `_build_label_map` |
-
-So the set of labels the detector can emit is bounded by `DocItemLabel`, but which subset heron uses, and in
-what id order, must be read from its `config.json`. `evaluate.py` records `id2label` in `run_config.json` and
-refuses to run if any mapped label is missing (`mapping.resolve`).
-
-**Which parser produced the existing FINAUDIT corpus.** Docling was never initialised in any FINAUDIT run done
-so far, for the same HuggingFace reason. All 14 documents in the audit corpus were parsed by the PyMuPDF
-fallback (`parser: pymupdf`), which uses rule-based text and table extraction, not a learned layout detector.
-"The pretrained layout detector used by FINAUDIT" therefore means the configured Docling default above. It has
-never processed a FINAUDIT document.
-
-## 2. What is evaluated, and why not raw Docling output
-
-PubLayNet provides **page images**: JPEGs rendered from PubMed Central PDFs, with COCO `[x, y, w, h]` pixel
-boxes. Docling's full `DocumentConverter` is not a clean object-detection target here, for three reasons:
-
-1. Its layout post-processing merges, splits and re-labels clusters using the PDF's text cells. On an image
-   input there are no PDF cells; they would have to come from OCR, which changes the result and is a separate
-   download, the OCR models.
-2. Its output boxes are in PDF points after post-processing, and carry Docling-level semantics such as
-   reading-order groups.
-3. Post-processed clusters keep a confidence, but filtering and merging change the score distribution, which
-   makes AP over those boxes ill-defined.
-
-The harness therefore evaluates **the underlying detector**: the same heron weights, the same image processor,
-the same `post_process_object_detection` call and the same 0.3 threshold that Docling's engine uses
-(`publaynet_eval/detector.py` reproduces `transformers_engine.predict_batch` line for line). These are the raw
-per-region predictions that Docling's layout stage starts from. The distinction matters when interpreting
-results: detector quality is measured, not end-to-end Docling parsing quality on born-digital PDFs.
-
-## 3. Dataset protocol (implemented, not executed)
-
-- **Split:** PubLayNet `val.json` only. The val archive is fetched separately, so the ~96 GB full archive and
-  the training images are never downloaded.
-- **Verification** (`publaynet_eval/dataset.py`):
-  - the categories must equal the published set {1 text, 2 title, 3 list, 4 table, 5 figure};
-  - every annotation must reference an existing image, have a positive size and lie inside the image;
-  - every selected JPEG must exist and have exactly the COCO `width × height`.
-
-  The run stops on any failure and writes `dataset_verification.json`.
-- **Subset:** image records are sorted by `id`, then `random.Random(20261101).sample(n=200)`. The selection
-  depends only on `val.json`. `subset_manifest.json` records ids, file names, sizes, per-image SHA-256 and the
-  SHA-256 of `val.json`.
-
-## 4. Class mapping (`publaynet_eval/mapping.py`)
-
-| PubLayNet | Docling label(s) | Evaluated | Reason |
-|---|---|---|---|
-| table | `table` | **primary** | same concept |
-| figure | `picture` | **primary** | same concept, different name |
-| title | `title`, `section_header` | secondary | PubLayNet "title" covers article titles *and* section headings |
-| text | `text`, `caption`, `footnote`, `formula` | secondary | PubLayNet folds captions and footnotes into text |
-| list | `list_item` | **not evaluated** | granularity mismatch: one PubLayNet box per list vs one Docling box per item |
-| — | `page_header`, `page_footer`, `code`, `checkbox_*`, `form`, `key_value_region`, `document_index` | ignored | not annotated in PubLayNet; neither TP nor FP; counts are logged |
-
-The secondary-class mappings are many-to-one, so their numbers are expected to be pessimistic for reasons of
-label definition rather than detection quality.
-
-## 5. Metrics (`publaynet_eval/metrics.py`)
-
-- **Per-class precision, recall and F1 at IoU 0.5.** Matching is per image and per class: predictions are taken
-  in descending score order and greedily matched one-to-one to the highest-IoU unmatched ground-truth box with
-  IoU ≥ 0.5, using the boxes kept at the production threshold (0.3).
-- **COCO AP / AP50 / AP75.** Computed with the official `pycocotools` COCOeval (2.0.11), and only because the
-  detector exposes real per-box scores. Inference runs once at a 0.01 score floor:
-  - AP uses all of those scored boxes;
-  - P/R/F1 re-filter to ≥ 0.3, which is identical to production because the threshold in
-    `post_process_object_detection` is a pure score filter.
-
-  AP is never computed from post-processed Docling boxes.
-- **Timing** (`timing.json`), each measured with `perf_counter`:
-  - model initialisation, reported once;
-  - preprocessing: RGB conversion plus the HF image processor;
-  - inference: the model forward pass under `inference_mode`;
-  - post-processing.
-
-  JPEG decoding is excluded, and two warm-up images are excluded from the statistics.
-- **Visualizations** (`results/visualizations/`, first 24 subset images, Table and Figure). Green = ground
-  truth, blue = true-positive prediction, red = false-positive prediction, orange dashed = missed ground truth
-  (false negative). Each box is labelled with its class and score.
-
-## 6. Verification of the harness (offline; not results)
-
-`tests/test_harness.py`, 6/6 passing (`pytest research/publaynet/tests`):
-
-- IoU, greedy one-to-one matching (a duplicate prediction becomes an FP) and the P/R/F1 edge cases.
-- The mapping fails loudly on a vocabulary that lacks a mapped label.
-- Dataset verification catches a wrong category set and a JPEG whose size disagrees with COCO; the subset
-  selection is deterministic.
-- An end-to-end run on a **synthetic** 3-image COCO set with a **scripted** detector double gives exact
-  TP/FP/FN counts, ignores unmapped labels, writes the CSVs and visualizations, and produces AP from scores
-  below the P/R threshold.
-- `LayoutDetector` runs on a **tiny, randomly initialised RT-DETRv2** built locally. Its outputs are meaningless
-  by design; the test checks the loading and inference path and that boxes come back in the input image's pixel
-  frame for a non-square 612×792 page.
-
-These tests verify code paths only. They say nothing about heron or PubLayNet.
-
-## 7. Failure analysis: what can and cannot be stated
-
-There are no observed failures, because nothing ran. The following are **expected failure sources**, derived
-from the label definitions and the code, that the evaluation is designed to separate. They are not measured
-findings:
-
-- **Label mismatch.** List is excluded entirely. Title and text are many-to-one. PubLayNet does not annotate
-  page headers and footers, so the harness drops those predictions instead of counting them as FP.
-  Caption-inside-figure conventions may differ between the datasets; the visualizations are where this would
-  show.
-- **OCR availability.** The detector needs no OCR: it sees only pixels. Docling's *full* pipeline on an image
-  needs OCR to obtain text cells for post-processing. FINAUDIT has OCR off by default (`docling_do_ocr`) and
-  parses born-digital PDFs, where cells come from the PDF text layer, so OCR does not affect FINAUDIT's
-  production path. It would affect any attempt to score full Docling output on PubLayNet images.
-- **Image-based vs PDF-based parsing.** On a PDF, Docling renders the page itself, at a scale of 1.0 = 72 dpi
-  for the layout model, and maps the boxes back to points. PubLayNet JPEGs have their own rendering resolution
-  and JPEG artefacts. Detector accuracy on PubLayNet images is therefore an imperfect proxy for accuracy on
-  FINAUDIT's rendered PDF pages.
-
-## 8. Is fine-tuning worth pursuing?
-
-**No evidence-based conclusion is possible: there is no baseline measurement.** Recommending or rejecting
-fine-tuning now would be speculation. What the decision should rest on:
-
-1. Run this baseline: 200 PubLayNet val images, Table and Figure F1 at IoU 0.5, plus AP.
-2. More importantly for FINAUDIT, run the same harness on in-domain pages. PubLayNet is biomedical journal
-   articles; FINAUDIT processes financial filings (10-K/10-Q tables, charts). A PubLayNet score answers "is the
-   detector broken on generic documents", not "is it good on filings". The audit's own figure-detection
-   finding (AUD-14) was made on PyMuPDF's rule-based regions, not on heron, so it is not evidence about heron
-   either.
-3. Fine-tuning is worth pursuing only if (a) in-domain Table or Figure recall or precision at IoU 0.5 is low
-   enough to cause downstream misses that the QA validator then has to abstain on, and (b) a held-out
-   comparison against this exact baseline (same subset, same seed, same thresholds) shows a gain. No such
-   comparison exists, and none is claimed.
-
-## 9. Files
-
-| Path | Content |
-|---|---|
-| `evaluate.py` | end-to-end runner (verification → subset → inference → metrics → CSVs → visualizations) |
-| `publaynet_eval/{dataset,mapping,metrics,detector,visualize}.py` | harness modules |
-| `fetch_inputs.sh` | fetches the val split, labels and model only; records SHA-256 and the resolved model commit |
-| `requirements.txt` | the exact versions installed where the harness was written |
-| `tests/test_harness.py` | offline tests (synthetic data, scripted and random-weight doubles) |
-| `results/environment.json` | installed versions, Docling default layout configuration, network denials |
-| `publaynet_metrics.csv`, `publaynet_per_image_results.csv` | schema only, status `NOT_RUN` (overwritten by a real run) |
+`fetch_inputs.sh` still points at the IBM DAX val archive. That host did not resolve here, so it was not used. Offline harness tests: `pytest research/publaynet/tests/test_harness.py` — 6 passed. Those tests do not use heron or PubLayNet.

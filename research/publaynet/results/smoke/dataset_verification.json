@@ -1,0 +1,23 @@
+{
+ "split_file": "val.json",
+ "split_sha256": "aeff1d25eba29c30f0d64d50f9b4f055a77fa23c93ccedcc2632098f54844161",
+ "n_images": 11245,
+ "n_annotations": 120744,
+ "categories": {
+  "1": "text",
+  "2": "title",
+  "3": "list",
+  "4": "table",
+  "5": "figure"
+ },
+ "category_counts": {
+  "text": 88625,
+  "title": 18801,
+  "list": 4239,
+  "table": 4752,
+  "figure": 4327
+ },
+ "problems": [],
+ "subset_n": 20,
+ "subset_image_problems": []
+}
