@@ -26,6 +26,13 @@ export const Route = createFileRoute("/trends")({
   head: () => ({
     meta: [
       { title: "Trends — FINAUDIT AI" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Trends — FINAUDIT AI" },
+      {
+        property: "og:description",
+        content: "Compare reported financial values across processed reports.",
+      },
       {
         name: "description",
         content: "Compare reported financial values across processed reports.",

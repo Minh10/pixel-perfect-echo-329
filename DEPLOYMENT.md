@@ -1,6 +1,26 @@
 # Deployment
 
-FINAUDIT AI is not deployed on a public URL. This guide is the supported way to host it. Do not put the FastAPI process on the public internet until `FINAUDIT_API_TOKEN` is set and an end-to-end check against that URL has passed. That check has not been done.
+The official FINAUDIT AI frontend is published at https://finauditai-cdac.lovable.app in the existing Lovable project. Lovable Cloud is connected. The real document service is not connected or verified through the published website; the default experience remains an explicitly labelled sample preview. Do not expose FastAPI until `FINAUDIT_API_TOKEN` is set.
+
+## Connection configuration still needed
+
+| Setting                       | Where                                            | Required value / status                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FINAUDIT_BACKEND_URL`        | Lovable project server-side Secrets              | Actual separately hosted HTTPS FastAPI origin, without `/api/v1`, query, credentials, or trailing path. **Not supplied; no backend hostname is known.**                       |
+| `FINAUDIT_API_TOKEN`          | Lovable server-side Secrets **and** FastAPI host | The same shared bearer token on both sides. **Not configured.** Never use a `VITE_` name.                                                                                     |
+| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets                      | Exact Cloud user UUID allowed to access all private reports. **Not configured: the user requested a login-free demo.**                                                        |
+| `VITE_FINAUDIT_SERVICE_MODE`  | Frontend deployment configuration                | Leave unset for the sample preview. Set to `proxy` only after private account access and the service are ready. This non-secret mode flag never contains credentials.         |
+| `FINAUDIT_LLM_API_KEY`        | FastAPI API and worker host only                 | Actual OpenAI key, read using `FINAUDIT_LLM_API_KEY_ENV=FINAUDIT_LLM_API_KEY`. **Not supplied or verified.** Lovable does not need this key because FastAPI owns model calls. |
+
+The frontend now ignores `VITE_FINAUDIT_API_URL`; a browser must never bypass the secure proxy. Requests use `/api/document-service/api/v1/...` on the app's own origin. The server validates Cloud authentication, checks the exact authorized user, allows only existing document-tool paths, and injects the FastAPI bearer token. PDF requests are streamed; background processing, progress and results remain owned by the FastAPI worker and Docling. Service errors are not fabricated as results. New proxy code uses supported TanStack server routes, not a new separate Edge Function.
+
+### Access activation is intentionally unfinished
+
+No profile table, login page, signup button or anonymous private-service access was added, following the clarification "no, just for demo". The private proxy returns unavailable while its configuration is missing, unauthorized without a valid session, and forbidden for any other user. The public sample remains accessible.
+
+Before private activation, create the owner through **More → Users → Add user** and configure **More → Users → Auth settings → Disable sign-up**. Hosted signup settings could not be verified or changed safely in this task; removing signup UI alone is not signup protection. Complete sign-in-only access with a validated HttpOnly, Secure, SameSite session cookie named `finaudit_access_token`, so native page images and source PDF links authenticate without URL tokens. JSON requests and uploads already support the browser's Cloud session bearer. Do not enable proxy mode before the cookie/sign-in flow is complete.
+
+After configuring secrets, publish the existing application again to make them available in production. Then upload a real financial PDF through the published intake, confirm the job completes, pages and citations load, and source images/PDFs read back securely. This acceptance test has **not** been performed; online PDF processing is **not claimed**.
 
 ## What has to stay private
 
@@ -15,12 +35,12 @@ The OpenAI key is `FINAUDIT_LLM_API_KEY` on the API and the worker. The provider
 
 ## Processes
 
-| Process | Command | Storage |
-|---|---|---|
-| API | `uvicorn app.main:app` via `scripts/start_api.py`, or the `api` service in Compose | `FINAUDIT_DATA_DIR` (SQLite, PDFs, renders) |
-| Worker | `python -m app.worker` | The same data directory. It claims parse and index jobs. |
-| Qdrant | Compose service, or `FINAUDIT_QDRANT_URL` | Required when the API and the worker are separate processes. Embedded Qdrant allows one process only. |
-| UI | `npm run build`, then serve the static `dist/` from a host that can reach the API | No document store of its own |
+| Process           | Command                                                                            | Storage                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| API               | `uvicorn app.main:app` via `scripts/start_api.py`, or the `api` service in Compose | `FINAUDIT_DATA_DIR` (SQLite, PDFs, renders)                                                           |
+| Worker            | `python -m app.worker`                                                             | The same data directory. It claims parse and index jobs.                                              |
+| Qdrant            | Compose service, or `FINAUDIT_QDRANT_URL`                                          | Required when the API and the worker are separate processes. Embedded Qdrant allows one process only. |
+| UI + secure proxy | Existing Lovable TanStack Start application                                        | Server-side secrets; no replacement document store                                                    |
 
 Compose already runs the API, one worker, and Qdrant on one named volume (`finaudit-data`) plus `qdrant-data`. That is the persistent layout. Back up both volumes. SQLite is in the data volume.
 
@@ -48,11 +68,11 @@ The UI is linked to the existing Lovable project `282cd50e-8aed-48da-9ff2-43355f
 2. In that Lovable project, sync from GitHub before writing another prompt.
 3. Do not create a second Lovable project.
 
-Lovable hosting, if used later, publishes the frontend only. Point it at an API that already requires `FINAUDIT_API_TOKEN`, through a proxy that holds the token. Until that proxy and a public URL are tested, the product is local.
+Lovable hosts the frontend and its server-side proxy. FastAPI, Docling, the worker, persistent data volumes and Qdrant remain separately hosted. No second project or replacement AI processing workflow is needed.
 
 ## Not done
 
-- No public hostname has been assigned.
-- No end-to-end test has been run against a public URL.
-- There are no user accounts and no per-tenant isolation.
-- A reverse proxy that injects the bearer token is described here and is not included as a running service.
+- No real FastAPI hostname, shared bearer token or authorized account has been configured.
+- No real-PDF end-to-end test has been run through the published app.
+- Sign-in and secure image/PDF session cookies are pending the decision to enable private access; public signup settings are unverified.
+- FastAPI has no per-tenant isolation; the single-user proxy must never grant additional accounts access.

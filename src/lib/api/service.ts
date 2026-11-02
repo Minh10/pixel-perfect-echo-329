@@ -1,5 +1,5 @@
 // Replaceable typed service layer. Live mode uses the FastAPI client when
-// VITE_FINAUDIT_API_URL is set. Demo mode stays on fictional fixtures and is
+// VITE_FINAUDIT_SERVICE_MODE is explicitly set to proxy. Demo mode stays on fictional fixtures and is
 // never mixed into live document, page, or evidence results.
 import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";

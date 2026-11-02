@@ -16,6 +16,7 @@ import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as EvaluationRouteImport } from './routes/evaluation'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as ApiDocumentServiceSplatRouteImport } from './routes/api/document-service/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const TrendsRoute = TrendsRouteImport.update({
   path: '/trends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDocumentServiceSplatRoute = ApiDocumentServiceSplatRouteImport.update({
+  id: '/api/document-service/$',
+  path: '/api/document-service/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
   '/trends': typeof TrendsRoute
+  '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
   '/trends': typeof TrendsRoute
+  '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/evaluation': typeof EvaluationRoute
   '/intelligence': typeof IntelligenceRoute
   '/trends': typeof TrendsRoute
+  '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/evaluation'
     | '/intelligence'
     | '/trends'
+    | '/api/document-service/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/evaluation'
     | '/intelligence'
     | '/trends'
+    | '/api/document-service/$'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/evaluation'
     | '/intelligence'
     | '/trends'
+    | '/api/document-service/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   EvaluationRoute: typeof EvaluationRoute
   IntelligenceRoute: typeof IntelligenceRoute
   TrendsRoute: typeof TrendsRoute
+  ApiDocumentServiceSplatRoute: typeof ApiDocumentServiceSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/document-service/$': {
+      id: '/api/document-service/$'
+      path: '/api/document-service/$'
+      fullPath: '/api/document-service/$'
+      preLoaderRoute: typeof ApiDocumentServiceSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   EvaluationRoute: EvaluationRoute,
   IntelligenceRoute: IntelligenceRoute,
   TrendsRoute: TrendsRoute,
+  ApiDocumentServiceSplatRoute: ApiDocumentServiceSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
