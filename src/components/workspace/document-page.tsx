@@ -56,7 +56,7 @@ export function DocumentPageView({
             src={apiAsset(`${page.imageUrl}?dpi=110`)}
             alt={`Page ${page.number} of ${documentTitle}`}
             decoding="async"
-            className="absolute inset-0 h-full w-full bg-paper"
+            className="absolute inset-0 h-full w-full"
           />
           {page.blocks.map((block) => {
             const ev = byBlock.get(block.id);
