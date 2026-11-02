@@ -29,7 +29,10 @@ export const Route = createFileRoute("/trends")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Trends — FINAUDIT AI" },
-      { property: "og:description", content: "Compare reported financial values across processed reports." },
+      {
+        property: "og:description",
+        content: "Compare reported financial values across processed reports.",
+      },
       {
         name: "description",
         content: "Compare reported financial values across processed reports.",

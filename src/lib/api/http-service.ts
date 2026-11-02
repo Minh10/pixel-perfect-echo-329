@@ -104,7 +104,11 @@ export const httpService = {
     throw new ApiError(501, "not_implemented", "Trends are not available from the backend yet");
   },
 
-  uploadDocument: async (file: File, meta: UploadMeta = {}, onProgress?: (fraction: number) => void) => {
+  uploadDocument: async (
+    file: File,
+    meta: UploadMeta = {},
+    onProgress?: (fraction: number) => void,
+  ) => {
     if (!API_URL) {
       return Promise.reject(
         new ApiError(0, "backend_unavailable", "The document service URL is not configured."),

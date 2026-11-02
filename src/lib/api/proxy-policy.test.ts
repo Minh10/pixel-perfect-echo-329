@@ -18,10 +18,26 @@ describe("private FastAPI proxy policy", () => {
     expect(allowedProxyPath("POST", "api/v1/qa")).toBe(true);
   });
   it("rejects arbitrary and encoded upstream paths", () => {
-    for (const path of ["admin", "api/v1/../admin", "api/v1/documents/%2e%2e", "https://other.example/api/v1/documents"]) expect(allowedProxyPath("GET", path)).toBe(false);
+    for (const path of [
+      "admin",
+      "api/v1/../admin",
+      "api/v1/documents/%2e%2e",
+      "https://other.example/api/v1/documents",
+    ])
+      expect(allowedProxyPath("GET", path)).toBe(false);
   });
   it("accepts only a fixed HTTPS service origin", () => {
-    expect(configuredBackend("https://documents.example.org")?.origin).toBe("https://documents.example.org");
-    for (const url of [undefined, "http://documents.example.org", "https://localhost", "https://127.0.0.1", "https://documents.example.org/api/v1", "https://user:pass@documents.example.org"]) expect(configuredBackend(url)).toBeNull();
+    expect(configuredBackend("https://documents.example.org")?.origin).toBe(
+      "https://documents.example.org",
+    );
+    for (const url of [
+      undefined,
+      "http://documents.example.org",
+      "https://localhost",
+      "https://127.0.0.1",
+      "https://documents.example.org/api/v1",
+      "https://user:pass@documents.example.org",
+    ])
+      expect(configuredBackend(url)).toBeNull();
   });
 });

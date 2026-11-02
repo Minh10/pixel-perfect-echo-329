@@ -4,13 +4,13 @@ The official FINAUDIT AI frontend is published at https://finauditai-cdac.lovabl
 
 ## Connection configuration still needed
 
-| Setting | Where | Required value / status |
-|---|---|---|
-| `FINAUDIT_BACKEND_URL` | Lovable project server-side Secrets | Actual separately hosted HTTPS FastAPI origin, without `/api/v1`, query, credentials, or trailing path. **Not supplied; no backend hostname is known.** |
-| `FINAUDIT_API_TOKEN` | Lovable server-side Secrets **and** FastAPI host | The same shared bearer token on both sides. **Not configured.** Never use a `VITE_` name. |
-| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets | Exact Cloud user UUID allowed to access all private reports. **Not configured: the user requested a login-free demo.** |
-| `VITE_FINAUDIT_SERVICE_MODE` | Frontend deployment configuration | Leave unset for the sample preview. Set to `proxy` only after private account access and the service are ready. This non-secret mode flag never contains credentials. |
-| `FINAUDIT_LLM_API_KEY` | FastAPI API and worker host only | Actual OpenAI key, read using `FINAUDIT_LLM_API_KEY_ENV=FINAUDIT_LLM_API_KEY`. **Not supplied or verified.** Lovable does not need this key because FastAPI owns model calls. |
+| Setting                       | Where                                            | Required value / status                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FINAUDIT_BACKEND_URL`        | Lovable project server-side Secrets              | Actual separately hosted HTTPS FastAPI origin, without `/api/v1`, query, credentials, or trailing path. **Not supplied; no backend hostname is known.**                       |
+| `FINAUDIT_API_TOKEN`          | Lovable server-side Secrets **and** FastAPI host | The same shared bearer token on both sides. **Not configured.** Never use a `VITE_` name.                                                                                     |
+| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets                      | Exact Cloud user UUID allowed to access all private reports. **Not configured: the user requested a login-free demo.**                                                        |
+| `VITE_FINAUDIT_SERVICE_MODE`  | Frontend deployment configuration                | Leave unset for the sample preview. Set to `proxy` only after private account access and the service are ready. This non-secret mode flag never contains credentials.         |
+| `FINAUDIT_LLM_API_KEY`        | FastAPI API and worker host only                 | Actual OpenAI key, read using `FINAUDIT_LLM_API_KEY_ENV=FINAUDIT_LLM_API_KEY`. **Not supplied or verified.** Lovable does not need this key because FastAPI owns model calls. |
 
 The frontend now ignores `VITE_FINAUDIT_API_URL`; a browser must never bypass the secure proxy. Requests use `/api/document-service/api/v1/...` on the app's own origin. The server validates Cloud authentication, checks the exact authorized user, allows only existing document-tool paths, and injects the FastAPI bearer token. PDF requests are streamed; background processing, progress and results remain owned by the FastAPI worker and Docling. Service errors are not fabricated as results. New proxy code uses supported TanStack server routes, not a new separate Edge Function.
 
@@ -35,12 +35,12 @@ The OpenAI key is `FINAUDIT_LLM_API_KEY` on the API and the worker. The provider
 
 ## Processes
 
-| Process | Command | Storage |
-|---|---|---|
-| API | `uvicorn app.main:app` via `scripts/start_api.py`, or the `api` service in Compose | `FINAUDIT_DATA_DIR` (SQLite, PDFs, renders) |
-| Worker | `python -m app.worker` | The same data directory. It claims parse and index jobs. |
-| Qdrant | Compose service, or `FINAUDIT_QDRANT_URL` | Required when the API and the worker are separate processes. Embedded Qdrant allows one process only. |
-| UI + secure proxy | Existing Lovable TanStack Start application | Server-side secrets; no replacement document store |
+| Process           | Command                                                                            | Storage                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| API               | `uvicorn app.main:app` via `scripts/start_api.py`, or the `api` service in Compose | `FINAUDIT_DATA_DIR` (SQLite, PDFs, renders)                                                           |
+| Worker            | `python -m app.worker`                                                             | The same data directory. It claims parse and index jobs.                                              |
+| Qdrant            | Compose service, or `FINAUDIT_QDRANT_URL`                                          | Required when the API and the worker are separate processes. Embedded Qdrant allows one process only. |
+| UI + secure proxy | Existing Lovable TanStack Start application                                        | Server-side secrets; no replacement document store                                                    |
 
 Compose already runs the API, one worker, and Qdrant on one named volume (`finaudit-data`) plus `qdrant-data`. That is the persistent layout. Back up both volumes. SQLite is in the data volume.
 
