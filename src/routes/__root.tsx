@@ -10,6 +10,8 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { configureDemoService } from "@/lib/api/service";
+import { setDemoEntry } from "@/lib/demo-entry";
+import { setLiveStatus } from "@/lib/live-status";
 
 import appCss from "../styles.css?url";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -139,8 +141,13 @@ function RootComponent() {
         const response = await fetch("/api/public/demo-session", { credentials: "same-origin" });
         if (!response.ok) return;
         const status = await response.json();
-        const live = status.enabled === true && status.entered === true;
-        if (!active || (live ? "live" : "sample") === mode) return;
+        const enabled = status.enabled === true;
+        const live = enabled && status.entered === true;
+        if (!active) return;
+        // A tab-local sample entry is meaningless once the live demo is on.
+        if (enabled) setDemoEntry(false);
+        setLiveStatus({ enabled, entered: live });
+        if ((live ? "live" : "sample") === mode) return;
         configureDemoService(live);
         await queryClient.cancelQueries();
         queryClient.clear();
