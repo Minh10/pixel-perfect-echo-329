@@ -38,7 +38,7 @@ Durable, atomic Lovable Cloud counters apply across server instances, fail close
 
 These are custom application limits, not a built-in platform limiter. Global ceilings are stronger than an IP quota for this shared demo and do not trust client-supplied IP headers. Counters use UTC minutes/days. There is no automatic counter cleanup yet; session/counter records contain no user identities, tokens or document contents.
 
-**POST limits are not a dollar spending guarantee.** One Docling/index job or QA can trigger multiple embeddings/model calls. Cursor must verify explicit per-job model-call/token caps, worker concurrency and an enforced spending cutoff on Windows before activation; reporting prices or a provider budget alert alone is not a hard cutoff. Cursor must also demonstrate how queued/in-flight jobs and retries are stopped after cancellation or disconnect. Existing backend has no verified dollar ceiling. Do not claim an unbounded paid service is safe simply because admin/admin is required. No local Windows backend changes were made here.
+**POST limits are not a dollar spending guarantee.** Before this activation, Cursor reported testing a 40-model-call cutoff (41st blocked before contacting OpenAI), emergency stop, one worker/job, three attempts, no model client retries, 120-second model timeout and 2048 output tokens per call; QA repair counts against the ceiling. These are owner-reported upstream checks, not independent Lovable tests or a verified monetary ceiling. No local Windows backend changes were made here. Publicly known admin/admin is not protection against strangers.
 
 ## Windows start and tunnel rotation
 
