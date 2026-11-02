@@ -33,7 +33,7 @@ Durable, atomic Lovable Cloud counters apply across server instances, fail close
 - 10 live entry attempts/minute globally.
 - 120 proxied requests/minute globally and 60/minute per signed session.
 - 2 work-creating POSTs/minute and 20/day globally, including QA, retrieval, interpretation, indexing and reprocessing. Failed/invalid requests consume the reserved budget too.
-- 3 PDF uploads/day globally; one unencrypted PDF per upload, maximum 10 MiB and 30 pages. JSON maximum 16 KiB, questions/queries maximum 2,000 characters, at most four report IDs and retrieval depth five.
+- 10 PDF uploads per UTC day globally; resets at 00:00 UTC using a new daily bucket, without resetting or deleting historical counts. One unencrypted PDF per upload, maximum 10 MiB and 30 pages. JSON maximum 16 KiB, questions/queries maximum 2,000 characters, at most four report IDs and retrieval depth five. A quota rejection explicitly states the limit and UTC reset time, not that the backend is unavailable.
 - Image DPI 36–150; fixed HTTPS upstream origin and strict path/method/query guards.
 
 These are custom application limits, not a built-in platform limiter. Global ceilings are stronger than an IP quota for this shared demo and do not trust client-supplied IP headers. Counters use UTC minutes/days. There is no automatic counter cleanup yet; session/counter records contain no user identities, tokens or document contents.

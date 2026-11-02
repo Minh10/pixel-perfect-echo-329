@@ -21,6 +21,7 @@
 - Generated Cloud integration files retain semantic and security ESLint checks but not the app's Prettier rule because their generator controls formatting.
 - Select live service only in browser effects after a server-verified enabled demo session; SSR always uses the public sample, preventing shared global live configuration from leaking between server requests.
 - Temporary demo counters and revocation use service-role-only Cloud tables and atomic RPCs; never use in-memory rate limiting, and fail closed on guard failure.
+- The global daily PDF allowance is defined in temporary-demo.ts and consumed by the proxy against UTC daily buckets; preserve historical counters when changing the allowance.
 - Inspect bounded multipart PDF bytes with pdf-lib before forwarding temporary uploads; this enforces page limits without changing FastAPI/Docling processing.
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.

@@ -191,8 +191,53 @@ it("reserves global daily work/upload budgets and per-minute request caps", asyn
   expect(calls.some(([bucket, limit]) => bucket.startsWith("work-minute:") && limit === 2)).toBe(
     true,
   );
-  expect(calls.some(([bucket, limit]) => bucket.startsWith("uploads:") && limit === 3)).toBe(true);
+  expect(calls.some(([bucket, limit]) => bucket.startsWith("uploads:") && limit === 10)).toBe(true);
   expect(fetch).not.toHaveBeenCalled();
+});
+it("allows seven more uploads after three used and rejects the eleventh in the same UTC day", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-02T06:52:00Z"));
+  let used = 3;
+  guard.consume.mockImplementation(async (bucket: string, limit: number) => {
+    if (!bucket.startsWith("uploads:")) return true;
+    expect(bucket).toBe("uploads:2026-11-02");
+    expect(limit).toBe(10);
+    if (used >= limit) return false;
+    used += 1;
+    return true;
+  });
+  const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ ok: true }));
+  const pdf = await PDFDocument.create();
+  pdf.addPage();
+  const bytes = new Uint8Array(await pdf.save());
+  try {
+    for (let i = 0; i < 8; i++) {
+      const form = new FormData();
+      form.set("file", new Blob([bytes], { type: "application/pdf" }), "fictional.pdf");
+      const response = await proxyDocumentRequest(
+        await req("api/v1/documents", "POST", form),
+        "api/v1/documents",
+        config,
+      );
+      expect(response.status).toBe(i < 7 ? 200 : 429);
+    }
+    expect(used).toBe(10);
+    expect(fetch).toHaveBeenCalledTimes(7);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+it("starts a new upload bucket at UTC midnight without resetting historical usage", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-03T00:00:00Z"));
+  guard.consume.mockClear();
+  try {
+    await proxyDocumentRequest(await req("api/v1/documents", "POST"), "api/v1/documents", config);
+    expect(guard.consume).toHaveBeenCalledWith("uploads:2026-11-03", 10);
+    expect(guard.consume).not.toHaveBeenCalledWith("uploads:2026-11-02", 10);
+  } finally {
+    vi.useRealTimers();
+  }
 });
 it("redacts upstream authentication errors and blocks redirects", async () => {
   const fetch = vi
