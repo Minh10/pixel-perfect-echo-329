@@ -21,10 +21,10 @@ export const Route = createFileRoute("/audit")({
   },
   head: () => ({
     meta: [
-      { title: "Consistency Audit — FINAUDIT AI" },
+      { title: "Check charts — FINAUDIT AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Consistency Audit — FINAUDIT AI" },
+      { property: "og:title", content: "Check charts — FINAUDIT AI" },
       {
         property: "og:description",
         content:
@@ -137,7 +137,7 @@ function AuditWorkspace() {
         <p className="text-xs text-muted-foreground">
           {reading
             ? `Model ${reading.provider} · ${reading.model}`
-            : "No stored chart reading for this figure."}
+            : "This chart has no saved analysis yet."}
         </p>
       </div>
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">

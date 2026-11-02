@@ -27,10 +27,10 @@ export const Route = createFileRoute("/trends")({
       : context.queryClient.ensureQueryData(documentsQuery()),
   head: () => ({
     meta: [
-      { title: "Trends — FINAUDIT AI" },
+      { title: "Compare reports — FINAUDIT AI" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Trends — FINAUDIT AI" },
+      { property: "og:title", content: "Compare reports — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Compare reported financial values across processed reports.",

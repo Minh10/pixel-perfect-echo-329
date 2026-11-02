@@ -20,7 +20,7 @@ export const Route = createFileRoute("/evaluation")({
     <PendingModule
       eyebrow="Quality"
       title="Evaluation"
-      description="Benchmark extraction accuracy, citation faithfulness and audit recall against labelled datasets."
+      description="Evaluate extracted values, citation support and detection of known discrepancies against labelled reference data."
       icon={<Gauge className="size-5" />}
     />
   ),

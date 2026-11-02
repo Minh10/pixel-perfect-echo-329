@@ -63,12 +63,12 @@ export const Route = createFileRoute("/intelligence")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Document Intelligence — FINAUDIT AI" },
+      { title: "Read report — FINAUDIT AI" },
       {
         name: "description",
         content: "Inspect financial report pages, tables and charts with linked evidence.",
       },
-      { property: "og:title", content: "Document Intelligence — FINAUDIT AI" },
+      { property: "og:title", content: "Read report — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Inspect financial report pages, tables and charts with linked evidence.",

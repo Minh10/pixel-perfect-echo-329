@@ -34,12 +34,12 @@ export const Route = createFileRoute("/analysis")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "AI Analysis — FINAUDIT AI" },
+      { title: "Ask a question — FINAUDIT AI" },
       {
         name: "description",
         content: "Evidence-grounded questions and answers over financial reports.",
       },
-      { property: "og:title", content: "AI Analysis — FINAUDIT AI" },
+      { property: "og:title", content: "Ask a question — FINAUDIT AI" },
       {
         property: "og:description",
         content: "Evidence-grounded questions and answers over financial reports.",
@@ -96,9 +96,15 @@ function AnalysisWorkspace() {
       <PageHeader
         eyebrow="Analysis"
         title="Ask a question"
-        description="Ask a question about processed financial documents. Answers are cited to retrieved text, tables and figures, or the service abstains."
+        description="Answers cite source passages, tables and charts. If evidence is insufficient, no supported answer is given."
       />
       <ReportTools documentId={requestedId ?? selected[0]} />
+      {selected.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Selected reports: </span>
+          {ready.filter((doc) => selected.includes(doc.id)).map((doc) => doc.title).join(" · ")}
+        </p>
+      )}
       <form onSubmit={submit} className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
@@ -122,7 +128,7 @@ function AnalysisWorkspace() {
             <legend className="text-xs text-muted-foreground">
               {requestedId
                 ? "The open report is already selected. Type a question, or add another report."
-                : "Documents to search. Leave none selected and the server chooses from the company named in the question."}
+                : "No report selected: matching reports are chosen using the company named in your question."}
             </legend>
             {documents.isError && (
               <p className="text-sm text-destructive">
