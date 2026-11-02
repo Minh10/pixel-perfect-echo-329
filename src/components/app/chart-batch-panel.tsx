@@ -187,7 +187,7 @@ export function ChartBatchPanel({
           {thinking || "Reading chart…"}
         </p>
       )}
-      <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">
+      <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border @lg:grid-cols-4">
         {(["match", "discrepancy", "insufficient", "unread"] as const).map((key) => (
           <div key={key} className="bg-card px-4 py-3">
             <dt className="text-xs text-muted-foreground">{LABEL[key]}</dt>

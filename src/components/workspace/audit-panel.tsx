@@ -143,7 +143,7 @@ function AuditWorkspace({
           </p>
         </div>
       )}
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border md:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border bg-border @lg:grid-cols-4">
         <Kpi label="Compared values" value={reading ? counts.compared : "—"} />
         <Kpi label="Matches" value={reading ? counts.matched : "—"} />
         <Kpi label="Potential discrepancies" value={reading ? counts.discrepancy : "—"} />
