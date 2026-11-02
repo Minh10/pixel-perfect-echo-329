@@ -65,7 +65,7 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
           {documents.map((d) => (
             <TableRow
               key={d.id}
-              className="hover:bg-primary-soft/50 focus-within:bg-primary-soft/50"
+              className="document-row hover:bg-primary-soft/50 focus-within:bg-primary-soft/50"
             >
               <TableCell className="py-5 pl-5 whitespace-normal">
                 <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
                       <Link
                         to="/intelligence"
                         search={{ doc: d.id }}
-                        className="inline-flex items-center gap-2 rounded-sm font-semibold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="action-link inline-flex items-center gap-2 rounded-sm font-semibold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         {d.title}
                         <ArrowUpRight className="hidden size-3.5 shrink-0 text-muted-foreground sm:block" />

@@ -64,7 +64,11 @@ export function OverviewMetrics({
   return (
     <dl className="grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2 xl:grid-cols-3">
       {stats.map((s) => (
-        <div key={s.label} className="flex min-h-36 min-w-0 flex-col bg-card p-5">
+        <div
+          key={s.label}
+          data-pointer-surface
+          className="metric-surface flex min-h-36 min-w-0 flex-col bg-card p-5"
+        >
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
             <s.icon className="size-5 shrink-0 text-primary" strokeWidth={1.5} />
@@ -152,7 +156,7 @@ export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
               key={n.to}
               asChild
               variant="ghost"
-              className="h-auto min-h-16 justify-start rounded-none border-b px-0 py-3 hover:bg-transparent hover:text-primary"
+              className="action-link h-auto min-h-16 justify-start rounded-none border-b px-0 py-3 hover:bg-transparent hover:text-primary"
             >
               <Link to={n.to}>
                 <n.icon className="size-4 shrink-0 text-primary" />

@@ -74,7 +74,7 @@
 
 :root {
   --radius: 0.375rem;
-  --background: oklch(0.985 0.006 85);
+  --background: oklch(0.98 0.004 265);
   --foreground: oklch(0.28 0.03 255);
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
@@ -122,6 +122,11 @@
   --sidebar-ring: var(--primary);
   --shadow-page:
     0 1px 3px oklch(0.263 0.013 255 / 0.09), 0 12px 32px -10px oklch(0.263 0.013 255 / 0.15);
+  --pointer-accent: color-mix(in oklab, var(--primary) 65%, var(--border));
+  --surface-hover: color-mix(in oklab, var(--primary-soft) 32%, var(--card));
+  --shadow-control-hover: 0 3px 8px -3px color-mix(in oklab, var(--foreground) 18%, transparent);
+  --motion-fast: 160ms;
+  --motion-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 @layer base {
@@ -139,9 +144,9 @@
     -webkit-font-smoothing: antialiased;
   }
   h1 {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-weight: 560;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 }
 
@@ -171,11 +176,80 @@
   }
 }
 
+[data-pointer-surface] {
+  position: relative;
+  isolation: isolate;
+  transition:
+    background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+
+[data-pointer-surface]::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  left: clamp(0px, calc(var(--pointer-x, 50%) - 32px), calc(100% - 64px));
+  width: 64px;
+  height: 2px;
+  background: var(--pointer-accent);
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--motion-ease);
+}
+
+.workstation-button,
+.workstation-nav,
+.action-link svg,
+.document-row {
+  transition:
+    color var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    transform var(--motion-fast) var(--motion-ease);
+}
+
+.document-row:focus-within {
+  box-shadow: inset 2px 0 var(--primary);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-pointer-active]::after {
+    opacity: 1;
+  }
+  .metric-surface:hover {
+    background: var(--surface-hover);
+  }
+  .intake-surface:hover {
+    border-color: var(--pointer-accent);
+  }
+  .workstation-button:not(:disabled):not([aria-disabled="true"]):active {
+    transform: translateY(1px);
+  }
+  .workstation-button:hover:not(:disabled) {
+    box-shadow: var(--shadow-control-hover);
+  }
+  .action-link:hover svg:last-child,
+  .action-link:focus-visible svg:last-child {
+    transform: translate(2px, -2px);
+    color: var(--primary);
+  }
+  .workstation-nav:hover {
+    border-left-color: var(--pointer-accent);
+  }
+  .document-row:hover {
+    box-shadow: inset 2px 0 var(--primary);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+  [data-pointer-surface]::after {
+    display: none;
   }
 }
