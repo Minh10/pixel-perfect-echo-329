@@ -28,6 +28,7 @@
 - Any demo-sourced value must be visibly labelled DEMO; modules without a backend show an honest pending state, never simulated verification results.
 - App shell (sidebar + header with breadcrumbs) lives in `__root.tsx`; nav items are defined once in `src/components/app/nav.ts`.
 - Report tool navigation reuses the central nav labels and preserves the document search parameter; it is presentation-only and never triggers processing or selects service mode.
+- The PDF workspace embeds shared question, chart-check and comparison panels beside the reader using URL tool state; legacy routes reuse those panels so features and secure service behavior stay consistent. Source links keep the current analysis tool while focusing the PDF evidence.
 
 - Overview summaries derive from query-loaded service values; do not introduce a second data source for dashboard visuals.
 - Document workspace uses the installed resizable panel primitives on desktop and stacked, bounded views on smaller screens, preserving URL-driven page navigation.

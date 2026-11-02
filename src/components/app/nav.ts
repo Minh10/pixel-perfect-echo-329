@@ -19,7 +19,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { title: "Overview", to: "/", icon: LayoutGrid, group: "Workspace" },
   { title: "Documents", to: "/documents", icon: FileText, group: "Workspace" },
-  { title: "Read report", to: "/intelligence", icon: ScanSearch, group: "Workspace" },
+  { title: "Report workspace", to: "/intelligence", icon: ScanSearch, group: "Workspace" },
   { title: "Ask a question", to: "/analysis", icon: MessageSquareText, group: "Analysis" },
   { title: "Check charts", to: "/audit", icon: ShieldCheck, group: "Analysis" },
   { title: "Compare reports", to: "/trends", icon: TrendingUp, group: "Analysis" },

@@ -14,11 +14,11 @@ import {
 import { IS_DEMO } from "@/lib/api/service";
 import { NAV_ITEMS } from "./nav";
 
-const GROUPS = ["Workspace", "Analysis", "Quality"] as const;
+const GROUPS = ["Workspace", "Quality"] as const;
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
+  const isActive = (to: string) => to === "/intelligence" ? ["/intelligence", "/analysis", "/audit", "/trends"].includes(pathname) : to === "/" ? pathname === "/" : pathname.startsWith(to);
 
   return (
     <Sidebar collapsible="icon">
