@@ -28,7 +28,7 @@ export function AnalysisPanel({
   documentId,
   embedded = false,
 }: {
-  documentId?: string;
+  documentId?: string | undefined;
   embedded?: boolean;
 }) {
   if (IS_DEMO || !api.ask) {
@@ -55,7 +55,7 @@ function AnalysisWorkspace({
   requestedId,
   embedded = false,
 }: {
-  requestedId?: string;
+  requestedId?: string | undefined;
   embedded?: boolean;
 }) {
   const navigate = useNavigate();

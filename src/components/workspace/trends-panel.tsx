@@ -19,7 +19,7 @@ export function ComparisonPanel({
   documentId,
   embedded = false,
 }: {
-  documentId?: string;
+  documentId?: string | undefined;
   embedded?: boolean;
 }) {
   return IS_DEMO || !api.getFacts ? (
@@ -47,6 +47,7 @@ function DemoTrends({ embedded = false }: { embedded?: boolean }) {
           actions={<DemoBadge />}
         />
       )}
+      {embedded && <DemoBadge />}
       <section className="rounded-md border bg-card p-5">
         <ChartContainer config={demoConfig} className="h-72 w-full">
           <BarChart data={data}>
@@ -76,7 +77,7 @@ function LiveComparison({
   requestedId,
   embedded = false,
 }: {
-  requestedId?: string;
+  requestedId?: string | undefined;
   embedded?: boolean;
 }) {
   const navigate = useNavigate();

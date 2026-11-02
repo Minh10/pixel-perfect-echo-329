@@ -17,7 +17,7 @@ export function ChartChecksPanel({
   documentId,
   embedded = false,
 }: {
-  documentId?: string;
+  documentId?: string | undefined;
   embedded?: boolean;
 }) {
   if (IS_DEMO || !api.getFacts || !api.searchEvidence) {
@@ -44,7 +44,7 @@ function AuditWorkspace({
   requestedId,
   embedded = false,
 }: {
-  requestedId?: string;
+  requestedId?: string | undefined;
   embedded?: boolean;
 }) {
   const documents = useQuery(documentsQuery());

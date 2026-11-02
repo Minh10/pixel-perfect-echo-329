@@ -129,6 +129,18 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const [zoom, setZoom] = useState(1);
   const [showPages, setShowPages] = useState(true);
   const [showInspector, setShowInspector] = useState(true);
+  const [desktop, setDesktop] = useState(false);
+  const [visitedTools, setVisitedTools] = useState<string[]>([tool]);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    setVisitedTools((current) => (current.includes(tool) ? current : [...current, tool]));
+  }, [tool]);
 
   const previousStatus = useRef(doc.status);
   const retriedEmptyPages = useRef(false);
@@ -188,41 +200,50 @@ function WorkspaceReady({ docId }: { docId: string }) {
       <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
         <p className="text-sm font-semibold">{tools.find((item) => item.id === tool)?.label}</p>
       </div>
-      {tool === "evidence" ? (
-        <>
-          <CitedExcerpt
-            citation={citation}
-            error={citationQuery.error}
-            pending={citationQuery.isFetching}
-          />
-          <EvidenceInspector
-            evidence={evidence}
-            pages={pages}
-            selected={selected}
-            filter={filter}
-            onFilter={setFilter}
-            onSelect={select}
-          />
-        </>
-      ) : (
-        <>
-          {citation && (
-            <details className="border-b px-4 py-3">
-              <summary className="cursor-pointer text-sm font-medium">
-                Selected source excerpt · p. {citation.pages[0]}
-              </summary>
-              <CitedExcerpt
-                citation={citation}
-                error={citationQuery.error}
-                pending={citationQuery.isFetching}
-              />
-            </details>
-          )}
-          {tool === "ask" && <AnalysisPanel key={docId} documentId={docId} embedded />}
-          {tool === "charts" && <ChartChecksPanel key={docId} documentId={docId} embedded />}
-          {tool === "compare" && <ComparisonPanel key={docId} documentId={docId} embedded />}
-        </>
-      )}
+      <div hidden={tool !== "evidence"}>
+        <CitedExcerpt
+          citation={citation}
+          error={citationQuery.error}
+          pending={citationQuery.isFetching}
+        />
+        <EvidenceInspector
+          evidence={evidence}
+          pages={pages}
+          selected={selected}
+          filter={filter}
+          onFilter={setFilter}
+          onSelect={select}
+        />
+      </div>
+      <div hidden={tool === "evidence"}>
+        {citation && (
+          <details className="border-b px-4 py-3">
+            <summary className="cursor-pointer text-sm font-medium">
+              Selected source excerpt · p. {citation.pages[0]}
+            </summary>
+            <CitedExcerpt
+              citation={citation}
+              error={citationQuery.error}
+              pending={citationQuery.isFetching}
+            />
+          </details>
+        )}
+        {visitedTools.includes("ask") && (
+          <div hidden={tool !== "ask"}>
+            <AnalysisPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+        {visitedTools.includes("charts") && (
+          <div hidden={tool !== "charts"}>
+            <ChartChecksPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+        {visitedTools.includes("compare") && (
+          <div hidden={tool !== "compare"}>
+            <ComparisonPanel key={docId} documentId={docId} embedded />
+          </div>
+        )}
+      </div>
     </>
   );
   const select = (id: string | null) => {
@@ -442,7 +463,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
             <>
               <ResizableHandle withHandle aria-label="Resize evidence inspector" />
               <ResizablePanel id="inspector" defaultSize="42%" minSize="300px" maxSize="60%">
-                <aside className="h-full overflow-y-auto bg-card">{toolContent()}</aside>
+                <aside className="h-full overflow-y-auto bg-card">{desktop && toolContent()}</aside>
               </ResizablePanel>
             </>
           )}
@@ -470,7 +491,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
           )}
         </main>
         {showInspector && (
-          <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">{toolContent()}</aside>
+          <aside className="max-h-[65svh] overflow-y-auto border-t bg-card">
+            {!desktop && toolContent()}
+          </aside>
         )}
       </div>
     </div>
