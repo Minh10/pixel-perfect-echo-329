@@ -39,7 +39,10 @@ function ResetPassword() {
       });
       cleanup = () => data.subscription.unsubscribe();
     });
-    return () => { cancelled = true; cleanup?.(); };
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
   return (
     <div className="page-layout">
