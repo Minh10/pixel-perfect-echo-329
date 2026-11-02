@@ -9,7 +9,7 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 
 # Secure backend preparation
 
-- [ ] Remove public account UI and redirect legacy account pages to Overview; preserve demo notices and locked private requests; verify lint, frontend tests, automated checks and browser flow.
+- [x] Remove public account UI and redirect legacy account pages to Overview; preserve demo notices and locked private requests. Verified public Overview/Documents/sample, legacy redirects and anonymous proxy 401 with no browser errors; 44 frontend tests pass, lint has zero errors/six existing warnings, automated compilation reports build OK. No standalone typecheck or production build was manually executed; hosted build status refers to an earlier commit.
 - [x] Simplify administrator sign-in while preserving public exploration, persistent cookies and disabled live processing (38 tests passed, full lint zero errors/six existing warnings, browser verified public Overview/Documents/sample and default-password rejection).
 
 - [x] Enable Cloud in the existing project, retaining the login-free demo.
