@@ -7,7 +7,7 @@ export function ReportTools({
   documentId,
   sample = false,
 }: {
-  documentId?: string;
+  documentId?: string | undefined;
   sample?: boolean;
 }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
