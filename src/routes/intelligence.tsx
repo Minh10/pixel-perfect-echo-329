@@ -13,8 +13,10 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { PdfIntake } from "@/components/app/pdf-intake";
 import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
 import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
@@ -25,13 +27,14 @@ import {
   documentQuery,
   documentsQuery,
   evidenceQuery,
+  jobQuery,
   pagesQuery,
 } from "@/lib/api/service";
-import type { ChunkRef, EvidenceCategory } from "@/lib/api/types";
+import type { ChunkRef, EvidenceCategory, FinDocument } from "@/lib/api/types";
 import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
-import { EmptyState, ErrorState, WorkspaceSkeleton } from "@/components/app/states";
+import { ErrorState, WorkspaceSkeleton } from "@/components/app/states";
 
 const search = z.object({
   doc: z.string().optional(),
@@ -94,24 +97,8 @@ function Workspace() {
   const { docId } = Route.useLoaderData();
   if (!docId) {
     return (
-      <div className="p-8">
-        <EmptyState
-          title="Upload a report to begin"
-          description="Document Intelligence opens a processed financial PDF. Upload one from the library to inspect its pages and evidence."
-          action={
-            IS_DEMO ? (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/intelligence" search={{ doc: DEFAULT_DOCUMENT_ID ?? undefined }}>
-                  Open demo report
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/documents">Upload a report</Link>
-              </Button>
-            )
-          }
-        />
+      <div className="page-layout">
+        <PdfIntake />
       </div>
     );
   }
@@ -135,14 +122,19 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const [showInspector, setShowInspector] = useState(true);
 
   const previousStatus = useRef(doc.status);
+  const retriedEmptyPages = useRef(false);
   useEffect(() => {
-    if (previousStatus.current === "processing" && doc.status !== "processing") {
+    const becameReady = previousStatus.current === "processing" && doc.status !== "processing";
+    const readyWithoutPages =
+      doc.status === "ready" && pages.length === 0 && !retriedEmptyPages.current;
+    if (becameReady || readyWithoutPages) {
+      retriedEmptyPages.current = true;
       void queryClient.invalidateQueries({ queryKey: ["pages", docId] });
       void queryClient.invalidateQueries({ queryKey: ["evidence", docId] });
       void queryClient.invalidateQueries({ queryKey: ["documents"] });
     }
     previousStatus.current = doc.status;
-  }, [doc.status, docId, queryClient]);
+  }, [doc.status, docId, pages.length, queryClient]);
 
   const citationQuery = useQuery({
     queryKey: ["citation", chunkParam],
@@ -200,37 +192,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
   }
 
   if (doc.status !== "ready" || pages.length === 0) {
-    return (
-      <div className="p-8">
-        <EmptyState
-          title={
-            doc.status === "processing"
-              ? "Document is still processing"
-              : doc.status === "failed"
-                ? "Processing failed"
-                : "No pages available"
-          }
-          description={
-            doc.status === "failed" && doc.error?.message
-              ? doc.error.message
-              : `${doc.title} has no parsed pages to display yet.`
-          }
-          action={
-            IS_DEMO ? (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/intelligence" search={{}}>
-                  Open demo report
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/documents">Back to documents</Link>
-              </Button>
-            )
-          }
-        />
-      </div>
-    );
+    return <AwaitingPages doc={doc} />;
   }
 
   return (
@@ -253,6 +215,25 @@ function WorkspaceReady({ docId }: { docId: string }) {
               .filter(Boolean)
               .join(" · ")}
             {!IS_DEMO && doc.parser ? ` · ${doc.parser.name}` : ""}
+          </p>
+          <p className="mt-1 flex flex-wrap gap-x-3 text-xs">
+            {IS_DEMO ? (
+              <Link to="/trends" search={{ doc: undefined }} className="text-primary">
+                View the sample trend
+              </Link>
+            ) : (
+              <>
+                <Link to="/audit" search={{ doc: doc.id }} className="text-primary">
+                  Check charts
+                </Link>
+                <Link to="/trends" search={{ doc: doc.id }} className="text-primary">
+                  Compare trends
+                </Link>
+                <Link to="/analysis" search={{ doc: doc.id }} className="text-primary">
+                  Ask about this report
+                </Link>
+              </>
+            )}
           </p>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
@@ -512,5 +493,48 @@ function CitedExcerpt({
         </>
       )}
     </section>
+  );
+}
+
+function AwaitingPages({ doc }: { doc: FinDocument }) {
+  const jobId = !IS_DEMO && doc.status === "processing" ? (doc.latestJobId ?? null) : null;
+  const { data: job } = useQuery({
+    ...jobQuery(jobId ?? "idle"),
+    enabled: Boolean(jobId),
+  });
+  const processing = doc.status === "processing";
+  const failed = doc.status === "failed";
+
+  return (
+    <div className="page-layout">
+      <section className="mx-auto max-w-lg space-y-4 rounded-md border bg-card p-6">
+        <p className="eyebrow">
+          {processing ? "Processing" : failed ? "Processing failed" : "Document"}
+        </p>
+        <h1 className="text-2xl font-semibold">{doc.title}</h1>
+        <p className="text-sm text-muted-foreground">
+          {failed && doc.error?.message
+            ? doc.error.message
+            : processing
+              ? "Pages, tables, and charts are being prepared. They appear here automatically."
+              : "This report has no parsed pages to display yet."}
+        </p>
+        {processing && (
+          <>
+            <p className="text-xs capitalize text-muted-foreground">
+              {job
+                ? `${job.stage} · ${Math.round(job.progress * 100)}%`
+                : "Waiting for the worker…"}
+            </p>
+            <Progress value={(job?.progress ?? 0) * 100} />
+          </>
+        )}
+        {!processing && (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/documents">Choose another PDF</Link>
+          </Button>
+        )}
+      </section>
+    </div>
   );
 }

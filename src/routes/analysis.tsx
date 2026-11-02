@@ -25,6 +25,10 @@ const KIND_TAG: Record<QACitation["evidenceKind"], string> = {
 };
 
 export const Route = createFileRoute("/analysis")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const doc = search["doc"];
+    return { doc: typeof doc === "string" && doc.length > 0 ? doc : undefined };
+  },
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
@@ -52,12 +56,6 @@ function AnalysisPage() {
         title="AI Analysis"
         description="Ask questions about a report and receive answers cited to specific pages, tables and charts."
         icon={<MessageSquareText className="size-5" />}
-        planned={[
-          "Question answering with page-level citations",
-          "Cross-document comparison",
-          "Answer refusal when evidence is insufficient",
-          "Exportable analyst notes",
-        ]}
       />
     );
   }
@@ -66,10 +64,11 @@ function AnalysisPage() {
 
 function AnalysisWorkspace() {
   const navigate = useNavigate();
+  const { doc: requestedId } = Route.useSearch();
   const documents = useQuery(documentsQuery());
   const ready = (documents.data ?? []).filter((doc) => doc.status === "ready");
   const [question, setQuestion] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(requestedId ? [requestedId] : []);
   const mutation = useMutation({
     mutationFn: (body: { question: string; documentIds?: string[] }) => api.ask!(body),
   });
@@ -113,8 +112,9 @@ function AnalysisWorkspace() {
         </div>
         <fieldset className="space-y-2">
           <legend className="text-xs text-muted-foreground">
-            Documents to search. Leave none selected and the server chooses from the company named
-            in the question.
+            {requestedId
+              ? "The open report is already selected. Type a question, or add another report."
+              : "Documents to search. Leave none selected and the server chooses from the company named in the question."}
           </legend>
           {documents.isError && (
             <p className="text-sm text-destructive">

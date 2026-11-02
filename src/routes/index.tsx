@@ -11,6 +11,7 @@ import {
   IS_DEMO,
 } from "@/lib/api/service";
 import type { Evidence } from "@/lib/api/types";
+import { PdfIntake } from "@/components/app/pdf-intake";
 import { DemoBadge, ErrorState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
 import { OverviewMetrics, OverviewPanels } from "@/components/app/overview-panels";
@@ -77,25 +78,28 @@ function Overview() {
           ],
   });
   const evidence = evidenceResults.flatMap((result) => result.data);
+  const latest = docs.find((doc) => doc.status === "ready");
 
   return (
     <div className="page-layout space-y-7">
       <PageHeader
         title="Overview"
-        description="Your financial report library, processing status and source evidence — in one workspace."
+        description={
+          IS_DEMO
+            ? "A sample financial library. Open the sample report to inspect pages, tables and charts."
+            : "Drop a PDF to process it. Pages, tables, charts, discrepancies and trends follow from that report."
+        }
         actions={
-          <>
-            <Button asChild variant="ghost">
-              <Link to="/documents">View Documents</Link>
-            </Button>
-            <Button asChild className="h-10">
-              <Link to="/intelligence">
-                Open Document Workspace <ArrowRight />
+          !IS_DEMO && latest ? (
+            <Button asChild variant="outline">
+              <Link to="/intelligence" search={{ doc: latest.id }}>
+                Continue latest report
               </Link>
             </Button>
-          </>
+          ) : null
         }
       />
+      <PdfIntake />
       <OverviewMetrics documents={docs} evidence={evidence} />
       {!IS_DEMO && api.getFigureInterpretation && (
         <StoredAnalyses

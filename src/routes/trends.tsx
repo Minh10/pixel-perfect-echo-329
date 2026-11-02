@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -11,9 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { DemoBadge, EmptyState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { compareReports } from "@/lib/fact-comparison";
+import { defaultTrendSelection } from "@/lib/report-selection";
 import { DEFAULT_DOCUMENT_ID, IS_DEMO, api, documentsQuery, trendsQuery } from "@/lib/api/service";
 
 export const Route = createFileRoute("/trends")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const doc = search["doc"];
+    return { doc: typeof doc === "string" && doc.length > 0 ? doc : undefined };
+  },
   loader: ({ context }) =>
     IS_DEMO
       ? context.queryClient.ensureQueryData(trendsQuery(DEFAULT_DOCUMENT_ID))
@@ -74,9 +79,16 @@ function formatReported(value: number) {
 
 function LiveComparison() {
   const navigate = useNavigate();
+  const { doc: requestedId } = Route.useSearch();
   const documents = useSuspenseQuery(documentsQuery());
   const ready = documents.data.filter((doc) => doc.status === "ready");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState(() => defaultTrendSelection(ready, requestedId));
+  const appliedRequest = useRef(requestedId);
+  useEffect(() => {
+    if (appliedRequest.current === requestedId) return;
+    appliedRequest.current = requestedId;
+    setSelected(defaultTrendSelection(ready, requestedId));
+  }, [ready, requestedId]);
   const [metric, setMetric] = useState("Revenue");
   const [query, setQuery] = useState("");
   const visible = useMemo(

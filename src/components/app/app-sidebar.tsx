@@ -63,7 +63,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-3 group-data-[collapsible=icon]:hidden">
         <p className="text-xs font-medium text-muted-foreground">Environment</p>
         <p className="text-xs text-sidebar-foreground">
-          {IS_DEMO ? "DEMO · Backend not connected" : "Live · Document service"}
+          {IS_DEMO ? "Sample library" : "Document service"}
         </p>
       </SidebarFooter>
     </Sidebar>

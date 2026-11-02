@@ -8,13 +8,11 @@ export function PendingModule({
   eyebrow,
   title,
   description,
-  planned,
   icon,
 }: {
   eyebrow: string;
   title: string;
   description: string;
-  planned: string[];
   icon: ReactNode;
 }) {
   return (
@@ -22,25 +20,14 @@ export function PendingModule({
       <PageHeader eyebrow={eyebrow} title={title} description={description} />
       <EmptyState
         icon={icon}
-        title="Awaiting backend integration"
-        description="This module will produce results once the analysis API is connected. No results are simulated here."
+        title="Document service not connected"
+        description="This published preview cannot run this step. No result is invented here. The sample report can still be inspected."
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/intelligence">Inspect source evidence</Link>
+          <Button asChild size="sm">
+            <Link to="/intelligence">Open sample report</Link>
           </Button>
         }
       />
-      <section className="border-t pt-5">
-        <p className="eyebrow mb-3">Planned capabilities</p>
-        <ul className="grid gap-2 text-sm md:grid-cols-2">
-          {planned.map((p) => (
-            <li key={p} className="flex gap-2">
-              <span className="mt-2 size-1 shrink-0 rounded-full bg-primary" />
-              {p}
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

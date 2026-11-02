@@ -13,6 +13,10 @@ import { IS_DEMO, api, documentsQuery, evidenceQuery, pagesQuery } from "@/lib/a
 import type { ChartInterpretation, Evidence, PageBlock, TableCheck } from "@/lib/api/types";
 
 export const Route = createFileRoute("/audit")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const doc = search["doc"];
+    return { doc: typeof doc === "string" && doc.length > 0 ? doc : undefined };
+  },
   head: () => ({
     meta: [
       { title: "Consistency Audit — FINAUDIT AI" },
@@ -34,12 +38,6 @@ function AuditPage() {
         title="Consistency Audit"
         description="Cross-check figures stated in narrative text against tables and charts to flag potential inconsistencies."
         icon={<ShieldCheck className="size-5" />}
-        planned={[
-          "Narrative vs. table figure reconciliation",
-          "Recomputation of derived ratios",
-          "Period-over-period restatement detection",
-          "Reviewer sign-off workflow",
-        ]}
       />
     );
   }
@@ -47,9 +45,10 @@ function AuditPage() {
 }
 
 function AuditWorkspace() {
+  const { doc: requestedId } = Route.useSearch();
   const documents = useQuery(documentsQuery());
   const ready = (documents.data ?? []).filter((doc) => doc.status === "ready");
-  const [documentId, setDocumentId] = useState<string>("");
+  const [documentId, setDocumentId] = useState<string>(requestedId ?? "");
   const selectedId = documentId || ready[0]?.id || "";
   const evidence = useQuery({
     ...evidenceQuery(selectedId),

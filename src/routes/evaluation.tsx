@@ -22,12 +22,6 @@ export const Route = createFileRoute("/evaluation")({
       title="Evaluation"
       description="Benchmark extraction accuracy, citation faithfulness and audit recall against labelled datasets."
       icon={<Gauge className="size-5" />}
-      planned={[
-        "Table extraction accuracy by document type",
-        "Citation faithfulness scoring",
-        "Audit finding precision / recall",
-        "Regression tracking across model versions",
-      ]}
     />
   ),
 });

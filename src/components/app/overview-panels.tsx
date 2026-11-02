@@ -161,14 +161,16 @@ export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
                   <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
                     {n.to === "/audit"
                       ? IS_DEMO
-                        ? "Pending in demo mode"
+                        ? "Available once a document service is connected"
                         : "Chart readings and table checks"
                       : n.to === "/trends"
                         ? IS_DEMO
-                          ? "Demo financial series"
+                          ? "Sample financial series"
                           : "Parsed facts across reports"
                         : n.to === "/documents"
-                          ? "Browse report library"
+                          ? IS_DEMO
+                            ? "Sample report library"
+                            : "Drop a PDF to process"
                           : "Inspect report evidence"}
                   </span>
                 </span>
