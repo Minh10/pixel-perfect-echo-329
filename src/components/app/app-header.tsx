@@ -48,28 +48,31 @@ export function AppHeader() {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {IS_DEMO && <DemoBadge />}
-        {(demoEntered || !IS_DEMO) ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={async () => {
-                const response = await fetch("/api/public/demo-session", { method: "DELETE", credentials: "same-origin" });
-                if (!response.ok) return;
-                setDemoEntry(false);
-                await navigate({ to: "/", replace: true, reloadDocument: true });
-              }}
-            >
-              <LogOut />
-              Exit demo
-            </Button>
-          ) : (
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/login">
-                <LogIn />
-                Demo entry
-              </Link>
-            </Button>
-          )}
+        {demoEntered || !IS_DEMO ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              const response = await fetch("/api/public/demo-session", {
+                method: "DELETE",
+                credentials: "same-origin",
+              });
+              if (!response.ok) return;
+              setDemoEntry(false);
+              await navigate({ to: "/", replace: true, reloadDocument: true });
+            }}
+          >
+            <LogOut />
+            Exit demo
+          </Button>
+        ) : (
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/login">
+              <LogIn />
+              Demo entry
+            </Link>
+          </Button>
+        )}
       </div>
     </header>
   );

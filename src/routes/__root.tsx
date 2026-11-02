@@ -146,11 +146,16 @@ function RootComponent() {
         queryClient.clear();
         setMode(live ? "live" : "sample");
         await router.invalidate();
-      } catch { /* Public sample remains available when live status is unavailable. */ }
+      } catch {
+        /* Public sample remains available when live status is unavailable. */
+      }
     };
     void sync();
     const timer = window.setInterval(sync, 30000);
-    return () => { active = false; window.clearInterval(timer); };
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
   }, [mode, queryClient, router]);
 
   return (

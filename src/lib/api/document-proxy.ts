@@ -3,7 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import { allowedProxyPath, authorizedUser, configuredBackend } from "./proxy-policy";
 import { AUTH_COOKIE } from "../auth-policy";
 import { demoGuard } from "../demo-guard";
-import { demoConfigured, demoCookie, demoSameOrigin, verifyDemoSession, type TemporaryConfig } from "../temporary-demo";
+import {
+  demoConfigured,
+  demoCookie,
+  demoSameOrigin,
+  verifyDemoSession,
+  type TemporaryConfig,
+} from "../temporary-demo";
 import { validateDemoBody } from "./demo-request";
 
 interface ProxyConfig extends TemporaryConfig {
@@ -25,24 +31,55 @@ export const proxyDocumentRequest = createServerOnlyFn(
     let body: Uint8Array | undefined;
     if (config.demoEnabled === "true") {
       const id = await verifyDemoSession(demoCookie(request), config.demoSecret);
-      if (!id) return failure(401, "unauthorized", "Enter the temporary demo to access live reports.");
-      if (!demoConfigured(config) || !configuredBackend(config.backendUrl)) return failure(503, "backend_unavailable", "Document service unavailable. Use the sample preview.");
-      if (request.method !== "GET" && !demoSameOrigin(request)) return failure(403, "forbidden", "Request origin is not allowed.");
-      if (request.headers.get("sec-fetch-site") === "cross-site") return failure(403, "forbidden", "Cross-site resources are not allowed.");
+      if (!id)
+        return failure(401, "unauthorized", "Enter the temporary demo to access live reports.");
+      if (!demoConfigured(config) || !configuredBackend(config.backendUrl))
+        return failure(
+          503,
+          "backend_unavailable",
+          "Document service unavailable. Use the sample preview.",
+        );
+      if (request.method !== "GET" && !demoSameOrigin(request))
+        return failure(403, "forbidden", "Request origin is not allowed.");
+      if (request.headers.get("sec-fetch-site") === "cross-site")
+        return failure(403, "forbidden", "Cross-site resources are not allowed.");
       try {
         const guard = await demoGuard();
-        if (!await guard.valid(id)) return failure(401, "unauthorized", "Demo session expired or ended.");
+        if (!(await guard.valid(id)))
+          return failure(401, "unauthorized", "Demo session expired or ended.");
         const minute = Math.floor(Date.now() / 60000);
         const day = new Date().toISOString().slice(0, 10);
-        if (!await guard.consume(`requests:${minute}`, 120) || !await guard.consume(`session:${id}:${minute}`, 60)) return failure(429, "demo_limit", "Temporary demo request limit reached.");
+        if (
+          !(await guard.consume(`requests:${minute}`, 120)) ||
+          !(await guard.consume(`session:${id}:${minute}`, 60))
+        )
+          return failure(429, "demo_limit", "Temporary demo request limit reached.");
         if (request.method === "POST") {
-          if (!await guard.consume(`work:${day}`, 20) || !await guard.consume(`work-minute:${minute}`, 2)) return failure(429, "demo_limit", "Temporary demo processing budget reached.");
-          if (path === "api/v1/documents" && !await guard.consume(`uploads:${day}`, 3)) return failure(429, "demo_limit", "Daily demo upload limit reached.");
+          if (
+            !(await guard.consume(`work:${day}`, 20)) ||
+            !(await guard.consume(`work-minute:${minute}`, 2))
+          )
+            return failure(429, "demo_limit", "Temporary demo processing budget reached.");
+          if (path === "api/v1/documents" && !(await guard.consume(`uploads:${day}`, 3)))
+            return failure(429, "demo_limit", "Daily demo upload limit reached.");
         }
         demo = true;
-      } catch { return failure(503, "demo_limits_unavailable", "Demo limits unavailable. Live access is disabled."); }
-      try { body = await validateDemoBody(request, path); }
-      catch { return failure(400, "invalid_request", "Demo accepts one unencrypted PDF up to 10 MiB / 30 pages, or bounded document-tool input."); }
+      } catch {
+        return failure(
+          503,
+          "demo_limits_unavailable",
+          "Demo limits unavailable. Live access is disabled.",
+        );
+      }
+      try {
+        body = await validateDemoBody(request, path);
+      } catch {
+        return failure(
+          400,
+          "invalid_request",
+          "Demo accepts one unencrypted PDF up to 10 MiB / 30 pages, or bounded document-tool input.",
+        );
+      }
     }
     const authorization = request.headers.get("Authorization");
     // The same HttpOnly cookie authenticates JSON, images, crops and downloads.
@@ -64,25 +101,26 @@ export const proxyDocumentRequest = createServerOnlyFn(
     }
     try {
       if (!demo) {
-      const authKey = config.authKey;
-      if (!authKey || !config.authUrl || !token) return failure(403, "forbidden", "Private access is not configured.");
-      const auth = createClient(config.authUrl, authKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-        global: {
-          fetch: (input, init) => {
-            const headers = new Headers(init?.headers);
-            if (authKey.startsWith("sb_") && headers.get("Authorization") === `Bearer ${authKey}`)
-              headers.delete("Authorization");
-            headers.set("apikey", authKey);
-            return fetch(input, { ...init, headers });
+        const authKey = config.authKey;
+        if (!authKey || !config.authUrl || !token)
+          return failure(403, "forbidden", "Private access is not configured.");
+        const auth = createClient(config.authUrl, authKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+          global: {
+            fetch: (input, init) => {
+              const headers = new Headers(init?.headers);
+              if (authKey.startsWith("sb_") && headers.get("Authorization") === `Bearer ${authKey}`)
+                headers.delete("Authorization");
+              headers.set("apikey", authKey);
+              return fetch(input, { ...init, headers });
+            },
           },
-        },
-      });
-      const { data, error } = await auth.auth.getUser(token);
-      if (error || !data.user)
-        return failure(401, "unauthorized", "Sign in to access private reports.");
-      if (!authorizedUser(data.user.id, config.authorizedUserId))
-        return failure(403, "forbidden", "This account is not authorized.");
+        });
+        const { data, error } = await auth.auth.getUser(token);
+        if (error || !data.user)
+          return failure(401, "unauthorized", "Sign in to access private reports.");
+        if (!authorizedUser(data.user.id, config.authorizedUserId))
+          return failure(403, "forbidden", "This account is not authorized.");
       }
       if (!backend || !config.backendToken)
         return failure(
@@ -149,7 +187,8 @@ export const proxyDocumentRequest = createServerOnlyFn(
 );
 
 export function validDocumentQuery(key: string, value: string): boolean {
-  if (key === "dpi") return /^[0-9]{2,3}$/.test(value) && Number(value) >= 36 && Number(value) <= 150;
+  if (key === "dpi")
+    return /^[0-9]{2,3}$/.test(value) && Number(value) >= 36 && Number(value) <= 150;
   if (key === "page") return /^[1-9][0-9]{0,4}$/.test(value);
   if (key === "parser") return ["auto", "docling", "pymupdf"].includes(value);
   if (key === "category") return ["table", "figure", "text"].includes(value);

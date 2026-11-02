@@ -46,15 +46,29 @@ function DemoEntry() {
               return;
             }
             try {
-              const status = await fetch("/api/public/demo-session", { credentials: "same-origin" }).then(r => r.json());
+              const status = await fetch("/api/public/demo-session", {
+                credentials: "same-origin",
+              }).then((r) => r.json());
               if (status.enabled === true) {
-                const response = await fetch("/api/public/demo-session", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
-                if (!response.ok) { const result = await response.json(); setError(result.error ?? "Demo entry unavailable."); return; }
+                const response = await fetch("/api/public/demo-session", {
+                  method: "POST",
+                  credentials: "same-origin",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ username, password }),
+                });
+                if (!response.ok) {
+                  const result = await response.json();
+                  setError(result.error ?? "Demo entry unavailable.");
+                  return;
+                }
                 setPassword("");
                 await navigate({ to: "/", replace: true, reloadDocument: true });
                 return;
               }
-            } catch { setError("Document service unavailable. Continue without entry for the sample."); return; }
+            } catch {
+              setError("Document service unavailable. Continue without entry for the sample.");
+              return;
+            }
             setDemoEntry(true);
             setPassword("");
             await navigate({
