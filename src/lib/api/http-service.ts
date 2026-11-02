@@ -13,15 +13,22 @@ import type {
   UploadMeta,
 } from "./types";
 
-export const API_URL = (import.meta.env["VITE_FINAUDIT_API_URL"] as string | undefined)?.replace(
-  /\/$/,
-  "",
-);
+// Direct browser-to-FastAPI connections are intentionally disabled. Only enable
+// proxy mode after the hosted service and private account access are configured.
+export const API_URL =
+  import.meta.env["VITE_FINAUDIT_SERVICE_MODE"] === "proxy" ? "/api/document-service" : undefined;
 
 const V1 = `${API_URL}/api/v1`;
 const JSON_TIMEOUT_MS = 20_000;
 const UPLOAD_TIMEOUT_MS = 120_000;
 const QA_TIMEOUT_MS = 120_000;
+
+async function sessionHeaders(): Promise<Record<string, string>> {
+  if (typeof window === "undefined") return {};
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data } = await supabase.auth.getSession();
+  return data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {};
+}
 
 export class ApiError extends Error {
   constructor(
@@ -57,6 +64,7 @@ async function req<T>(path: string, init?: RequestInit, timeoutMs = JSON_TIMEOUT
   try {
     res = await fetch(`${V1}${path}`, {
       ...init,
+      headers: { ...Object.fromEntries(new Headers(init?.headers)), ...(await sessionHeaders()) },
       signal: init?.signal ?? AbortSignal.timeout(timeoutMs),
     });
   } catch (err) {
@@ -75,7 +83,11 @@ async function req<T>(path: string, init?: RequestInit, timeoutMs = JSON_TIMEOUT
 
 /** Resolve a backend-relative URL (imageUrl fields, source PDF) to an absolute one. */
 export const apiAsset = (relative: string) => {
-  if (/^https?:\/\//i.test(relative)) return relative;
+  // Never let service-provided absolute URLs bypass the authenticated proxy.
+  if (/^https?:\/\//i.test(relative)) {
+    const url = new URL(relative);
+    relative = `${url.pathname}${url.search}`;
+  }
   return `${API_URL}${relative.startsWith("/") ? relative : `/${relative}`}`;
 };
 
@@ -92,12 +104,13 @@ export const httpService = {
     throw new ApiError(501, "not_implemented", "Trends are not available from the backend yet");
   },
 
-  uploadDocument: (file: File, meta: UploadMeta = {}, onProgress?: (fraction: number) => void) => {
+  uploadDocument: async (file: File, meta: UploadMeta = {}, onProgress?: (fraction: number) => void) => {
     if (!API_URL) {
       return Promise.reject(
         new ApiError(0, "backend_unavailable", "The document service URL is not configured."),
       );
     }
+    const headers = await sessionHeaders();
     return new Promise<{ document: FinDocument; job: Job }>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       const fd = new FormData();
@@ -106,6 +119,7 @@ export const httpService = {
         if (value) fd.append(key, value);
       }
       xhr.open("POST", `${V1}/documents`);
+      for (const [name, value] of Object.entries(headers)) xhr.setRequestHeader(name, value);
       xhr.timeout = UPLOAD_TIMEOUT_MS;
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable && event.total > 0) onProgress?.(event.loaded / event.total);
