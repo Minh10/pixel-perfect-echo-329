@@ -42,15 +42,21 @@ export function EvidenceInspector({
   const reading = useMutation({
     mutationFn: () => {
       const docId = selected?.provenance?.documentId;
-      if (IS_DEMO || !docId || !selected || !api.interpretFigure) throw new Error("Live chart reading unavailable");
+      if (IS_DEMO || !docId || !selected || !api.interpretFigure)
+        throw new Error("Live chart reading unavailable");
       return api.interpretFigure(docId, selected.blockId);
     },
   });
-  useEffect(() => { detail.current?.focus({ preventScroll: true }); detail.current?.scrollIntoView({ block: "nearest" }); }, [selected?.id]);
+  useEffect(() => {
+    detail.current?.focus({ preventScroll: true });
+    detail.current?.scrollIntoView({ block: "nearest" });
+  }, [selected?.id]);
   const filtered = filter === "all" ? evidence : evidence.filter((e) => e.category === filter);
   const related = selected ? evidence.filter((e) => selected.related.includes(e.id)) : [];
   const selectedBlock = selected
-    ? pages.find((page) => page.number === selected.page)?.blocks.find((block) => block.id === selected.blockId)
+    ? pages
+        .find((page) => page.number === selected.page)
+        ?.blocks.find((block) => block.id === selected.blockId)
     : undefined;
   // Only show filters that have something behind them.
   const filters = FILTERS.filter(
@@ -92,8 +98,41 @@ export function EvidenceInspector({
               <BlockContent block={selectedBlock} />
             </div>
           ) : null}
-          {selectedBlock?.table && <p className="mt-2 text-xs text-muted-foreground">{selectedBlock.table.rows.length} extracted rows · {selectedBlock.table.columns.length} columns</p>}
-          {!IS_DEMO && selectedBlock?.figure && selected.provenance && api.interpretFigure && <div className="mt-4 space-y-3"><Button variant="outline" size="sm" disabled={reading.isPending} onClick={() => reading.mutate()}><ScanLine className="size-4"/>{reading.isPending ? "Reading…" : "Read chart"}</Button>{reading.isError && <p role="alert" className="text-xs text-destructive">{reading.error.message}</p>}{reading.data?.blockId === selected.blockId && <div className="space-y-2 text-sm"><p>{reading.data.summary || reading.data.title}</p><p className="text-xs text-muted-foreground">{reading.data.caveat}</p>{reading.data.points.map((point,index) => <p key={index} className="text-xs">{point.label}: {point.value} · visual estimate</p>)}</div>}</div>}
+          {selectedBlock?.table && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {selectedBlock.table.rows.length} extracted rows ·{" "}
+              {selectedBlock.table.columns.length} columns
+            </p>
+          )}
+          {!IS_DEMO && selectedBlock?.figure && selected.provenance && api.interpretFigure && (
+            <div className="mt-4 space-y-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={reading.isPending}
+                onClick={() => reading.mutate()}
+              >
+                <ScanLine className="size-4" />
+                {reading.isPending ? "Reading…" : "Read chart"}
+              </Button>
+              {reading.isError && (
+                <p role="alert" className="text-xs text-destructive">
+                  {reading.error.message}
+                </p>
+              )}
+              {reading.data?.blockId === selected.blockId && (
+                <div className="space-y-2 text-sm">
+                  <p>{reading.data.summary || reading.data.title}</p>
+                  <p className="text-xs text-muted-foreground">{reading.data.caveat}</p>
+                  {reading.data.points.map((point, index) => (
+                    <p key={index} className="text-xs">
+                      {point.label}: {point.value} · visual estimate
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {selected.extracted && (
             <dl className="mt-4 divide-y rounded-sm border">
               {selected.extracted.map((f) => (
@@ -190,36 +229,55 @@ export function EvidenceInspector({
         {filtered.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No evidence in this category.</li>
         )}
-        {Array.from(new Set(filtered.map(item => item.page))).sort((a,b) => (a===currentPage ? -1 : b===currentPage ? 1 : a-b)).map(pageNumber => <li key={pageNumber}>
-          <details open={pageNumber===currentPage || pageNumber===selected?.page} className="border-b">
-            <summary className="cursor-pointer px-4 py-3 text-xs font-medium">Page {pageNumber}{pageNumber===currentPage ? " · current" : ""}<span className="ml-2 text-muted-foreground">{filtered.filter(item=>item.page===pageNumber).length} regions</span></summary>
-            <ul>{[...filtered.filter(item=>item.page===pageNumber)].sort((a,b)=>a.category.localeCompare(b.category)).map(e => <li key={e.id}>
-              <Button
-                variant="ghost"
-                type="button"
-                onClick={() => onSelect(e.id)}
-                className={cn(
-                  "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 px-4 py-3 text-left transition-colors hover:bg-muted",
-                  selected?.id === e.id && "bg-evidence-soft/60",
-                  e.page === currentPage && "border-l-2 border-l-primary",
-                )}
+        {Array.from(new Set(filtered.map((item) => item.page)))
+          .sort((a, b) => (a === currentPage ? -1 : b === currentPage ? 1 : a - b))
+          .map((pageNumber) => (
+            <li key={pageNumber}>
+              <details
+                open={pageNumber === currentPage || pageNumber === selected?.page}
+                className="border-b"
               >
-                <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
-                  p.{e.page}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xs font-medium">{e.label}</span>
-                  <span className="block truncate text-[11px] text-muted-foreground">
-                    {readableExcerpt(e)}
+                <summary className="cursor-pointer px-4 py-3 text-xs font-medium">
+                  Page {pageNumber}
+                  {pageNumber === currentPage ? " · current" : ""}
+                  <span className="ml-2 text-muted-foreground">
+                    {filtered.filter((item) => item.page === pageNumber).length} regions
                   </span>
-                </span>
-                <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
-                  {CATEGORY_LABEL[e.category]}
-                </span>
-              </Button>
-            </li>)}</ul>
-          </details>
-        </li>)}
+                </summary>
+                <ul>
+                  {[...filtered.filter((item) => item.page === pageNumber)]
+                    .sort((a, b) => a.category.localeCompare(b.category))
+                    .map((e) => (
+                      <li key={e.id}>
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          onClick={() => onSelect(e.id)}
+                          className={cn(
+                            "flex h-auto w-full justify-start whitespace-normal rounded-none gap-3 px-4 py-3 text-left transition-colors hover:bg-muted",
+                            selected?.id === e.id && "bg-evidence-soft/60",
+                            e.page === currentPage && "border-l-2 border-l-primary",
+                          )}
+                        >
+                          <span className="w-8 shrink-0 font-mono text-[11px] text-muted-foreground">
+                            p.{e.page}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-xs font-medium">{e.label}</span>
+                            <span className="block truncate text-[11px] text-muted-foreground">
+                              {readableExcerpt(e)}
+                            </span>
+                          </span>
+                          <span className="shrink-0 font-mono text-[10px] uppercase text-muted-foreground">
+                            {CATEGORY_LABEL[e.category]}
+                          </span>
+                        </Button>
+                      </li>
+                    ))}
+                </ul>
+              </details>
+            </li>
+          ))}
       </ul>
     </div>
   );

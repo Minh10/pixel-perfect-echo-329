@@ -133,22 +133,61 @@
 }
 
 /* Report-only geometry: the PDF and its inspector are independent scroll surfaces. */
-.report-workspace { color: var(--report-ink); }
-.report-canvas { background: var(--report-canvas); padding: 24px; scrollbar-gutter: stable; }
-.pdf-sheet { max-width: none; }
-.report-inspector { scrollbar-gutter: stable; overscroll-behavior: contain; }
-.report-toolbar button[aria-pressed="true"] { color: var(--primary); background: var(--secondary); }
-.inspector-tab { position: relative; color: var(--muted-foreground); }
-.inspector-tab[data-active="true"] { color: var(--primary); }
-.inspector-tab[data-active="true"]::after { content: ""; position: absolute; bottom: -1px; left: 10px; right: 10px; height: 2px; background: var(--primary); }
-.report-overview button:hover svg { transform: translateX(2px); transition: transform var(--motion-fast) var(--motion-ease); }
+.report-workspace {
+  color: var(--report-ink);
+}
+.report-canvas {
+  background: var(--report-canvas);
+  padding: 24px;
+  scrollbar-gutter: stable;
+}
+.pdf-sheet {
+  max-width: none;
+}
+.report-inspector {
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+.report-toolbar button[aria-pressed="true"] {
+  color: var(--primary);
+  background: var(--secondary);
+}
+.inspector-tab {
+  position: relative;
+  color: var(--muted-foreground);
+}
+.inspector-tab[data-active="true"] {
+  color: var(--primary);
+}
+.inspector-tab[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: var(--primary);
+}
+.report-overview button:hover svg {
+  transform: translateX(2px);
+  transition: transform var(--motion-fast) var(--motion-ease);
+}
 @media (min-width: 1024px) {
-  .report-toolbar { grid-template-columns: minmax(180px,1fr) auto auto; }
+  .report-toolbar {
+    grid-template-columns: minmax(180px, 1fr) auto auto;
+  }
 }
 @media (max-width: 639px) {
-  .report-toolbar { grid-template-columns: minmax(0,1fr); }
-  .report-toolbar > div:nth-child(2) { justify-content: center; }
-  .report-view-controls { grid-column: 1; justify-content: center; }
+  .report-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .report-toolbar > div:nth-child(2) {
+    justify-content: center;
+  }
+  .report-view-controls {
+    grid-column: 1;
+    justify-content: center;
+  }
 }
 
 @layer base {
