@@ -149,12 +149,12 @@ export async function handleChartSummary(request: Request) {
       chunks.push(chunk.value);
     }
     if (
-      !(await guard.consume(`work:${day}`, 20)) ||
+      !(await guard.consume(`work:${day}`, MAX_DAILY_WORK_REQUESTS)) ||
       !(await guard.consume(`work-minute:${minute}`, 2))
     )
       return failure(
         429,
-        "Temporary demo processing budget reached; daily budget resets at 00:00 UTC.",
+        `Daily AI action limit (${MAX_DAILY_WORK_REQUESTS}) or 2-per-minute pace reached; wait a minute or until 00:00 UTC (07:00 Vietnam).`,
       );
     if (!(await guard.consume(`gateway-charts:${day}`, MAX_GATEWAY_CHART_CALLS)))
       return failure(

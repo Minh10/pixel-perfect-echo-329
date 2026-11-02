@@ -8,6 +8,7 @@ import {
   demoCookie,
   demoSameOrigin,
   MAX_DAILY_PDF_UPLOADS,
+  MAX_DAILY_WORK_REQUESTS,
   verifyDemoSession,
   type TemporaryConfig,
 } from "../temporary-demo";
@@ -57,10 +58,10 @@ export const proxyDocumentRequest = createServerOnlyFn(
           return failure(429, "demo_limit", "Temporary demo request limit reached.");
         if (request.method === "POST") {
           if (
-            !(await guard.consume(`work:${day}`, 20)) ||
+            !(await guard.consume(`work:${day}`, MAX_DAILY_WORK_REQUESTS)) ||
             !(await guard.consume(`work-minute:${minute}`, 2))
           )
-            return failure(429, "demo_limit", "Temporary demo processing budget reached.");
+            return failure(429, "demo_limit", `Daily AI action limit (${MAX_DAILY_WORK_REQUESTS}) or 2-per-minute pace reached; wait a minute or until 00:00 UTC (07:00 Vietnam).`);
           if (
             path === "api/v1/documents" &&
             !(await guard.consume(`uploads:${day}`, MAX_DAILY_PDF_UPLOADS))
