@@ -13,5 +13,6 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 - [x] Prepare an authenticated, server-side FastAPI proxy without changing intake or processing architecture.
 - [x] Document exact connection settings and unresolved access requirements in DEPLOYMENT.md.
 - [x] Run proxy security and existing selection/routing tests; verify sample flow (18 tests passed, changed proxy/test files lint clean, preview build OK, sample opens and unconfigured proxy returns 503 with no browser errors).
-- [ ] Activate private sign-in, native image/PDF secure session cookies and verify signup disabled (blocked: user clarified no login, demo only; authorized account not supplied; hosted signup configuration unverified).
+- [ ] Implement single-account sign-in and authenticated report cookies; disable signup at the provider.
+- [ ] Fix generated-file lint failures without excluding security checks; run tests, full lint and inspect automated compilation/build checks.
 - [ ] Connect and verify real published PDF processing (blocked: hosted FastAPI URL, shared token, authorized account).
