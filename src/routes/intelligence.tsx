@@ -157,7 +157,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const { setOpen } = useSidebar();
   const sidebarSetter = useRef(setOpen);
   sidebarSetter.current = setOpen;
-  const restored = useRef(false);
+  const [preferencesReady, setPreferencesReady] = useState(false);
   useEffect(() => {
     sidebarSetter.current(false);
     const media = window.matchMedia("(min-width: 1024px)");
@@ -183,15 +183,15 @@ function WorkspaceReady({ docId }: { docId: string }) {
     } catch {
       /* Optional reader preferences never affect service selection. */
     }
-    restored.current = true;
+    setPreferencesReady(true);
   }, [docId]);
   useEffect(() => {
-    if (restored.current)
+    if (preferencesReady)
       window.sessionStorage.setItem(
         `finaudit:reader:${docId}`,
         JSON.stringify({ fit, zoom, highlights: showHighlights }),
       );
-  }, [docId, fit, zoom, showHighlights]);
+  }, [docId, fit, zoom, showHighlights, preferencesReady]);
   useEffect(() => {
     setVisitedTools((current) => (current.includes(tool) ? current : [...current, tool]));
   }, [tool]);
