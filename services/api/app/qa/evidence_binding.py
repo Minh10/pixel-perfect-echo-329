@@ -149,6 +149,22 @@ def _scale_ok(fact_scale: str, claim_scale: str) -> tuple[bool, str]:
 
 
 # --------------------------------------------------------------------------- table binding
+def _fact_identity(f: dict) -> tuple:
+    """Economic identity, not geometry: only explicit repeated totals may cross groups."""
+    row, group = _norm(f.get("rowLabel", "")), _norm(f.get("rowGroup") or "")
+    # A reconciliation may repeat its headline total below "Net earnings includes:".
+    # Segment/category groups remain distinct, even when their amounts are equal.
+    if group.endswith(" includes:") or group.endswith(" includes"):
+        prefix = re.sub(r"\s+includes:?$", "", group)
+        if prefix and row.startswith(prefix + " "):
+            group = ""
+    p = f.get("period") or {}
+    return (f.get("documentId"), f.get("tableId"), row, group,
+            Decimal(f["value"]), f.get("isPercent", False),
+            p.get("label"), p.get("fiscalYear"), p.get("endDate"), p.get("periodType"),
+            f.get("scale"), f.get("currency"), f.get("scope"))
+
+
 def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: str = "") -> tuple[list[dict], dict | None]:
     p = parse_amount(claim.quote)
     nums = [p.value] if p else [t.value for t in scan_numeric_tokens(claim.quote) if t.kind == "value"]
@@ -167,6 +183,11 @@ def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: s
     if len(matched) > 1:  # the claim may name the row group (section) to disambiguate
         narrowed = [f for f in matched if f.get("rowGroup") and _norm(f["rowGroup"]) in rl]
         matched = narrowed or matched
+        # Period is part of identity; equal amounts in different columns are not interchangeable.
+        period_matches = [f for f in matched if all(c["ok"] for c in _period_ok(f.get("period") or {}, claim.period, question))]
+        matched = period_matches or matched
+        if all(f.get("factId") and f.get("tableId") for f in matched) and len({_fact_identity(f) for f in matched}) == 1:
+            matched = [sorted(matched, key=lambda f: str(f.get("factId") or ""))[0]]
     if len(matched) != 1:
         why = ("value not found in this table" if not by_value else
                "value not found in the quoted row" if not matched else "value/row match more than one cell")
@@ -182,6 +203,7 @@ def bind_table(claim: OperandClaim, facts: list[dict], question: str, context: s
     cd = _claim_date(claim.period)
     siblings = [g for g in facts if g is not f and g.get("rowLabel") == f["rowLabel"]
                 and g.get("rowGroup") == f.get("rowGroup") and g.get("factId") != f.get("factId")
+                and _fact_identity(g) != _fact_identity(f)
                 and (g.get("period") or {}).get("fiscalYear") == per.get("fiscalYear") and per.get("fiscalYear")]
     if pchecks and pchecks[0]["ok"]:
         if cd and per.get("endDate") and cd != per["endDate"]:

@@ -30,6 +30,7 @@
 - Report tool navigation reuses the central nav labels and preserves the document search parameter; it is presentation-only and never triggers processing or selects service mode.
 - The PDF workspace embeds shared question, chart-check and comparison panels beside the reader using URL tool state; legacy routes reuse those panels so features and secure service behavior stay consistent. Source links keep the current analysis tool while focusing the PDF evidence.
 - Ask AI keeps the open PDF in request scope, derives suggested questions only from parsed facts with known periods, and leaves answer validation/abstention to FastAPI; this prevents unrelated report routing without fabricating answers.
+- FastAPI QA accepts repeated totals only with stored same-table provenance and identical economic/period/unit/scope identity, separates calendar tokens from amounts, and retains verbatim citation checks; source edits never deploy to the owner's running Windows process automatically.
 
 - Overview summaries derive from query-loaded service values; do not introduce a second data source for dashboard visuals.
 - Document workspace uses a report-first two-pane resizable layout on desktop and bounded stacked views on mobile; thumbnails overlay the canvas, fit sizing follows the canvas via ResizeObserver, and presentation preferences never select service mode. Overview derives only from loaded document/page/evidence data; tool/page/evidence navigation stays URL-driven.

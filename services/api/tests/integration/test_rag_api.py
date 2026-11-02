@@ -19,8 +19,10 @@ pytestmark = pytest.mark.integration
 
 @pytest.fixture
 def env(tmp_path: Path, fixtures_dir: Path):
-    s = Settings(data_dir=tmp_path / "data", parser="pymupdf", embedder="none", qa_method="bm25")
-    client, worker = TestClient(create_app(s)), Worker(s)
+    s = Settings(data_dir=tmp_path / "data", parser="pymupdf", embedder="none", qa_method="bm25",
+                 api_token="isolated-test-token", qdrant_url=None)
+    client = TestClient(create_app(s), headers={"Authorization": "Bearer isolated-test-token"})
+    worker = Worker(s)
     with (fixtures_dir / "annual_report_excerpt.pdf").open("rb") as fh:
         doc = client.post("/api/v1/documents", files={"file": ("a.pdf", fh)},
                           data={"issuer": "Fictional Example Holdings plc", "period": "2025"}).json()["document"]

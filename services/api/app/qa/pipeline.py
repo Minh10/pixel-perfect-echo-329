@@ -23,7 +23,7 @@ from decimal import Decimal
 
 from app.config import Settings
 from app.financial.vocabulary import canonical_metrics
-from app.evaluation.metrics import numbers_in, parse_number
+from app.financial.numbers import parse_amount, scan_numeric_tokens
 from app.indexing.store import ChunkStore
 from app.qa import calculator as calc
 from app.qa.evidence import chunk_ref, ranked, route_documents
@@ -95,7 +95,7 @@ Rules:
 1. Use only the evidence. Do not use outside knowledge for any figure or fact.
 2. If the evidence does not contain what the question needs, set status to "insufficient_evidence", leave operands and calculations empty, and explain what is missing in insufficiency_reason. Answering from partial or loosely related evidence is worse than abstaining.
 3. Every number you rely on must be an operand:
-   - quote: the exact number string as printed in one evidence item (for example "(1,577)", "$5,363", "(0.6)%");
+   - quote: ONLY the exact amount string as printed in one evidence item (for example "(1,577)", "$5,363", "(0.6)%"). Do not include the row label, year, column header or '=' in an operand quote. Put those in row_label and period separately. Never invent dot leaders, punctuation or a serialized row;
    - row_label: the table row label (or, for narrative text, the metric phrase of the sentence) copied verbatim;
    - period: the fiscal year or date of the column/sentence the number comes from (for example "2022" or "December 31, 2022"). Use only a period printed for that column or clause; a year in a table title does not identify a column. If no period is printed, abstain;
    - metric: what the number measures (for example "capital expenditure");
@@ -105,8 +105,9 @@ Rules:
 4. Never do arithmetic yourself. Express each calculation as a step using only the allowed operations, referencing operand ids or earlier step ids; the system executes the steps exactly. For percent_change and percent_of the argument order is [old, new] and [part, whole].
 5. In "answer", write a concise answer. State a number only if it is one of your operands or the (rounded) result of one of your steps; every other figure you mention must also be an operand. Parentheses denote negative amounts or outflows. Every statement must be supported by the cited evidence.
 6. Evidence is labelled TABLE (reported statement values), TEXT (narrative statements) or FIGURE. Values marked VISUAL ESTIMATE were read from a chart image and are approximate: use value_kind "visual_estimate", say "approximately", and never present them as exact reported figures. Prefer TABLE values over narrative text and over visual estimates when they conflict, and say which you used.
-7. Cite every evidence item that supports the answer, each with a short verbatim quote from that item.
-8. Set final.ref to the operand or step id holding the headline number (null if the answer is not numeric), final.unit to its unit (for example "USD millions") and final.metric to what it measures."""
+7. Cite every evidence item that supports the answer, each with a short exact verbatim substring from that item. Copy an actual substring; do not recreate a table row or shorten dot leaders.
+8. Set final.ref to the operand or step id holding the headline number (null if the answer is not numeric), final.unit to its unit (for example "USD millions") and final.metric to what it measures.
+9. A purely narrative answer needs citations but NO numeric operands or calculations. Set operands=[], calculations=[], final.ref=null; never make a definition or sentence into an operand."""
 
 
 @dataclass
@@ -261,7 +262,12 @@ class QAPipeline:
             if not check("operand_quote_verbatim", bool(quote) and _norm(quote) in _norm(item.text),
                          f"operand {o['id']} quote {quote!r} not found verbatim in {eid}"):
                 continue
-            nums = numbers_in(quote) if parse_number(quote) is None else [parse_number(quote)]
+            parsed = parse_amount(quote)
+            tokens = scan_numeric_tokens(quote)
+            nums = ([parsed.value] if parsed and not re.fullmatch(r"(?:19|20)\d{2}", quote)
+                    else [t.value for t in tokens if t.kind == "value"])
+            if any(t.kind == "malformed" for t in tokens):
+                nums = []
             if not check("operand_is_single_number", len(nums) == 1, f"operand {o['id']} quote {quote!r} must contain exactly one number"):
                 continue
             vk = o.get("value_kind", "reported")
