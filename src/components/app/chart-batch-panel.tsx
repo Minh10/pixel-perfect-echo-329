@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/lib/api/http-service";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api/service";
 import type { ChartInterpretation, Evidence } from "@/lib/api/types";
