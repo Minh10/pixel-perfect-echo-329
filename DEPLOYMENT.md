@@ -1,88 +1,83 @@
-# Deployment
+# FINAUDIT AI temporary Windows demonstration
 
-The official FINAUDIT AI frontend is published at https://finauditai-cdac.lovable.app in the existing Lovable project. Lovable Cloud is connected. The real document service is not connected or verified through the published website; the default experience remains an explicitly labelled sample preview. Do not expose FastAPI until `FINAUDIT_API_TOKEN` is set.
+Official existing website: https://finauditai-cdac.lovable.app. Keep this Lovable project and GitHub main; do not fork. Nothing in this change activates or publishes live processing.
 
-## Connection configuration still needed
+## What is implemented
 
-| Setting                       | Where                                            | Required value / status                                                                                                                                                       |
-| ----------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FINAUDIT_BACKEND_URL`        | Lovable project server-side Secrets              | Actual separately hosted HTTPS FastAPI origin, without `/api/v1`, query, credentials, or trailing path. **Not supplied; no backend hostname is known.**                       |
-| `FINAUDIT_API_TOKEN`          | Lovable server-side Secrets **and** FastAPI host | The same shared bearer token on both sides. **Not configured.** Never use a `VITE_` name.                                                                                     |
-| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets                      | Exact UUID of the manually created owner Cloud account. **Not configured; no account exists yet.**                                                                            |
-| `VITE_FINAUDIT_SERVICE_MODE`  | Frontend deployment configuration                | Leave unset for the sample preview. Set to `proxy` only after private account access and the service are ready. This non-secret mode flag never contains credentials.         |
-| `FINAUDIT_LLM_API_KEY`        | FastAPI API and worker host only                 | Actual OpenAI key, read using `FINAUDIT_LLM_API_KEY_ENV=FINAUDIT_LLM_API_KEY`. **Not supplied or verified.** Lovable does not need this key because FastAPI owns model calls. |
+- Public Overview, Documents and labelled sample remain available without entry. With live mode off, admin/admin opens only the sample.
+- With the server switch on and private configuration complete, admin/admin obtains a signed **one-hour** `__Host-finaudit_demo` cookie: Secure, HttpOnly, SameSite=Strict, Path=/, no Domain. This is a temporary demo session, **not a Cloud user or owner identity**. Anyone knowing the credentials can enter; it does not secure against strangers.
+- Every live JSON, job, page image, chart crop, citation, Docling export and PDF download verifies the signature, expiry and durable revocation before forwarding. Exit demo revokes the session, clears its cookie and returns to the sample. The off switch denies these demo cookies immediately after the updated deployment reaches production.
+- All existing frontend-used FastAPI routes are already allowlisted. Arbitrary admin routes, encoded/traversal paths, cross-origin mutations, unexpected redirects and invalid parameters are rejected. FastAPI receives only the server-injected bearer token, not the demo cookie. Errors and response headers do not expose upstream authentication details.
+- The browser discovers live mode from server-verified status after hydration; no VITE activation flag is required. SSR always renders sample mode; no fictional results are substituted for live results.
+- Native PDF/image resources and Range requests remain same-origin. Temporary uploads retain multipart boundaries but are bounded and inspected before forwarding; downloads are streamed.
 
-The frontend now ignores `VITE_FINAUDIT_API_URL`; a browser must never bypass the secure proxy. Requests use `/api/document-service/api/v1/...` on the app's own origin. The server validates Cloud authentication, checks the exact authorized user, allows only existing document-tool paths, and injects the FastAPI bearer token. PDF requests are streamed; background processing, progress and results remain owned by the FastAPI worker and Docling. Service errors are not fabricated as results. New proxy code uses supported TanStack server routes, not a new separate Edge Function.
+## Server-only settings in Lovable
 
-### Public demo and private access activation
+Open **Project Settings → Secrets** in this existing project. Never paste token values in chat or commit them.
 
-The website opens directly into the existing public Overview and sample workspace. Optional **Demo entry** at `/login` accepts the publicly guessable `admin` / `admin` combination and opens the existing sample report; **Exit demo** clears only a tab-local sample-entry flag and returns to Overview. Visitors can continue without entry. There is no signup, account creation or account-management UI; `/reset-password` still redirects to Overview. The header does not query or renew an owner session. Proxy mode remains off.
+| Name                              | Required action                                                                                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FINAUDIT_DEMO_SESSION_SECRET`    | Already generated and stored privately. Do not copy or reveal it.                                                                                                                    |
+| `FINAUDIT_BACKEND_URL`            | Add the current HTTPS origin only, e.g. `https://strip-conduct-pct-newton.trycloudflare.com`, without `/api/v1`. This reported hostname has not been authenticated or verified here. |
+| `FINAUDIT_API_TOKEN`              | Privately copy the existing Windows `services/api/.env` bearer token into this secret. It must match the API exactly. Lovable does not have it yet.                                  |
+| `FINAUDIT_TEMPORARY_DEMO_ENABLED` | Leave absent or `false` now. Set exactly `true` only after the owner verifies limits and explicitly approves activation/publication. This is the single activation switch.           |
 
-**This is NOT secure authentication.** Demo entry writes no auth cookies, creates no Cloud identity, calls no real login function and never grants access to private documents, the privileged proxy or paid OpenAI operations. Its browser-only presentation state is never read by server authorization. It is available only in sample mode; it is not a substitute for live access control. Do not treat `admin/admin` as a private credential or save it as a server secret.
+`FINAUDIT_AUTHORIZED_USER_ID` is **not required** for temporary demo mode; no account must be created. Retained legacy owner policy is unchanged when the demo switch is off. `VITE_FINAUDIT_SERVICE_MODE` is no longer used to activate live requests. Never put bearer tokens, signing secrets or OpenAI credentials in VITE variables.
 
-Single-user demo mode describes the visible sample experience only. It does not identify anonymous visitors as the owner, provision an account, mint a privileged session or bypass any server check. Private paid PDF/OpenAI operations remain unavailable.
+OpenAI remains exclusively on Windows FastAPI and its worker (`FINAUDIT_LLM_API_KEY`, configured by that backend); do not add it to Lovable.
 
-**Access blocker:** non-interactive owner-only access, such as a private network or identity-aware hosting edge, has not been implemented or verified. Before enabling private processing, enforce that access on every JSON request, PDF image, chart crop, source download and paid operation. Do not trust unsigned identity headers, a public mode flag or a globally privileged browser session. Existing Cloud authentication and exact-owner checks remain intact; they are not replaced by demo mode or by merely proposing edge access.
+## Conservative controls and remaining cost gate
 
-**Provider blocker:** email/password authentication has been enabled. Public signup has **not** been confirmed disabled: the available configuration tool replaces several settings together and a safe read of the current HIBP setting is unavailable. Set **More → Users → Auth settings → Disable sign-up** before activation. This changes the provider, not just the interface. Confirm the hosted settings report signup disabled and an anonymous signup attempt is rejected. The application's owner UUID check denies every other account regardless, but is not a substitute for this provider setting.
+Durable, atomic Lovable Cloud counters apply across server instances, fail closed if unavailable, and cannot be reset by logging out or changing IP. Limits are deliberately global for this one demonstration, not per-user production quotas:
 
-The retained server authentication code uses `__Host-finaudit_access` and `__Host-finaudit_refresh` cookies with **Secure, HttpOnly, SameSite=Lax, Path=/** and no Domain. The proxy still revalidates the access cookie with Cloud Auth and the exact owner UUID for every private resource. This code is retained as a fail-closed safeguard, not an active login experience or a verified non-interactive access solution.
+- 10 live entry attempts/minute globally.
+- 120 proxied requests/minute globally and 60/minute per signed session.
+- 2 work-creating POSTs/minute and 20/day globally, including QA, retrieval, interpretation, indexing and reprocessing. Failed/invalid requests consume the reserved budget too.
+- 3 PDF uploads/day globally; one unencrypted PDF per upload, maximum 10 MiB and 30 pages. JSON maximum 16 KiB, questions/queries maximum 2,000 characters, at most four report IDs and retrieval depth five.
+- Image DPI 36–150; fixed HTTPS upstream origin and strict path/method/query guards.
 
-Do not enable proxy mode until non-interactive owner-only access is implemented and verified on the published HTTPS site and the actual FastAPI backend is reachable. A direct request without authentication returns 401 even before backend configuration. Backend-unavailable responses remain honest errors; no sample values are mixed into private results.
+These are custom application limits, not a built-in platform limiter. Global ceilings are stronger than an IP quota for this shared demo and do not trust client-supplied IP headers. Counters use UTC minutes/days. There is no automatic counter cleanup yet; session/counter records contain no user identities, tokens or document contents.
 
-After configuring secrets, publish the existing application again to make them available in production. Then upload a real financial PDF through the published intake, confirm the job completes, pages and citations load, and source images/PDFs read back securely. This acceptance test has **not** been performed; online PDF processing is **not claimed**.
+**POST limits are not a dollar spending guarantee.** One Docling/index job or QA can trigger multiple embeddings/model calls. Cursor must verify explicit per-job model-call/token caps, worker concurrency and a provider spending cap on Windows before activation. Existing backend has no verified dollar ceiling. Do not claim an unbounded paid service is safe simply because admin/admin is required. No local Windows backend changes were made here.
 
-## What has to stay private
+## Windows start and tunnel rotation
 
-The document API accepts PDF uploads and returns parsed tables, page images, and chart readings. It has no user accounts. CORS is not access control.
+No checked-in `.ps1`, `.bat` or `.cmd` launcher exists in this repository, so an owner-specific Windows script cannot be named or verified. Cursor should supply its actual launcher path and commands. For the existing Python helper, from PowerShell at the repository root with the backend virtual environment activated:
 
-- `scripts/start_api.py` listens on `127.0.0.1:8000`.
-- `docker-compose.yml` publishes API port 8000 and Qdrant port 6333 on `127.0.0.1` only. Inside the container, uvicorn listens on `0.0.0.0` so the port mapping can reach it. Do not change the host side of that mapping to `0.0.0.0`.
-- When `FINAUDIT_API_TOKEN` is set, every `/api/v1` route except `GET /api/v1/health` requires `Authorization: Bearer <token>`. Health stays open so a private probe can run.
-- Do not put the token in `VITE_` variables. A Vite variable is shipped in the browser bundle. The browser should talk only to a same-origin proxy that adds the header on the server.
-
-The OpenAI key is `FINAUDIT_LLM_API_KEY` on the API and the worker. The provider used for the verified chart readings is `openai`, model `gpt-4.1-mini`, base URL `https://api.openai.com/v1`. The key is read from the environment named by `FINAUDIT_LLM_API_KEY_ENV`. It is never a request field and must not be committed.
-
-## Processes
-
-| Process           | Command                                                                            | Storage                                                                                               |
-| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| API               | `uvicorn app.main:app` via `scripts/start_api.py`, or the `api` service in Compose | `FINAUDIT_DATA_DIR` (SQLite, PDFs, renders)                                                           |
-| Worker            | `python -m app.worker`                                                             | The same data directory. It claims parse and index jobs.                                              |
-| Qdrant            | Compose service, or `FINAUDIT_QDRANT_URL`                                          | Required when the API and the worker are separate processes. Embedded Qdrant allows one process only. |
-| UI + secure proxy | Existing Lovable TanStack Start application                                        | Server-side secrets; no replacement document store                                                    |
-
-Compose already runs the API, one worker, and Qdrant on one named volume (`finaudit-data`) plus `qdrant-data`. That is the persistent layout. Back up both volumes. SQLite is in the data volume.
-
-Set these in `services/api/.env` (gitignored) or the process environment, not in the image:
-
-```text
-FINAUDIT_PARSER=docling
-FINAUDIT_DATA_DIR=/data
-FINAUDIT_QDRANT_URL=http://qdrant:6333
-FINAUDIT_API_TOKEN=<long random secret>
-FINAUDIT_LLM_PROVIDER=openai
-FINAUDIT_LLM_MODEL=gpt-4.1-mini
-FINAUDIT_LLM_BASE_URL=https://api.openai.com/v1
-FINAUDIT_LLM_API_KEY=<server-side key>
-FINAUDIT_CORS_ORIGINS=["https://<your-ui-origin>"]
+```powershell
+Set-Location services/api
+python scripts/start_api.py
 ```
 
-Build the image from `services/api` with the Dockerfile. It installs CPU torch, the API, and can preload Docling weights and the MiniLM embedder. The worker uses the same image and a different command.
+In a second activated PowerShell window in `services/api`, run `python -m app.worker`. Start the owner's existing Qdrant service and ensure API/worker use the same data directory and Qdrant URL. The API helper loads `services/api/.env` and listens at `127.0.0.1:8000`. Keep API/Qdrant host ports loopback-only.
 
-## Lovable
+In another window:
 
-The UI is linked to the existing Lovable project `282cd50e-8aed-48da-9ff2-43355f4aa3d5`. Lovable commits to GitHub `main` and reads `main` back.
+```powershell
+cloudflared tunnel --url http://127.0.0.1:8000
+```
 
-1. Push this `main` first.
-2. In that Lovable project, sync from GitHub before writing another prompt.
-3. Do not create a second Lovable project.
+Copy the newly printed HTTPS origin into `FINAUDIT_BACKEND_URL` in Lovable Secrets each time the quick tunnel restarts. Never include the bearer token in the URL. The previously reported hostname may already be expired. Do not expose Qdrant through the tunnel.
 
-Lovable hosts the frontend and its server-side proxy. FastAPI, Docling, the worker, persistent data volumes and Qdrant remain separately hosted. No second project or replacement AI processing workflow is needed.
+## Explicit activation and published acceptance
 
-## Not done
+1. Cursor supplies the current tunnel origin, actual Windows launcher instructions, matching API contract and verified worker/model cost controls; owner privately sets the shared token.
+2. Verify the real service locally, with a small real PDF and model calls bounded. Do not turn on the switch before these controls are verified.
+3. Owner explicitly approves temporary public demo deployment, sets the server switch to `true`, then uses **Publish** on this existing Lovable project. Secret changes affect preview immediately; production requires publication.
+4. At **https://finauditai-cdac.lovable.app**, enter admin/admin. Confirm no-cookie and forged-cookie API calls are 401; off switch denies demo access; cross-origin mutations are 403; unrelated paths are 404.
+5. Upload a real PDF through the existing drop area. Confirm actual job success, Docling pages, table facts, chart interpretations/comparisons, fact-based trends, grounded QA/citations and original PDF download. Check images and crops load through `/api/document-service`, never by direct token-bearing URLs.
 
-- No real FastAPI hostname, shared bearer token or authorized account has been configured.
-- No real-PDF end-to-end test has been run through the published app.
-- Non-interactive owner-only access is not implemented or verified. The retained proxy still requires a real authenticated owner; anonymous demo visitors cannot use it.
-- FastAPI has no per-tenant isolation; the single-user proxy must never grant additional accounts access.
+**This published acceptance has not been performed.** Unit tests use controlled fixtures, not the owner's PC. The reported old production proxy 404 is not fixed online until the new code is published and the exact production route is checked.
+
+## Disable immediately after the demo
+
+1. **Stop cloudflared on Windows (Ctrl+C)**: this immediately disconnects the upstream, including in-flight/new network requests where possible. Stop API/worker too if desired; already queued work must be stopped separately to halt its costs.
+2. Set `FINAUDIT_TEMPORARY_DEMO_ENABLED=false` in Lovable Secrets and republish. All demo sessions then fail closed; public sample remains available.
+3. Exit demo to revoke the current cookie. Optionally rotate the shared FastAPI token on both Windows and Lovable privately before another demo.
+
+## Exact current blockers
+
+- Signing secret and durable guards are provisioned; live switch remains OFF.
+- Upstream token and URL are not set in Lovable; Windows runtime/tunnel connectivity and model cost caps remain unverified.
+- No real PDF has been processed through the published website by this implementation.
+- No new app, account, local backend modification, live activation or publication was performed.

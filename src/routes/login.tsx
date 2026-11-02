@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DemoBadge } from "@/components/app/states";
 import { acceptsDemoEntry, setDemoEntry } from "@/lib/demo-entry";
-import { DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
 
 // Sample UX only: never calls real sign-in, creates cookies, or unlocks the proxy.
 export const Route = createFileRoute("/login")({
-  beforeLoad: () => {
-    if (!IS_DEMO) throw redirect({ to: "/", replace: true });
-  },
   head: () => ({
     meta: [
       { title: "Demo workspace — FINAUDIT AI" },
@@ -38,8 +34,7 @@ function DemoEntry() {
           <DemoBadge />
           <h1 className="text-2xl font-semibold">Demo entry</h1>
           <p className="text-sm text-muted-foreground">
-            Public sample only. Use admin / admin. Not secure authentication; no private reports or
-            paid processing access.
+            Use admin / admin. Temporary demonstration, not protection against strangers.
           </p>
         </div>
         <form
@@ -50,12 +45,35 @@ function DemoEntry() {
               setError("Use admin / admin for the sample demo.");
               return;
             }
-            if (!DEFAULT_DOCUMENT_ID) return;
+            try {
+              const status = await fetch("/api/public/demo-session", {
+                credentials: "same-origin",
+              }).then((r) => r.json());
+              if (status.enabled === true) {
+                const response = await fetch("/api/public/demo-session", {
+                  method: "POST",
+                  credentials: "same-origin",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ username, password }),
+                });
+                if (!response.ok) {
+                  const result = await response.json();
+                  setError(result.error ?? "Demo entry unavailable.");
+                  return;
+                }
+                setPassword("");
+                await navigate({ to: "/", replace: true, reloadDocument: true });
+                return;
+              }
+            } catch {
+              setError("Document service unavailable. Continue without entry for the sample.");
+              return;
+            }
             setDemoEntry(true);
             setPassword("");
             await navigate({
               to: "/intelligence",
-              search: { doc: DEFAULT_DOCUMENT_ID },
+              search: { doc: "nhc-ar-2025" },
               replace: true,
             });
           }}
@@ -89,7 +107,7 @@ function DemoEntry() {
             </p>
           )}
           <Button type="submit" className="w-full">
-            Enter sample demo
+            Enter demo
           </Button>
         </form>
         <Button asChild variant="outline" className="w-full">

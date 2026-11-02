@@ -3,7 +3,7 @@
 // never mixed into live document, page, or evidence results.
 import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";
-import { API_URL, httpService } from "./http-service";
+import { configureHttpService, httpService } from "./http-service";
 import type {
   ChartInterpretation,
   ChunkRef,
@@ -54,10 +54,17 @@ export const demoService: FinAuditService = {
 };
 
 /** Whether the active service returns demo data (drives DEMO labels in UI). */
-export const IS_DEMO = !API_URL;
-export const api: FinAuditService = IS_DEMO ? demoService : httpService;
+export let IS_DEMO = true;
+export let api: FinAuditService = demoService;
 /** Demo-mode default only. In live mode there is no fixed default document. */
-export const DEFAULT_DOCUMENT_ID: string | null = IS_DEMO ? "nhc-ar-2025" : null;
+export let DEFAULT_DOCUMENT_ID: string | null = "nhc-ar-2025";
+// Called only from a browser effect after server verification, never during SSR.
+export function configureDemoService(live: boolean) {
+  IS_DEMO = !live;
+  api = live ? httpService : demoService;
+  DEFAULT_DOCUMENT_ID = live ? null : "nhc-ar-2025";
+  configureHttpService(live);
+}
 
 export const documentsQuery = () =>
   queryOptions({

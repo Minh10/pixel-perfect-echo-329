@@ -14,13 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      finaudit_demo_budgets: {
+        Row: {
+          bucket: string
+          used: number
+        }
+        Insert: {
+          bucket: string
+          used?: number
+        }
+        Update: {
+          bucket?: string
+          used?: number
+        }
+        Relationships: []
+      }
+      finaudit_demo_sessions: {
+        Row: {
+          expires_at: string
+          id: string
+          revoked: boolean
+        }
+        Insert: {
+          expires_at: string
+          id: string
+          revoked?: boolean
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          revoked?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_demo_budget: {
+        Args: { p_bucket: string; p_limit: number }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
