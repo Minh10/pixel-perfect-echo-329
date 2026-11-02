@@ -153,6 +153,7 @@ function AuditWorkspace() {
         />
       )}
       <ChartBatchPanel
+        key={selectedId}
         documentId={selectedId}
         figures={figures}
         facts={facts.data ?? []}

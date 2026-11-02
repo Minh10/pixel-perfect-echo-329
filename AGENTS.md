@@ -13,6 +13,8 @@
 
 ## Architecture rules
 
+- AI Gateway batch chart summaries use a separate signed-demo, same-origin server endpoint through FinAuditService; keep FastAPI interpretation/table verification unchanged because narrative summaries are not audited facts. Cache summaries and terminal gateway pauses in service-role-only storage; reserve existing request/work budgets plus a separate daily gateway ceiling before paid calls.
+
 - All data access goes through `src/lib/api/service.ts` (`FinAuditService` interface + queryOptions); swap the demo implementation for a FastAPI HTTP client there — UI never imports demo data directly.
 - Lovable Cloud provides secure server-side communication; FastAPI and Docling remain the document-processing backend because the accepted processing architecture must be preserved.
 - All live browser requests use the same-origin document-service proxy; upstream credentials are read only inside server handlers. Default owner access remains fail-closed; an explicit server-only temporary demo switch permits a validated signed demo cookie with durable revocation and atomic budgets, never a Cloud identity.

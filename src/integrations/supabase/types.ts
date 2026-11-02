@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      finaudit_chart_gateway_state: {
+        Row: {
+          key: string
+          payload: Json
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          payload: Json
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          payload?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       finaudit_demo_budgets: {
         Row: {
           bucket: string

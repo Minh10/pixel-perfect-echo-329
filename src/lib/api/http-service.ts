@@ -12,6 +12,7 @@ import type {
   TrendPoint,
   UploadMeta,
 } from "./types";
+import { getChartSummaries, getChartSummary, summariseChart } from "./chart-summary-client";
 
 // Direct browser-to-FastAPI connections are intentionally disabled. Only enable
 // proxy mode after the hosted service and private account access are configured.
@@ -90,6 +91,9 @@ export const sourceDocumentUrl = (id: string) =>
   apiAsset(`/api/v1/documents/${encodeURIComponent(id)}/source`);
 
 export const httpService = {
+  getChartSummaries,
+  getChartSummary,
+  summariseChart,
   listDocuments: () => req<FinDocument[]>("/documents"),
   getDocument: (id: string) => req<FinDocument>(`/documents/${encodeURIComponent(id)}`),
   getPages: (id: string) => req<DocumentPage[]>(`/documents/${encodeURIComponent(id)}/pages`),

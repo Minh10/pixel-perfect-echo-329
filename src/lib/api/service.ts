@@ -18,8 +18,18 @@ import type {
   TrendPoint,
   UploadMeta,
 } from "./types";
+import type { GatewaySummary } from "./chart-summary-client";
+import type { ChartSummaryEvent } from "../ai/chart-summary";
 
 export interface FinAuditService {
+  getChartSummaries?(documentId: string): Promise<Record<string, GatewaySummary>>;
+  getChartSummary?(documentId: string, blockId: string): Promise<GatewaySummary | null>;
+  summariseChart?(
+    documentId: string,
+    blockId: string,
+    signal: AbortSignal,
+    onEvent: (event: ChartSummaryEvent) => void,
+  ): Promise<GatewaySummary>;
   listDocuments(): Promise<FinDocument[]>;
   getDocument(id: string): Promise<FinDocument>;
   getPages(id: string): Promise<DocumentPage[]>;

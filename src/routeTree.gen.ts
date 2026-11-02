@@ -18,6 +18,7 @@ import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as ApiChartSummaryRouteImport } from './routes/api/chart-summary'
 import { Route as ApiDocumentServiceSplatRouteImport } from './routes/api/document-service/$'
 import { Route as ApiPublicDemoSessionRouteImport } from './routes/api/public/demo-session'
 
@@ -66,6 +67,11 @@ const TrendsRoute = TrendsRouteImport.update({
   path: '/trends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChartSummaryRoute = ApiChartSummaryRouteImport.update({
+  id: '/api/chart-summary',
+  path: '/api/chart-summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDocumentServiceSplatRoute = ApiDocumentServiceSplatRouteImport.update({
   id: '/api/document-service/$',
   path: '/api/document-service/$',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
+  '/api/chart-summary': typeof ApiChartSummaryRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
   '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
+  '/api/chart-summary': typeof ApiChartSummaryRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
   '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/trends': typeof TrendsRoute
+  '/api/chart-summary': typeof ApiChartSummaryRoute
   '/api/document-service/$': typeof ApiDocumentServiceSplatRoute
   '/api/public/demo-session': typeof ApiPublicDemoSessionRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/trends'
+    | '/api/chart-summary'
     | '/api/document-service/$'
     | '/api/public/demo-session'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/trends'
+    | '/api/chart-summary'
     | '/api/document-service/$'
     | '/api/public/demo-session'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/trends'
+    | '/api/chart-summary'
     | '/api/document-service/$'
     | '/api/public/demo-session'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TrendsRoute: typeof TrendsRoute
+  ApiChartSummaryRoute: typeof ApiChartSummaryRoute
   ApiDocumentServiceSplatRoute: typeof ApiDocumentServiceSplatRoute
   ApiPublicDemoSessionRoute: typeof ApiPublicDemoSessionRoute
 }
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chart-summary': {
+      id: '/api/chart-summary'
+      path: '/api/chart-summary'
+      fullPath: '/api/chart-summary'
+      preLoaderRoute: typeof ApiChartSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/document-service/$': {
       id: '/api/document-service/$'
       path: '/api/document-service/$'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TrendsRoute: TrendsRoute,
+  ApiChartSummaryRoute: ApiChartSummaryRoute,
   ApiDocumentServiceSplatRoute: ApiDocumentServiceSplatRoute,
   ApiPublicDemoSessionRoute: ApiPublicDemoSessionRoute,
 }
