@@ -1,6 +1,7 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { allowedProxyPath, authorizedUser, configuredBackend } from "./proxy-policy";
+import { AUTH_COOKIE } from "../auth-policy";
 
 interface ProxyConfig {
   backendUrl?: string | undefined;
@@ -17,31 +18,19 @@ export const proxyDocumentRequest = createServerOnlyFn(
   async (request: Request, path: string, config: ProxyConfig) => {
     if (!allowedProxyPath(request.method, path))
       return failure(404, "not_found", "Document endpoint not found.");
-    const backend = configuredBackend(config.backendUrl);
-    if (
-      !backend ||
-      !config.backendToken ||
-      !config.authorizedUserId ||
-      !config.authUrl ||
-      !config.authKey
-    ) {
-      return failure(
-        503,
-        "backend_unavailable",
-        "Private document processing is not configured. Use the sample preview.",
-      );
-    }
     const authorization = request.headers.get("Authorization");
-    // The future login integration must issue this HttpOnly, Secure, SameSite
-    // cookie after authenticating, for native image/PDF requests. Never a URL token.
+    // The same HttpOnly cookie authenticates JSON, images, crops and downloads.
     const cookieToken = request.headers
       .get("Cookie")
       ?.split(";")
       .map((part) => part.trim())
-      .find((part) => part.startsWith("finaudit_access_token="))
-      ?.slice("finaudit_access_token=".length);
+      .find((part) => part.startsWith(`${AUTH_COOKIE}=`))
+      ?.slice(`${AUTH_COOKIE}=`.length);
     const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : cookieToken;
     if (!token) return failure(401, "unauthorized", "Sign in to access private reports.");
+    const backend = configuredBackend(config.backendUrl);
+    if (!config.authorizedUserId || !config.authUrl || !config.authKey)
+      return failure(403, "forbidden", "Private access is not configured.");
     if (request.method !== "GET") {
       const origin = request.headers.get("Origin");
       if (!origin || origin !== new URL(request.url).origin)
@@ -66,6 +55,12 @@ export const proxyDocumentRequest = createServerOnlyFn(
         return failure(401, "unauthorized", "Sign in to access private reports.");
       if (!authorizedUser(data.user.id, config.authorizedUserId))
         return failure(403, "forbidden", "This account is not authorized.");
+      if (!backend || !config.backendToken)
+        return failure(
+          503,
+          "backend_unavailable",
+          "The document service is not connected. Use the sample preview.",
+        );
       const target = new URL(path, backend);
       const incoming = new URL(request.url);
       for (const [key, value] of incoming.searchParams) {

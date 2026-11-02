@@ -47,4 +47,10 @@ export default tseslint.config(
     },
   },
   eslintPluginPrettier,
+  {
+    // Generated Cloud clients use provider formatting and are regenerated.
+    // Retain all semantic/security lint; only their formatter rule differs.
+    files: ["src/integrations/supabase/**/*.ts"],
+    rules: { "prettier/prettier": "off" },
+  },
 );

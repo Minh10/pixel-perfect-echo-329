@@ -8,17 +8,23 @@ The official FINAUDIT AI frontend is published at https://finauditai-cdac.lovabl
 | ----------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `FINAUDIT_BACKEND_URL`        | Lovable project server-side Secrets              | Actual separately hosted HTTPS FastAPI origin, without `/api/v1`, query, credentials, or trailing path. **Not supplied; no backend hostname is known.**                       |
 | `FINAUDIT_API_TOKEN`          | Lovable server-side Secrets **and** FastAPI host | The same shared bearer token on both sides. **Not configured.** Never use a `VITE_` name.                                                                                     |
-| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets                      | Exact Cloud user UUID allowed to access all private reports. **Not configured: the user requested a login-free demo.**                                                        |
+| `FINAUDIT_AUTHORIZED_USER_ID` | Lovable server-side Secrets                      | Exact UUID of the manually created owner Cloud account. **Not configured; no account exists yet.**                                                                            |
 | `VITE_FINAUDIT_SERVICE_MODE`  | Frontend deployment configuration                | Leave unset for the sample preview. Set to `proxy` only after private account access and the service are ready. This non-secret mode flag never contains credentials.         |
 | `FINAUDIT_LLM_API_KEY`        | FastAPI API and worker host only                 | Actual OpenAI key, read using `FINAUDIT_LLM_API_KEY_ENV=FINAUDIT_LLM_API_KEY`. **Not supplied or verified.** Lovable does not need this key because FastAPI owns model calls. |
 
 The frontend now ignores `VITE_FINAUDIT_API_URL`; a browser must never bypass the secure proxy. Requests use `/api/document-service/api/v1/...` on the app's own origin. The server validates Cloud authentication, checks the exact authorized user, allows only existing document-tool paths, and injects the FastAPI bearer token. PDF requests are streamed; background processing, progress and results remain owned by the FastAPI worker and Docling. Service errors are not fabricated as results. New proxy code uses supported TanStack server routes, not a new separate Edge Function.
 
-### Access activation is intentionally unfinished
+### Private access implementation and activation
 
-No profile table, login page, signup button or anonymous private-service access was added, following the clarification "no, just for demo". The private proxy returns unavailable while its configuration is missing, unauthorized without a valid session, and forbidden for any other user. The public sample remains accessible.
+`/login` implements email/password sign-in only. Sign-in is checked server-side against exactly `FINAUDIT_AUTHORIZED_USER_ID`, and no profile table or public signup UI is needed. `/reset-password` supports emailed recovery. The public sample remains accessible and proxy mode remains off.
 
-Before private activation, create the owner through **More → Users → Add user** and configure **More → Users → Auth settings → Disable sign-up**. Hosted signup settings could not be verified or changed safely in this task; removing signup UI alone is not signup protection. Complete sign-in-only access with a validated HttpOnly, Secure, SameSite session cookie named `finaudit_access_token`, so native page images and source PDF links authenticate without URL tokens. JSON requests and uploads already support the browser's Cloud session bearer. Do not enable proxy mode before the cookie/sign-in flow is complete.
+**Account blocker:** no Cloud auth users exist. Create your single owner account through **More → Users → Add user → Create new user**, then store its UUID as `FINAUDIT_AUTHORIZED_USER_ID` in server-side Secrets. Do not invent a UUID or authorize the first arbitrary registrant.
+
+**Provider blocker:** email/password authentication has been enabled. Public signup has **not** been confirmed disabled: the available configuration tool replaces several settings together and a safe read of the current HIBP setting is unavailable. Set **More → Users → Auth settings → Disable sign-up** before activation. This changes the provider, not just the interface. Confirm the hosted settings report signup disabled and an anonymous signup attempt is rejected. The application's owner UUID check denies every other account regardless, but is not a substitute for this provider setting.
+
+Sign-in issues `__Host-finaudit_access` and `__Host-finaudit_refresh` cookies with **Secure, HttpOnly, SameSite=Lax, Path=/** and no Domain. Access expires with the provider token; the refresh cookie lasts at most seven days. The header renews an expired access token through a same-origin server request while the app is open. Native PDF page images, chart crops and original-PDF downloads automatically send the same cookie; no token goes in a resource URL or sign-in response. The proxy revalidates each request with Cloud Auth and the owner UUID. Logout revokes the provider session and clears both cookies; cached queries are cancelled and cleared. HTTPS is required (browsers permit secure cookies on localhost for development).
+
+Do not enable proxy mode until owner login, renewal, logout and resource access are tested on the published HTTPS site and the actual FastAPI backend is reachable. A direct request without authentication returns 401 even before backend configuration. Backend-unavailable responses remain honest errors; no sample values are mixed into private results.
 
 After configuring secrets, publish the existing application again to make them available in production. Then upload a real financial PDF through the published intake, confirm the job completes, pages and citations load, and source images/PDFs read back securely. This acceptance test has **not** been performed; online PDF processing is **not claimed**.
 
@@ -74,5 +80,5 @@ Lovable hosts the frontend and its server-side proxy. FastAPI, Docling, the work
 
 - No real FastAPI hostname, shared bearer token or authorized account has been configured.
 - No real-PDF end-to-end test has been run through the published app.
-- Sign-in and secure image/PDF session cookies are pending the decision to enable private access; public signup settings are unverified.
+- Owner-account creation, owner UUID configuration and provider signup restriction are pending; authenticated end-to-end checks cannot run until the owner exists.
 - FastAPI has no per-tenant isolation; the single-user proxy must never grant additional accounts access.
