@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { PdfIntake } from "@/components/app/pdf-intake";
+import { ReportTools } from "@/components/app/report-tools";
 import { DemoBadge } from "@/components/app/states";
 import { Label } from "@/components/ui/label";
 import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
@@ -216,25 +217,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
               .join(" · ")}
             {!IS_DEMO && doc.parser ? ` · ${doc.parser.name}` : ""}
           </p>
-          <p className="mt-1 flex flex-wrap gap-x-3 text-xs">
-            {IS_DEMO ? (
-              <Link to="/trends" search={{ doc: undefined }} className="text-primary">
-                View the sample trend
-              </Link>
-            ) : (
-              <>
-                <Link to="/audit" search={{ doc: doc.id }} className="text-primary">
-                  Check charts
-                </Link>
-                <Link to="/trends" search={{ doc: doc.id }} className="text-primary">
-                  Compare trends
-                </Link>
-                <Link to="/analysis" search={{ doc: doc.id }} className="text-primary">
-                  Ask about this report
-                </Link>
-              </>
-            )}
-          </p>
+          <div className="mt-2">
+            <ReportTools documentId={doc.id} sample={IS_DEMO} />
+          </div>
         </div>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <div className="flex shrink-0 items-center gap-1">

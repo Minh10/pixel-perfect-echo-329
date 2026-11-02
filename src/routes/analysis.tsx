@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { ReportTools } from "@/components/app/report-tools";
 import { ApiError, apiAsset } from "@/lib/api/http-service";
 import { IS_DEMO, api, documentsQuery } from "@/lib/api/service";
 import type { QACitation, QAResponse, ValueKind } from "@/lib/api/types";
@@ -53,7 +54,7 @@ function AnalysisPage() {
     return (
       <PendingModule
         eyebrow="Analysis"
-        title="AI Analysis"
+        title="Ask a question"
         description="Ask questions about a report and receive answers cited to specific pages, tables and charts."
         icon={<MessageSquareText className="size-5" />}
       />
@@ -94,9 +95,10 @@ function AnalysisWorkspace() {
     <div className="page-layout space-y-6">
       <PageHeader
         eyebrow="Analysis"
-        title="AI Analysis"
+        title="Ask a question"
         description="Ask a question about processed financial documents. Answers are cited to retrieved text, tables and figures, or the service abstains."
       />
+      <ReportTools documentId={requestedId ?? selected[0]} />
       <form onSubmit={submit} className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
@@ -110,7 +112,13 @@ function AnalysisWorkspace() {
             {mutation.isPending ? "Asking…" : "Ask"}
           </Button>
         </div>
-        <fieldset className="space-y-2">
+        <details className="border-y py-3" open={requestedId ? undefined : true}>
+          <summary className="cursor-pointer text-sm font-medium">
+            {selected.length > 0
+              ? `Reports included · ${selected.length} selected`
+              : "Reports included · automatic selection"}
+          </summary>
+        <fieldset className="mt-3 space-y-2">
           <legend className="text-xs text-muted-foreground">
             {requestedId
               ? "The open report is already selected. Type a question, or add another report."
@@ -150,6 +158,7 @@ function AnalysisWorkspace() {
             ))}
           </ul>
         </fieldset>
+        </details>
       </form>
 
       {mutation.isError && (

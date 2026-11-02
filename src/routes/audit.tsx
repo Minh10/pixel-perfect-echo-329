@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Minus, Plus, ShieldCheck } from "lucide-react";
 import { PendingModule } from "@/components/app/pending-module";
 import { ChartBatchPanel } from "@/components/app/chart-batch-panel";
+import { ReportTools } from "@/components/app/report-tools";
 import { ReviewStatus } from "@/components/app/review-status";
 import { EmptyState, ErrorState, PageHeader } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,7 @@ function AuditPage() {
     return (
       <PendingModule
         eyebrow="Analysis"
-        title="Consistency Audit"
+        title="Check charts"
         description="Cross-check figures stated in narrative text against tables and charts to flag potential inconsistencies."
         icon={<ShieldCheck className="size-5" />}
       />
@@ -106,9 +107,10 @@ function AuditWorkspace() {
     <div className="page-layout space-y-8">
       <PageHeader
         eyebrow="Visual analysis"
-        title="Consistency Audit"
+        title="Check charts"
         description="Compare a chart reading with the reported table facts from the same document."
       />
+      <ReportTools documentId={selectedId} />
       <div className="grid gap-6 border-b pb-6 lg:grid-cols-[minmax(0,1.4fr)_auto] lg:items-end">
         <label className="block max-w-xl text-sm">
           <span className="text-xs text-muted-foreground">Processed report</span>
