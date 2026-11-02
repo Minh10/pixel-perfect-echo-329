@@ -3,12 +3,11 @@ import { getRequest, getCookie, setResponseHeader } from "@tanstack/react-start/
 import { z } from "zod";
 import { authClient, readOwnerSession, saveAuthCookies, clearAuthCookies } from "./auth-session";
 import { AUTH_COOKIE, REFRESH_COOKIE, isOwner, sameOrigin } from "./auth-policy";
+import { adminPassword } from "./admin-credential";
 
 export const signIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z
-      .object({ email: z.string().email().max(254), password: z.string().min(1).max(256) })
-      .parse(input),
+    z.object({ email: z.string().email().max(254), password: adminPassword }).parse(input),
   )
   .handler(async ({ data }) => {
     setResponseHeader("Cache-Control", "private, no-store");

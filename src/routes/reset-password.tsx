@@ -89,7 +89,7 @@ function ResetPassword() {
                 id="new-password"
                 type="password"
                 autoComplete="new-password"
-                minLength={8}
+                minLength={12}
                 maxLength={256}
                 required
                 value={password}

@@ -9,6 +9,8 @@ Checks: 7 routing tests passed; redesigned files lint with no errors (one existi
 
 # Secure backend preparation
 
+- [x] Simplify administrator sign-in while preserving public exploration, persistent cookies and disabled live processing (38 tests passed, full lint zero errors/six existing warnings, browser verified public Overview/Documents/sample and default-password rejection).
+
 - [x] Enable Cloud in the existing project, retaining the login-free demo.
 - [x] Prepare an authenticated, server-side FastAPI proxy without changing intake or processing architecture.
 - [x] Document exact connection settings and unresolved access requirements in DEPLOYMENT.md.
