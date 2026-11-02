@@ -22,4 +22,4 @@
 
 ## Publishing
 
-Publication and official-site post-deploy checks are recorded in the task roadmap after deployment. Local screenshots alone are not proof of published behavior.
+Published snapshot 30b48ef to https://finauditai-cdac.lovable.app. Official-site checks confirmed the redesigned sample, page/evidence navigation, Fit Page and Fit Width, persisted 110% zoom, signed entry/cookie flags, guarded live document list, synthetic PDF image and bbox selection. Existing synthetic segment-chart source crop loaded in inspector with matching PDF highlight and Read chart control. Ask AI, Audit and Trends panels opened without runtime errors; no paid action invoked. Sample checked at 1280/1440/1920/390, signed live PDF at 1280/1440. Screenshot evidence is saved in Files. Deployment initially still served the old page, then the new page was confirmed; scheduling alone was not counted as success.

@@ -1,6 +1,6 @@
 # Existing FINAUDIT AI demonstration
 
-- [ ] Redesign only PDF workspace into a readable two-pane analyst workstation; retain grounded tools, source linking, sample/live isolation and all backend safeguards. Verify sample/live screenshots, interactions, tests and publish only after passing.
+- [x] Redesign PDF workspace into a 65/35 reader with collapsed navigation/thumbnails and truthful Overview. Published snapshot 30b48ef to the existing official domain; post-deploy sample and signed live synthetic PDF/crop verified at 1280/1440, sample at 1920/390. Page jumps, keyboard, evidence/bbox linking, filters, fit, persisted zoom and tools pass without runtime errors or horizontal overflow. 102 tests pass, lint zero errors/six existing warnings, host build OK. No paid calls/uploads/backend changes. Standalone typecheck and fresh remote CI not independently observed. Screenshots saved in Files.
 
 - [x] Raise only AI Gateway chart allowance to 200 per UTC day; preserve historical counters, signed-session, request/work/PDF guards and Windows backend. All 15 targeted tests pass; lint zero errors/six existing warnings; host build OK. No paid calls or counter mutations; not published. Shared 40-work/day and 2-work/minute caps remain unchanged and can stop batches earlier.
 
