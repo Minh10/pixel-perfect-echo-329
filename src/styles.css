@@ -178,10 +178,20 @@
   }
 }
 @media (max-width: 639px) {
-  .app-header[data-report-workspace="true"] [data-slot="breadcrumb"] { min-width: 0; overflow: hidden; }
-  .app-header[data-report-workspace="true"] [data-slot="breadcrumb-page"] { display: block; max-width: 100%; }
-  .app-header[data-report-workspace="true"] > div:last-child { gap: 6px; }
-  .app-header[data-report-workspace="true"] > div:first-child { overflow: hidden; }
+  .app-header[data-report-workspace="true"] [data-slot="breadcrumb"] {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .app-header[data-report-workspace="true"] [data-slot="breadcrumb-page"] {
+    display: block;
+    max-width: 100%;
+  }
+  .app-header[data-report-workspace="true"] > div:last-child {
+    gap: 6px;
+  }
+  .app-header[data-report-workspace="true"] > div:first-child {
+    overflow: hidden;
+  }
   .report-toolbar {
     grid-template-columns: minmax(0, 1fr);
   }
