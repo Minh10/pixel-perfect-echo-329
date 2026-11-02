@@ -1,7 +1,7 @@
 # Existing FINAUDIT AI demonstration
 
 - [x] Improve document-scoped Ask AI, fact-based question suggestions, multiline entry and honest validation-failure messages; test a public readable Berkshire Q1 2025 PDF through signed live preview. One upload → Ready, 30 facts; one narrative answer with two exact citations/page navigation and one unsupported forecast abstention pass. Five other supported questions blocked by unchanged FastAPI prompt/validator; 12 reported Windows calls total. 106 tests pass, lint zero errors/six existing warnings; not published. Details in docs/ASK_AI_VERIFICATION.md.
-- [ ] Reliable numeric and broader narrative Ask AI answers: blocked by Windows FastAPI duplicate-cell, quote/period binding and numeric-operand validation; running backend left unchanged.
+- [ ] Fix Windows FastAPI numerical validation in existing source with grounded regression tests and a safe owner-operated rollout; do not restart or replace the running service.
 
 - [x] Focused published workspace review: one real synthetic-test QA HTTP 200 abstained faithfully because period/unit validation failed (two Windows model calls); no uploads or Gateway calls. Fixed narrow-pane question layout, source-loading guard/focus, mobile tool scroll and wrapping, misleading 503 configuration message and error-source link context. Local sample mobile and signed-live bbox selection verified; 102 tests pass, lint zero errors/six existing warnings, latest host typecheck/build OK. Fixes not published; published citation-answer click NOT RUN because QA returned no citations. Backend extraction/validation limitation unchanged.
 
