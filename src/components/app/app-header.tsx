@@ -27,7 +27,7 @@ export function AppHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-20 grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-card px-4 md:px-8">
+    <header data-report-workspace={pathname === "/intelligence"} className="app-header sticky top-0 z-20 grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b bg-card px-4 md:px-8">
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="h-5" />
