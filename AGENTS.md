@@ -37,4 +37,5 @@
 - Evaluation renders a curated projection of checked-in experiment artifacts, separating layout baselines from financial QA accuracy; refresh the projection from research results when experiments change.
 - Document workspace uses a report-first two-pane resizable layout on desktop and bounded stacked views on mobile; thumbnails overlay the canvas, fit sizing follows the canvas via ResizeObserver, and presentation preferences never select service mode. Overview derives only from loaded document/page/evidence data; tool/page/evidence navigation stays URL-driven.
 - Header and upload entry controls derive from the server-verified demo-session status; a tab-local sample entry never shows as live, so stale entries prompt re-activation instead.
+- Document-reading routes share an outage boundary with invalidate/reset recovery; known proxy HTTP errors require explicit retry rather than repeated automatic reads, preserving fail-closed live access.
 - Decorative pointer feedback is browser-only, delegated and animation-frame throttled; global CSS owns motion tokens and reduced-motion handling so presentation never changes service selection or processing.

@@ -1,6 +1,6 @@
 # Existing FINAUDIT AI demonstration
 
-- [ ] Verify fresh React module graph and signed-session outage state; unify document errors with explicit retry/reset and prevent repeated failed proxy reads.
+- [x] Fresh browser does not reproduce null React dispatcher; open preview had mixed optimized React hashes. Shared document error boundary and explicit retry/reset verified for Overview/Documents/Workspace under real signed 502 outage; sample works after exit. Stubbed transport recovery passes (not live backend success); no uncaught errors, 119 tests pass, lint zero errors/six warnings, host build OK. User should reload stale preview; tunnel remains unreachable, no backend changes.
 - [x] Refine premium Overview with four truthful indicators, source-linked priorities and compatible trend preview; preserve sample/live separation and avoid automatic paid analysis.
 - [x] Polish report-first reader, contextual evidence/Ask AI/Audit/Trends and focus controls; preserve all existing source navigation and backend contracts.
 - [x] Simplify Documents and present reproducible Evaluation results with explicit scientific limitations.
