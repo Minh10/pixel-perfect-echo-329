@@ -136,6 +136,13 @@
 .report-workspace {
   color: var(--report-ink);
 }
+.report-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  height: 100svh;
+  background: var(--background);
+}
 .report-canvas {
   background: var(--report-canvas);
   padding: 24px;
@@ -330,9 +337,7 @@
   .workstation-nav svg {
     transition: transform 220ms var(--motion-ease);
   }
-  .workstation-nav:hover svg {
-    transform: translateY(-1px) rotate(-7deg);
-  }
+  .workstation-nav:hover svg { transform: translateY(-1px); }
   .intake-surface:hover > span:first-of-type svg {
     transform: translateY(-3px);
   }

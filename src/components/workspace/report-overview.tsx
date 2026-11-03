@@ -1,4 +1,13 @@
-import { ArrowUpRight, FileText, Table2, ScanLine, ChevronRight, MessageSquareText, ShieldCheck, TrendingUp } from "lucide-react";
+import {
+  ArrowUpRight,
+  FileText,
+  Table2,
+  ScanLine,
+  ChevronRight,
+  MessageSquareText,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IS_DEMO } from "@/lib/api/service";
 import type { DocumentPage, Evidence, FinDocument } from "@/lib/api/types";
@@ -30,7 +39,12 @@ export function ReportOverview({
       value: evidence.filter((item) => item.category === "table").length,
       icon: Table2,
     },
-    { label: "Visuals", value: evidence.filter((item) => item.category === "figure" || item.category === "chart").length, icon: ScanLine },
+    {
+      label: "Visuals",
+      value: evidence.filter((item) => item.category === "figure" || item.category === "chart")
+        .length,
+      icon: ScanLine,
+    },
   ];
   return (
     <div className="report-overview p-5 xl:p-6">
@@ -81,7 +95,24 @@ export function ReportOverview({
         )}
       </section>
       <div className="mb-6 grid gap-1 border-y py-2">
-        {([{ tool: "ask", label: "Ask about this report", icon: MessageSquareText }, { tool: "charts", label: "Inspect charts & checks", icon: ShieldCheck }, { tool: "compare", label: "Compare reported values", icon: TrendingUp }] as const).map(({ tool, label, icon: Icon }) => <Button key={tool} variant="ghost" className="h-9 justify-start gap-2 px-0 text-xs" onClick={() => onTool(tool)}><Icon className="size-3.5 text-primary" />{label}<ArrowUpRight className="ml-auto size-3.5 text-muted-foreground" /></Button>)}
+        {(
+          [
+            { tool: "ask", label: "Ask about this report", icon: MessageSquareText },
+            { tool: "charts", label: "Inspect charts & checks", icon: ShieldCheck },
+            { tool: "compare", label: "Compare reported values", icon: TrendingUp },
+          ] as const
+        ).map(({ tool, label, icon: Icon }) => (
+          <Button
+            key={tool}
+            variant="ghost"
+            className="h-9 justify-start gap-2 px-0 text-xs"
+            onClick={() => onTool(tool)}
+          >
+            <Icon className="size-3.5 text-primary" />
+            {label}
+            <ArrowUpRight className="ml-auto size-3.5 text-muted-foreground" />
+          </Button>
+        ))}
       </div>
       <section aria-label="Document outline">
         <div className="mb-3 flex items-center justify-between">

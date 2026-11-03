@@ -128,9 +128,12 @@ function AnalysisWorkspace({
             disabled={mutation.isPending}
           />
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{embedded ? "Open PDF included" : "Evidence-grounded question"}</span>
+            <span className="text-xs text-muted-foreground">
+              {embedded ? "Open PDF included" : "Evidence-grounded question"}
+            </span>
             <Button type="submit" disabled={mutation.isPending || question.trim().length < 3}>
-              <MessageSquareText className="size-4" />{mutation.isPending ? "Asking…" : "Ask AI"}
+              <MessageSquareText className="size-4" />
+              {mutation.isPending ? "Asking…" : "Ask AI"}
             </Button>
           </div>
         </div>
@@ -246,7 +249,11 @@ function AnalysisWorkspace({
       )}
 
       {result?.status === "answered" && (
-        <article className={embedded ? "space-y-5 border-t pt-5" : "space-y-6 rounded-md border bg-card p-5"}>
+        <article
+          className={
+            embedded ? "space-y-5 border-t pt-5" : "space-y-6 rounded-md border bg-card p-5"
+          }
+        >
           <h3 className="text-sm font-semibold break-words">{result.question}</h3>
           {result.answer && <p className="text-sm leading-relaxed">{result.answer}</p>}
           {result.value && (

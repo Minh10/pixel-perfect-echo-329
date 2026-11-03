@@ -150,37 +150,37 @@ export function EvidenceInspector({
             </dl>
           )}
           <details className="mt-4 text-xs text-muted-foreground">
-          <summary className="cursor-pointer">Source & extraction details</summary>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            {selected.confidence == null ? (
-              <p className="text-[11px] text-muted-foreground">
-                Confidence: not reported by parser
-              </p>
-            ) : (
-              <ConfidenceBar value={selected.confidence} />
-            )}
-            {IS_DEMO && <DemoBadge />}
-          </div>
-          {IS_DEMO && (
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Extraction is illustrative. No figure has been verified against source filings.
-            </p>
-          )}
-          {!IS_DEMO && selected.provenance && (
-            <dl className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
-              <div>
-                {selected.provenance.parser} · {selected.provenance.method}
-              </div>
-              <div>
-                p. {selected.provenance.page} · bbox {selected.provenance.bbox.l.toFixed(1)},{" "}
-                {selected.provenance.bbox.t.toFixed(1)}, {selected.provenance.bbox.r.toFixed(1)},{" "}
-                {selected.provenance.bbox.b.toFixed(1)} pt
-              </div>
-              {selected.category === "disclosure" && selected.detection?.rule && (
-                <div className="font-sans">{selected.detection.rule}</div>
+            <summary className="cursor-pointer">Source & extraction details</summary>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              {selected.confidence == null ? (
+                <p className="text-[11px] text-muted-foreground">
+                  Confidence: not reported by parser
+                </p>
+              ) : (
+                <ConfidenceBar value={selected.confidence} />
               )}
-            </dl>
-          )}
+              {IS_DEMO && <DemoBadge />}
+            </div>
+            {IS_DEMO && (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Extraction is illustrative. No figure has been verified against source filings.
+              </p>
+            )}
+            {!IS_DEMO && selected.provenance && (
+              <dl className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
+                <div>
+                  {selected.provenance.parser} · {selected.provenance.method}
+                </div>
+                <div>
+                  p. {selected.provenance.page} · bbox {selected.provenance.bbox.l.toFixed(1)},{" "}
+                  {selected.provenance.bbox.t.toFixed(1)}, {selected.provenance.bbox.r.toFixed(1)},{" "}
+                  {selected.provenance.bbox.b.toFixed(1)} pt
+                </div>
+                {selected.category === "disclosure" && selected.detection?.rule && (
+                  <div className="font-sans">{selected.detection.rule}</div>
+                )}
+              </dl>
+            )}
           </details>
           {related.length > 0 && (
             <div className="mt-4">

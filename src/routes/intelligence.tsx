@@ -20,6 +20,8 @@ import {
   Maximize,
   Copy,
   Check,
+  Focus,
+  Minimize,
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -152,6 +154,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const [showPages, setShowPages] = useState(false);
   const [showInspector, setShowInspector] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [desktop, setDesktop] = useState(false);
   const [visitedTools, setVisitedTools] = useState<string[]>([tool]);
   const { setOpen } = useSidebar();
@@ -335,6 +338,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           current={current}
           onPage={goTo}
           onEvidence={() => changeTool("evidence")}
+          onTool={changeTool}
         />
       </div>
       <div hidden={tool !== "evidence"}>
@@ -410,7 +414,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
     </main>
   );
   return (
-    <div className="report-workspace flex min-w-0 flex-col lg:h-[calc(100svh-3.5rem)]">
+    <div className={`report-workspace flex min-w-0 flex-col ${focusMode ? "report-focus" : "lg:h-[calc(100svh-3.5rem)]"}`}>
       <header className="report-toolbar grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-card px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <ReaderAction label="Back to library">
@@ -557,6 +561,11 @@ function WorkspaceReady({ docId }: { docId: string }) {
               onClick={() => setShowHighlights((value) => !value)}
             >
               <Highlighter className="size-4" />
+            </Button>
+          </ReaderAction>
+          <ReaderAction label={focusMode ? "Exit focus mode" : "Focus mode"}>
+            <Button variant="ghost" size="icon" className="size-8" aria-label={focusMode ? "Exit focus mode" : "Focus mode"} aria-pressed={focusMode} onClick={() => setFocusMode((value) => !value)}>
+              {focusMode ? <Minimize className="size-4" /> : <Focus className="size-4" />}
             </Button>
           </ReaderAction>
           {!IS_DEMO && page?.imageUrl && doc.sha256 && (
