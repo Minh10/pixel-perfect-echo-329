@@ -1,9 +1,10 @@
 # Existing FINAUDIT AI demonstration
 
-- [ ] Refine premium Overview with four truthful indicators, source-linked priorities and compatible trend preview; preserve sample/live separation and avoid automatic paid analysis.
-- [ ] Polish report-first reader, contextual evidence/Ask AI/Audit/Trends and focus controls; preserve all existing source navigation and backend contracts.
-- [ ] Simplify Documents and present reproducible Evaluation results with explicit scientific limitations.
-- [ ] Verify sample and available signed live flows, inspect before/after screenshots at required widths, run frontend tests/lint and report unavailable checks without publishing unless requested.
+- [x] Refine premium Overview with four truthful indicators, source-linked priorities and compatible trend preview; preserve sample/live separation and avoid automatic paid analysis.
+- [x] Polish report-first reader, contextual evidence/Ask AI/Audit/Trends and focus controls; preserve all existing source navigation and backend contracts.
+- [x] Simplify Documents and present reproducible Evaluation results with explicit scientific limitations.
+- [x] Verify sample at 1280/1440/1920/890/390 widths, selected table/chart evidence, filters/fit/focus; 114 tests pass, lint zero errors/six existing warnings, latest harness typecheck/build OK. Demo entry/cookie/exit/anonymous guards pass; before/after screenshots saved, no paid calls/uploads, not published. Details: docs/PREMIUM_PRODUCT_REVIEW.md.
+- [ ] Real upload/Ready, Ask answers/citations and live audit/trends readback blocked: signed document list 502, current Dover tunnel DNS does not resolve; requires owner-restored reachable Windows tunnel. No backend changes made.
 
 - [x] Improve document-scoped Ask AI, fact-based question suggestions, multiline entry and honest validation-failure messages; test a public readable Berkshire Q1 2025 PDF through signed live preview. One upload → Ready, 30 facts; one narrative answer with two exact citations/page navigation and one unsupported forecast abstention pass. Five other supported questions blocked by unchanged FastAPI prompt/validator; 12 reported Windows calls total. 106 tests pass, lint zero errors/six existing warnings; not published. Details in docs/ASK_AI_VERIFICATION.md.
 - [x] Fix FastAPI numerical validation source: provenance-bound equivalent totals, explicit-period candidate selection, separate year/amount tokens and exact-quote/narrative prompt guidance. Real Berkshire replay passes 4603/11222/1214 with pages 1/1/2; 302 Python QA/security/HTTP tests and 106 frontend tests pass; lint zero errors/six warnings, host build OK. No paid calls, uploads, live-process or tunnel changes. Rollout: services/api/docs/QA_NUMERICAL_FIX.md.
