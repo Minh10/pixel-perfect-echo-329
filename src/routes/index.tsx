@@ -55,7 +55,7 @@ function Overview() {
       IS_DEMO ? "sample" : "live",
       docs
         .filter((doc) => doc.status === "ready")
-        .map((doc) => doc.id)
+        .map((doc) => `${doc.id}:${doc.processedAt ?? doc.uploadedAt}`)
         .join(","),
     ],
     queryFn: () => loadLibraryIntelligence(api, docs, IS_DEMO, DEFAULT_DOCUMENT_ID),
