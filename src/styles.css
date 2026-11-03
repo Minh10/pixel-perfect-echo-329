@@ -337,7 +337,9 @@
   .workstation-nav svg {
     transition: transform 220ms var(--motion-ease);
   }
-  .workstation-nav:hover svg { transform: translateY(-1px); }
+  .workstation-nav:hover svg {
+    transform: translateY(-1px);
+  }
   .intake-surface:hover > span:first-of-type svg {
     transform: translateY(-3px);
   }
