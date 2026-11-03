@@ -96,10 +96,18 @@ export const documentQuery = (id: string) =>
   });
 
 export const pagesQuery = (id: string) =>
-  queryOptions({ queryKey: ["pages", id], queryFn: () => api.getPages(id), retry: retryDocumentRead });
+  queryOptions({
+    queryKey: ["pages", id],
+    queryFn: () => api.getPages(id),
+    retry: retryDocumentRead,
+  });
 
 export const evidenceQuery = (id: string) =>
-  queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id), retry: retryDocumentRead });
+  queryOptions({
+    queryKey: ["evidence", id],
+    queryFn: () => api.getEvidence(id),
+    retry: retryDocumentRead,
+  });
 
 // Demo mode keeps the labelled fictional series. Live mode does not call this.
 export const trendsQuery = (id: string | null) =>

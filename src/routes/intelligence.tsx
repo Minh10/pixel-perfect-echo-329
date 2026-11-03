@@ -1,5 +1,6 @@
+import { DocumentError } from "@/components/app/document-error";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -36,7 +37,7 @@ import { PdfIntake } from "@/components/app/pdf-intake";
 import { AnalysisPanel } from "@/components/workspace/analysis-panel";
 import { ChartChecksPanel } from "@/components/workspace/audit-panel";
 import { ComparisonPanel } from "@/components/workspace/trends-panel";
-import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
+import { apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
 import {
   DEFAULT_DOCUMENT_ID,
   IS_DEMO,
@@ -51,7 +52,7 @@ import type { ChunkRef, EvidenceCategory, FinDocument } from "@/lib/api/types";
 import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
-import { ErrorState, WorkspaceSkeleton } from "@/components/app/states";
+import { WorkspaceSkeleton } from "@/components/app/states";
 import { selectWorkspaceDocument } from "@/lib/workspace-selection";
 
 const search = z.object({
@@ -94,21 +95,7 @@ export const Route = createFileRoute("/intelligence")({
     ],
   }),
   pendingComponent: WorkspaceSkeleton,
-  errorComponent: function WorkspaceError({ error }) {
-    const router = useRouter();
-    const unavailable =
-      error instanceof ApiError &&
-      (error.code === "backend_unavailable" || error.code === "timeout");
-    return (
-      <div className="p-8">
-        <ErrorState
-          title={unavailable ? "Document service unavailable" : "Couldn't load this document"}
-          message={error instanceof Error ? error.message : String(error)}
-          onRetry={() => router.invalidate()}
-        />
-      </div>
-    );
-  },
+  errorComponent: DocumentError,
   component: Workspace,
 });
 

@@ -1,14 +1,14 @@
+import { DocumentError } from "@/components/app/document-error";
 import { useState } from "react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { ApiError } from "@/lib/api/http-service";
 import { IS_DEMO, documentsQuery } from "@/lib/api/service";
 import { PdfIntake } from "@/components/app/pdf-intake";
-import { EmptyState, ErrorState, PageHeader, PageSkeleton } from "@/components/app/states";
+import { EmptyState, PageHeader, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
 
 export const Route = createFileRoute("/documents")({
@@ -30,21 +30,7 @@ export const Route = createFileRoute("/documents")({
     ],
   }),
   pendingComponent: PageSkeleton,
-  errorComponent: function DocumentsError({ error }) {
-    const router = useRouter();
-    const unavailable =
-      error instanceof ApiError &&
-      (error.code === "backend_unavailable" || error.code === "timeout");
-    return (
-      <div className="p-8">
-        <ErrorState
-          title={unavailable ? "Document service unavailable" : "Couldn't load documents"}
-          message={error instanceof Error ? error.message : String(error)}
-          onRetry={() => router.invalidate()}
-        />
-      </div>
-    );
-  },
+  errorComponent: DocumentError,
   component: Documents,
 });
 

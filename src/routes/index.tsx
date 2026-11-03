@@ -1,10 +1,10 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { DocumentError } from "@/components/app/document-error";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ApiError } from "@/lib/api/http-service";
 import { api, documentsQuery, DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
-import { DemoBadge, ErrorState, PageSkeleton } from "@/components/app/states";
+import { DemoBadge, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
 import { OverviewMetrics, OverviewPanels } from "@/components/app/overview-panels";
 import { loadLibraryIntelligence, recentReports } from "@/lib/library-intelligence";
@@ -28,21 +28,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   pendingComponent: PageSkeleton,
-  errorComponent: function OverviewError({ error }) {
-    const router = useRouter();
-    const unavailable =
-      error instanceof ApiError &&
-      (error.code === "backend_unavailable" || error.code === "timeout");
-    return (
-      <div className="p-8">
-        <ErrorState
-          title={unavailable ? "Document service unavailable" : "Couldn't load the overview"}
-          message={error instanceof Error ? error.message : String(error)}
-          onRetry={() => router.invalidate()}
-        />
-      </div>
-    );
-  },
+  errorComponent: DocumentError,
   component: Overview,
 });
 
