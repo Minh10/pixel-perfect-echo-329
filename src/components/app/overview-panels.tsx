@@ -1,189 +1,57 @@
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  CircleAlert,
-  Clock3,
-  FileText,
-  Layers,
-  ScanSearch,
-} from "lucide-react";
-import type { FinDocument, Evidence } from "@/lib/api/types";
+import { ArrowUpRight, FileText, ScanLine, Table2, ShieldCheck, TrendingUp, CircleAlert } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { IS_DEMO } from "@/lib/api/service";
-import { DemoBadge } from "./states";
-import { NAV_ITEMS } from "./nav";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { libraryTrend, type LibraryIntelligence } from "@/lib/library-intelligence";
+import type { FinDocument } from "@/lib/api/types";
 
-export function OverviewMetrics({
-  documents,
-  evidence,
-}: {
-  documents: FinDocument[];
-  evidence: Evidence[];
-}) {
-  const ready = documents.filter((d) => d.status === "ready");
+export function OverviewMetrics({ documents, intelligence, pending }: { documents: FinDocument[]; intelligence?: LibraryIntelligence; pending: boolean }) {
+  const partial = intelligence?.unavailable;
   const stats = [
-    {
-      label: "Documents",
-      value: documents.length,
-      detail: "Reports in your library",
-      icon: FileText,
-    },
-    {
-      label: "Ready for Review",
-      value: ready.length,
-      detail: "Available for inspection",
-      icon: CheckCircle2,
-    },
-    {
-      label: "Pages Indexed",
-      value: ready.reduce((sum, d) => sum + d.pages, 0),
-      detail: "Across ready reports",
-      icon: Layers,
-    },
-    {
-      label: "Evidence Regions",
-      value: evidence.length,
-      detail: IS_DEMO ? "In the demo workspace report" : "Across ready reports",
-      icon: ScanSearch,
-    },
-    {
-      label: "Tables",
-      value: evidence.filter((item) => item.category === "table").length,
-      detail: "Extracted table regions",
-      icon: Layers,
-    },
-    {
-      label: "Figures",
-      value: evidence.filter((item) => item.category === "figure" || item.category === "chart")
-        .length,
-      detail: "Extracted chart regions",
-      icon: ScanSearch,
-    },
+    { label: "Processed reports", value: documents.filter((doc) => doc.status === "ready").length, icon: FileText, detail: "Ready to inspect" },
+    { label: "Financial facts", value: intelligence?.facts.filter((fact) => fact.valueStatus === "parsed").length, icon: Table2, detail: partial?.has("facts") ? "Unavailable or incomplete" : "Parsed table values", unavailable: partial?.has("facts") },
+    { label: "Charts interpreted", value: intelligence?.readings.length, icon: ScanLine, detail: partial?.has("readings") ? "Unavailable or incomplete" : "Saved model readings", unavailable: partial?.has("readings") },
+    { label: "Potential discrepancies", value: intelligence?.readings.reduce((sum, reading) => sum + reading.tableChecks.filter((check) => check.status === "conflict").length, 0), icon: ShieldCheck, detail: partial?.has("readings") ? "Unavailable or incomplete" : "Flagged points, not verified errors", unavailable: partial?.has("readings") },
   ];
-  return (
-    <dl className="grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2 xl:grid-cols-3">
-      {stats.map((s) => (
-        <div
-          key={s.label}
-          data-pointer-surface
-          className="metric-surface flex min-h-36 min-w-0 flex-col bg-card p-5"
-        >
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-            <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
-            <s.icon className="size-5 shrink-0 text-primary" strokeWidth={1.5} />
-          </div>
-          <dd className="mt-4 text-[2.5rem] font-semibold leading-none tabular">
-            {s.value.toLocaleString()}
-          </dd>
-          <div className="mt-auto flex items-center justify-between gap-2 pt-4">
-            <p className="text-xs text-muted-foreground">{s.detail}</p>
-            {IS_DEMO && <DemoBadge />}
-          </div>
-        </div>
-      ))}
-    </dl>
-  );
+  return <dl className="grid grid-cols-2 border-y bg-card lg:grid-cols-4">
+    {stats.map((stat) => <div key={stat.label} className="metric-surface min-w-0 border-b p-4 odd:border-r lg:border-b-0 lg:border-r lg:last:border-r-0 sm:p-5">
+      <dt className="flex items-center justify-between gap-2 text-xs font-medium text-muted-foreground">{stat.label}<stat.icon className="size-4 shrink-0" /></dt>
+      <dd className="mt-3 font-mono text-3xl font-medium tabular">{stat.unavailable ? "—" : stat.value === undefined ? pending ? "…" : "—" : stat.value.toLocaleString()}</dd>
+      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{stat.detail}</p>
+    </div>)}
+  </dl>;
 }
 
-export function OverviewPanels({ documents }: { documents: FinDocument[] }) {
-  const statuses = [
-    {
-      key: "ready",
-      label: "Ready for review",
-      icon: CheckCircle2,
-      color: "bg-success",
-      text: "text-success",
-    },
-    {
-      key: "processing",
-      label: "Processing",
-      icon: Clock3,
-      color: "bg-warning",
-      text: "text-warning",
-    },
-    {
-      key: "failed",
-      label: "Failed",
-      icon: CircleAlert,
-      color: "bg-destructive",
-      text: "text-destructive",
-    },
-  ].map((s) => ({ ...s, count: documents.filter((d) => d.status === s.key).length }));
-  return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-      <section className="min-w-0 border-y py-5" aria-labelledby="processing-title">
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="processing-title" className="text-base font-semibold">
-            Document Processing
-          </h2>
-          {IS_DEMO && <DemoBadge />}
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Current library status · {documents.length} reports
-        </p>
-        <div className="mt-6 flex h-2.5 overflow-hidden rounded-sm bg-muted" aria-hidden="true">
-          {statuses.map((s) => (
-            <span
-              key={s.key}
-              className={s.color}
-              style={{ width: `${documents.length ? (s.count / documents.length) * 100 : 0}%` }}
-            />
-          ))}
-        </div>
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          {statuses.map((s) => (
-            <div key={s.key} className="min-w-0">
-              <s.icon className={`mb-2 size-4 ${s.text}`} />
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-              <p className="mt-1 text-2xl font-semibold tabular">{s.count}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className="min-w-0 border-y py-5" aria-labelledby="actions-title">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 id="actions-title" className="text-base font-semibold">
-            Quick Actions
-          </h2>
-          {IS_DEMO && <DemoBadge />}
-        </div>
-        <div className="grid gap-x-5 sm:grid-cols-2">
-          {NAV_ITEMS.filter((n) =>
-            ["/intelligence", "/documents", "/trends", "/audit"].includes(n.to),
-          ).map((n) => (
-            <Button
-              key={n.to}
-              asChild
-              variant="ghost"
-              className="action-link h-auto min-h-16 justify-start rounded-none border-b px-0 py-3 hover:bg-transparent hover:text-primary"
-            >
-              <Link to={n.to}>
-                <n.icon className="size-4 shrink-0 text-primary" />
-                <span className="min-w-0 flex-1 whitespace-normal">
-                  {n.title}
-                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
-                    {n.to === "/audit"
-                      ? IS_DEMO
-                        ? "Available once a document service is connected"
-                        : "Chart readings and table checks"
-                      : n.to === "/trends"
-                        ? IS_DEMO
-                          ? "Sample financial series"
-                          : "Parsed facts across reports"
-                        : n.to === "/documents"
-                          ? IS_DEMO
-                            ? "Sample report library"
-                            : "Drop a PDF to process"
-                          : "Inspect report evidence"}
-                  </span>
-                </span>
-                <ArrowUpRight className="shrink-0 text-muted-foreground" />
-              </Link>
-            </Button>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
+export function OverviewPanels({ intelligence, pending, error }: { intelligence?: LibraryIntelligence; pending: boolean; error: boolean }) {
+  const trend = intelligence ? libraryTrend(intelligence) : null;
+  const flags = intelligence?.readings.flatMap((reading) => reading.tableChecks.filter((check) => check.status === "conflict").map((check) => ({ reading, check }))) ?? [];
+  const ready = intelligence?.reports[0];
+  const unRead = intelligence?.evidence.find((item) => item.provenance && item.category === "figure" && !intelligence.readings.some((reading) => reading.blockId === item.blockId && reading.documentId === item.provenance?.documentId));
+  return <div className="grid gap-7 xl:grid-cols-2">
+    <section className="min-w-0" aria-label="Priority insights">
+      <div className="mb-4 flex items-center justify-between"><h2 className="text-base font-semibold">Review priorities</h2><span className="eyebrow">SOURCE-LINKED</span></div>
+      {pending && !intelligence ? <p role="status" className="py-5 text-sm text-muted-foreground">Loading extracted evidence…</p> : error ? <p className="py-5 text-sm text-muted-foreground">Library intelligence unavailable. Reports remain accessible below.</p> : <div className="divide-y border-y">
+        {flags.slice(0, 2).map(({ reading, check }, index) => <Button key={`${reading.blockId}-${index}`} asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-none px-0 py-4 text-left">
+          <Link to="/intelligence" search={{ doc: reading.documentId, tool: "charts", page: check.page ?? undefined }}><CircleAlert className="size-4 shrink-0 text-warning" /><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{check.label}: potential chart–table difference</span><span className="mt-1 block text-xs text-muted-foreground">Chart estimate {check.estimate} · reported {check.tableValue ?? "not stated"} · requires review</span></span><ArrowUpRight className="size-4 shrink-0" /></Link>
+        </Button>)}
+        {unRead && <Button asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-none px-0 py-4 text-left"><Link to="/intelligence" search={{ doc: unRead.provenance?.documentId, page: unRead.page, ev: unRead.id, tool: "evidence" }}><ScanLine className="size-4 shrink-0 text-primary" /><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{unRead.label}</span><span className="mt-1 block text-xs text-muted-foreground">Page {unRead.page} · no saved chart reading in this preview</span></span><ArrowUpRight className="size-4 shrink-0" /></Link></Button>}
+        {ready && <Button asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-none px-0 py-4 text-left"><Link to="/intelligence" search={{ doc: ready.id }}><FileText className="size-4 shrink-0 text-primary" /><span className="min-w-0 flex-1"><span className="block text-sm font-medium">{ready.title}</span><span className="mt-1 block text-xs text-muted-foreground">{ready.pages} pages · ready for evidence inspection</span></span><ArrowUpRight className="size-4 shrink-0" /></Link></Button>}
+        {!ready && <p className="py-5 text-sm text-muted-foreground">No processed report available yet.</p>}
+      </div>}
+      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{intelligence?.sample ? "DEMO · Synthetic evidence is illustrative, not verified financial findings." : `Read-only preview of up to six recent ready reports and eight stored chart readings. No new AI analysis is generated.`}</p>
+    </section>
+    <section className="min-w-0" aria-label="Financial trend preview">
+      <div className="mb-4 flex items-center justify-between"><h2 className="text-base font-semibold">Reported trends</h2><TrendingUp className="size-4 text-muted-foreground" /></div>
+      {trend ? <>
+        <p className="text-sm font-medium">{trend.issuer} · {trend.metric}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{trend.points[0]?.currency} · {trend.points[0]?.scale} · {trend.points[0]?.scope}</p>
+        <ChartContainer config={{ value: { label: "Reported value", color: "var(--chart-1)" } }} className="mt-4 h-40 w-full">
+          <BarChart accessibilityLayer data={trend.points}><CartesianGrid vertical={false} /><XAxis dataKey="periodLabel" axisLine={false} tickLine={false} /><YAxis width={48} axisLine={false} tickLine={false} /><ChartTooltip content={<ChartTooltipContent />} /><Bar dataKey="value" fill="var(--color-value)" radius={2} /></BarChart>
+        </ChartContainer>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">{trend.points.map((point) => <Button key={point.factId} asChild variant="link" size="sm" className="h-auto px-0 text-xs"><Link to="/intelligence" search={{ doc: point.documentId, page: point.page, ev: point.tableEvidenceId, tool: "evidence" }}>{point.periodLabel}: {point.displayValue} · p.{point.page}<ArrowUpRight className="size-3" /></Link></Button>)}</div>
+        <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{trend.note}</p>
+      </> : <div className="border-y py-6"><p className="text-sm font-medium">Comparable evidence comes first</p><p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{pending ? "Checking available reporting periods…" : "Select two comparable financial reports to explore their reported trends."}</p><Button asChild variant="link" className="mt-3 h-auto px-0 text-sm"><Link to="/intelligence" search={{ doc: ready?.id, tool: "compare" }}>Compare reports <ArrowUpRight className="size-3.5" /></Link></Button><p className="mt-3 text-[11px] text-muted-foreground">Issuer, metric, reporting period, currency, scale and scope must align.</p></div>}
+    </section>
+  </div>;
 }
