@@ -1,5 +1,6 @@
 # Existing FINAUDIT AI demonstration
 
+- [ ] Verify fresh React module graph and signed-session outage state; unify document errors with explicit retry/reset and prevent repeated failed proxy reads.
 - [x] Refine premium Overview with four truthful indicators, source-linked priorities and compatible trend preview; preserve sample/live separation and avoid automatic paid analysis.
 - [x] Polish report-first reader, contextual evidence/Ask AI/Audit/Trends and focus controls; preserve all existing source navigation and backend contracts.
 - [x] Simplify Documents and present reproducible Evaluation results with explicit scientific limitations.

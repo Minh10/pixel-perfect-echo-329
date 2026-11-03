@@ -4,6 +4,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { DEMO_DOCUMENTS, DEMO_EVIDENCE, DEMO_PAGES, DEMO_TRENDS } from "./demo-data";
 import { configureHttpService, httpService } from "./http-service";
+import { retryDocumentRead } from "./read-retry";
 import type {
   ChartInterpretation,
   ChunkRef,
@@ -80,6 +81,7 @@ export const documentsQuery = () =>
   queryOptions({
     queryKey: ["documents"],
     queryFn: () => api.listDocuments(),
+    retry: retryDocumentRead,
     refetchInterval: (query) =>
       !IS_DEMO && query.state.data?.some((doc) => doc.status === "processing") ? 2000 : false,
   });
@@ -88,15 +90,16 @@ export const documentQuery = (id: string) =>
   queryOptions({
     queryKey: ["document", id],
     queryFn: () => api.getDocument(id),
+    retry: retryDocumentRead,
     refetchInterval: (query) =>
       !IS_DEMO && query.state.data?.status === "processing" ? 1500 : false,
   });
 
 export const pagesQuery = (id: string) =>
-  queryOptions({ queryKey: ["pages", id], queryFn: () => api.getPages(id) });
+  queryOptions({ queryKey: ["pages", id], queryFn: () => api.getPages(id), retry: retryDocumentRead });
 
 export const evidenceQuery = (id: string) =>
-  queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id) });
+  queryOptions({ queryKey: ["evidence", id], queryFn: () => api.getEvidence(id), retry: retryDocumentRead });
 
 // Demo mode keeps the labelled fictional series. Live mode does not call this.
 export const trendsQuery = (id: string | null) =>
