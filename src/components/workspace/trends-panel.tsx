@@ -48,7 +48,7 @@ function DemoTrends({ embedded = false }: { embedded?: boolean }) {
         />
       )}
       {embedded && <DemoBadge />}
-      <section className="rounded-md border bg-card p-5">
+      <section className={embedded ? "border-y py-4" : "rounded-md border bg-card p-5"}>
         <ChartContainer config={demoConfig} className="h-72 w-full">
           <BarChart data={data}>
             <CartesianGrid vertical={false} />

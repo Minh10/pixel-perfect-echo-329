@@ -106,7 +106,7 @@ function AnalysisWorkspace({
           description="Answers cite source passages, tables and charts. If evidence is insufficient, no supported answer is given."
         />
       )}
-      {selected.length > 0 && (
+      {selected.length > 0 && !embedded && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Selected reports: </span>
           {ready
@@ -116,7 +116,7 @@ function AnalysisWorkspace({
         </p>
       )}
       <form onSubmit={submit} className="space-y-4">
-        <div className="flex flex-col gap-2 @md:flex-row">
+        <div className="space-y-2">
           <Textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
@@ -127,9 +127,12 @@ function AnalysisWorkspace({
             className="min-w-0 resize-y"
             disabled={mutation.isPending}
           />
-          <Button type="submit" disabled={mutation.isPending || question.trim().length < 3}>
-            {mutation.isPending ? "Asking…" : "Ask"}
-          </Button>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">{embedded ? "Open PDF included" : "Evidence-grounded question"}</span>
+            <Button type="submit" disabled={mutation.isPending || question.trim().length < 3}>
+              <MessageSquareText className="size-4" />{mutation.isPending ? "Asking…" : "Ask AI"}
+            </Button>
+          </div>
         </div>
         {suggestions.length > 0 && (
           <div className="space-y-1 border-l-2 border-primary pl-3">
@@ -243,7 +246,7 @@ function AnalysisWorkspace({
       )}
 
       {result?.status === "answered" && (
-        <article className="space-y-6 rounded-md border bg-card p-5">
+        <article className={embedded ? "space-y-5 border-t pt-5" : "space-y-6 rounded-md border bg-card p-5"}>
           <h3 className="text-sm font-semibold break-words">{result.question}</h3>
           {result.answer && <p className="text-sm leading-relaxed">{result.answer}</p>}
           {result.value && (
@@ -312,7 +315,7 @@ function AnalysisWorkspace({
                   <Button
                     variant="ghost"
                     type="button"
-                    className="block h-auto w-full whitespace-normal rounded-md border px-3 py-3 text-left hover:bg-primary-soft/40"
+                    className="block h-auto w-full whitespace-normal rounded-none border-l-2 border-evidence bg-evidence-soft/30 px-3 py-3 text-left hover:bg-evidence-soft/60"
                     aria-label={`View source on page ${page ?? "unknown"}`}
                     onClick={() =>
                       navigate({

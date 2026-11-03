@@ -1,4 +1,4 @@
-import { ArrowUpRight, FileText, Table2, ScanLine, ChevronRight } from "lucide-react";
+import { ArrowUpRight, FileText, Table2, ScanLine, ChevronRight, MessageSquareText, ShieldCheck, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IS_DEMO } from "@/lib/api/service";
 import type { DocumentPage, Evidence, FinDocument } from "@/lib/api/types";
@@ -10,6 +10,7 @@ export function ReportOverview({
   current,
   onPage,
   onEvidence,
+  onTool,
 }: {
   doc: FinDocument;
   pages: DocumentPage[];
@@ -17,6 +18,7 @@ export function ReportOverview({
   current: number;
   onPage: (page: number) => void;
   onEvidence: () => void;
+  onTool: (tool: "ask" | "charts" | "compare") => void;
 }) {
   const page = pages.find((item) => item.number === current);
   const regions = evidence.filter((item) => item.page === current);
@@ -28,6 +30,7 @@ export function ReportOverview({
       value: evidence.filter((item) => item.category === "table").length,
       icon: Table2,
     },
+    { label: "Visuals", value: evidence.filter((item) => item.category === "figure" || item.category === "chart").length, icon: ScanLine },
   ];
   return (
     <div className="report-overview p-5 xl:p-6">
@@ -38,18 +41,18 @@ export function ReportOverview({
           {IS_DEMO ? "Illustrative sample" : "Pages ready"}
         </span>
       </div>
-      <h2 className="text-xl font-semibold leading-snug">{doc.issuer || doc.title}</h2>
+      <h2 className="break-words text-lg font-semibold leading-snug">{doc.issuer || doc.title}</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         {[doc.type, doc.period].filter(Boolean).join(" · ") || doc.filename || "Financial report"}
       </p>
-      <div className="my-6 grid grid-cols-3 divide-x border-y py-4">
+      <div className="my-5 grid grid-cols-4 divide-x border-y py-4">
         {counts.map(({ label, value, icon: Icon }) => (
           <div key={label} className="px-3 first:pl-0">
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Icon className="size-3" />
               {label}
             </span>
-            <p className="mt-2 font-mono text-2xl font-medium tabular">{value}</p>
+            <p className="mt-2 font-mono text-xl font-medium tabular">{value}</p>
           </div>
         ))}
       </div>
@@ -77,6 +80,9 @@ export function ReportOverview({
           </p>
         )}
       </section>
+      <div className="mb-6 grid gap-1 border-y py-2">
+        {([{ tool: "ask", label: "Ask about this report", icon: MessageSquareText }, { tool: "charts", label: "Inspect charts & checks", icon: ShieldCheck }, { tool: "compare", label: "Compare reported values", icon: TrendingUp }] as const).map(({ tool, label, icon: Icon }) => <Button key={tool} variant="ghost" className="h-9 justify-start gap-2 px-0 text-xs" onClick={() => onTool(tool)}><Icon className="size-3.5 text-primary" />{label}<ArrowUpRight className="ml-auto size-3.5 text-muted-foreground" /></Button>)}
+      </div>
       <section aria-label="Document outline">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="eyebrow">DOCUMENT OUTLINE</h3>
