@@ -1,5 +1,6 @@
+import { DocumentError } from "@/components/app/document-error";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -20,6 +21,8 @@ import {
   Maximize,
   Copy,
   Check,
+  Focus,
+  Minimize,
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -34,7 +37,7 @@ import { PdfIntake } from "@/components/app/pdf-intake";
 import { AnalysisPanel } from "@/components/workspace/analysis-panel";
 import { ChartChecksPanel } from "@/components/workspace/audit-panel";
 import { ComparisonPanel } from "@/components/workspace/trends-panel";
-import { ApiError, apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
+import { apiAsset, sourceDocumentUrl } from "@/lib/api/http-service";
 import {
   DEFAULT_DOCUMENT_ID,
   IS_DEMO,
@@ -49,7 +52,7 @@ import type { ChunkRef, EvidenceCategory, FinDocument } from "@/lib/api/types";
 import { DocumentPageView } from "@/components/workspace/document-page";
 import { PageNavigator } from "@/components/workspace/page-navigator";
 import { EvidenceInspector } from "@/components/workspace/evidence-inspector";
-import { ErrorState, WorkspaceSkeleton } from "@/components/app/states";
+import { WorkspaceSkeleton } from "@/components/app/states";
 import { selectWorkspaceDocument } from "@/lib/workspace-selection";
 
 const search = z.object({
@@ -92,21 +95,7 @@ export const Route = createFileRoute("/intelligence")({
     ],
   }),
   pendingComponent: WorkspaceSkeleton,
-  errorComponent: function WorkspaceError({ error }) {
-    const router = useRouter();
-    const unavailable =
-      error instanceof ApiError &&
-      (error.code === "backend_unavailable" || error.code === "timeout");
-    return (
-      <div className="p-8">
-        <ErrorState
-          title={unavailable ? "Document service unavailable" : "Couldn't load this document"}
-          message={error instanceof Error ? error.message : String(error)}
-          onRetry={() => router.invalidate()}
-        />
-      </div>
-    );
-  },
+  errorComponent: DocumentError,
   component: Workspace,
 });
 
@@ -152,6 +141,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
   const [showPages, setShowPages] = useState(false);
   const [showInspector, setShowInspector] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [desktop, setDesktop] = useState(false);
   const [visitedTools, setVisitedTools] = useState<string[]>([tool]);
   const { setOpen } = useSidebar();
@@ -335,6 +325,7 @@ function WorkspaceReady({ docId }: { docId: string }) {
           current={current}
           onPage={goTo}
           onEvidence={() => changeTool("evidence")}
+          onTool={changeTool}
         />
       </div>
       <div hidden={tool !== "evidence"}>
@@ -410,7 +401,9 @@ function WorkspaceReady({ docId }: { docId: string }) {
     </main>
   );
   return (
-    <div className="report-workspace flex min-w-0 flex-col lg:h-[calc(100svh-3.5rem)]">
+    <div
+      className={`report-workspace flex min-w-0 flex-col ${focusMode ? "report-focus" : "lg:h-[calc(100svh-3.5rem)]"}`}
+    >
       <header className="report-toolbar grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-card px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <ReaderAction label="Back to library">
@@ -557,6 +550,18 @@ function WorkspaceReady({ docId }: { docId: string }) {
               onClick={() => setShowHighlights((value) => !value)}
             >
               <Highlighter className="size-4" />
+            </Button>
+          </ReaderAction>
+          <ReaderAction label={focusMode ? "Exit focus mode" : "Focus mode"}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label={focusMode ? "Exit focus mode" : "Focus mode"}
+              aria-pressed={focusMode}
+              onClick={() => setFocusMode((value) => !value)}
+            >
+              {focusMode ? <Minimize className="size-4" /> : <Focus className="size-4" />}
             </Button>
           </ReaderAction>
           {!IS_DEMO && page?.imageUrl && doc.sha256 && (

@@ -1,30 +1,16 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useQueries, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { DocumentError } from "@/components/app/document-error";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ApiError } from "@/lib/api/http-service";
-import {
-  api,
-  documentsQuery,
-  evidenceQuery,
-  DEFAULT_DOCUMENT_ID,
-  IS_DEMO,
-} from "@/lib/api/service";
-import type { Evidence } from "@/lib/api/types";
-import { PdfIntake } from "@/components/app/pdf-intake";
-import { DemoBadge, ErrorState, PageHeader, PageSkeleton } from "@/components/app/states";
+import { api, documentsQuery, DEFAULT_DOCUMENT_ID, IS_DEMO } from "@/lib/api/service";
+import { DemoBadge, PageSkeleton } from "@/components/app/states";
 import { DocumentsTable } from "@/components/app/documents-table";
 import { OverviewMetrics, OverviewPanels } from "@/components/app/overview-panels";
+import { loadLibraryIntelligence, recentReports } from "@/lib/library-intelligence";
 
 export const Route = createFileRoute("/")({
-  loader: async ({ context }) => {
-    const docs = await context.queryClient.ensureQueryData(documentsQuery());
-    const ids =
-      IS_DEMO && DEFAULT_DOCUMENT_ID
-        ? [DEFAULT_DOCUMENT_ID]
-        : docs.filter((doc) => doc.status === "ready").map((doc) => doc.id);
-    await Promise.all(ids.map((id) => context.queryClient.ensureQueryData(evidenceQuery(id))));
-  },
+  loader: ({ context }) => context.queryClient.ensureQueryData(documentsQuery()),
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
@@ -42,88 +28,70 @@ export const Route = createFileRoute("/")({
     ],
   }),
   pendingComponent: PageSkeleton,
-  errorComponent: function OverviewError({ error }) {
-    const router = useRouter();
-    const unavailable =
-      error instanceof ApiError &&
-      (error.code === "backend_unavailable" || error.code === "timeout");
-    return (
-      <div className="p-8">
-        <ErrorState
-          title={unavailable ? "Document service unavailable" : "Couldn't load the overview"}
-          message={error instanceof Error ? error.message : String(error)}
-          onRetry={() => router.invalidate()}
-        />
-      </div>
-    );
-  },
+  errorComponent: DocumentError,
   component: Overview,
 });
 
 function Overview() {
   const { data: docs } = useSuspenseQuery(documentsQuery());
-  const evidenceIds =
-    IS_DEMO && DEFAULT_DOCUMENT_ID
-      ? [DEFAULT_DOCUMENT_ID]
-      : docs.filter((doc) => doc.status === "ready").map((doc) => doc.id);
-  const evidenceResults = useSuspenseQueries({
-    queries:
-      evidenceIds.length > 0
-        ? evidenceIds.map((id) => evidenceQuery(id))
-        : [
-            {
-              queryKey: ["evidence", "none"],
-              queryFn: async () => [] as Evidence[],
-            },
-          ],
+  const latest = recentReports(docs).find((doc) => doc.status === "ready");
+  const intelligence = useQuery({
+    queryKey: [
+      "library-intelligence",
+      IS_DEMO ? "sample" : "live",
+      docs
+        .filter((doc) => doc.status === "ready")
+        .map((doc) => `${doc.id}:${doc.processedAt ?? doc.uploadedAt}`)
+        .join(","),
+    ],
+    queryFn: () => loadLibraryIntelligence(api, docs, IS_DEMO, DEFAULT_DOCUMENT_ID),
+    staleTime: 300_000,
+    retry: false,
   });
-  const evidence = evidenceResults.flatMap((result) => result.data);
-  const latest = docs.find((doc) => doc.status === "ready");
-
   return (
     <div className="page-layout space-y-7">
-      <PageHeader
-        title="Overview"
-        description={
-          IS_DEMO
-            ? "A sample financial library. Open the sample report to inspect pages, tables and charts."
-            : "Drop a PDF to process it. Pages, tables, charts, discrepancies and trends follow from that report."
-        }
-        actions={
-          !IS_DEMO && latest ? (
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-2">FINANCIAL DOCUMENT INTELLIGENCE</p>
+          <h1 className="text-3xl font-semibold">
+            FINAUDIT <span className="text-primary">AI</span>
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+            Understand financial reports, verify visual evidence, and discover source-grounded
+            trends.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {latest && (
             <Button asChild variant="outline">
               <Link to="/intelligence" search={{ doc: latest.id }}>
-                Continue latest report
+                Open report <ArrowRight className="size-4" />
               </Link>
             </Button>
-          ) : null
-        }
-      />
-      <PdfIntake />
-      <details className="border-b pb-4">
-        <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
-          Library statistics · {docs.length} reports
-        </summary>
-        <div className="mt-4">
-          <OverviewMetrics documents={docs} evidence={evidence} />
-          {!IS_DEMO && api.getFigureInterpretation && (
-            <StoredAnalyses
-              figures={evidenceIds.flatMap((documentId, index) =>
-                (evidenceResults[index]?.data ?? [])
-                  .filter((item) => item.category === "figure")
-                  .map((item) => ({ documentId, blockId: item.blockId })),
-              )}
-            />
           )}
-          <OverviewPanels documents={docs} />
+          <Button asChild>
+            <Link to="/documents">{IS_DEMO ? "Document library" : "Upload PDF"}</Link>
+          </Button>
         </div>
-      </details>
+      </header>
+      <OverviewMetrics
+        documents={docs}
+        intelligence={intelligence.data}
+        pending={intelligence.isPending}
+      />
+      <OverviewPanels
+        intelligence={intelligence.data}
+        pending={intelligence.isPending}
+        error={intelligence.isError}
+      />
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold">Recent Documents</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Financial reports in your library</p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold">
+            Recent reports{" "}
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              {docs.length} in library
+            </span>
+          </h2>
           <div className="flex items-center gap-3">
             {IS_DEMO && <DemoBadge />}
             <Button asChild variant="link" size="sm">
@@ -133,43 +101,22 @@ function Overview() {
             </Button>
           </div>
         </div>
-        <DocumentsTable documents={docs} />
+        <DocumentsTable documents={recentReports(docs).slice(0, 4)} />
       </section>
+      <footer
+        className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-4 text-[11px] text-muted-foreground"
+        aria-label="Processing architecture"
+      >
+        <span className="font-medium text-foreground">Evidence pipeline</span>
+        {["PDF", "Layout detection", "Financial facts", "Evidence index", "AI analysis"].map(
+          (stage, index) => (
+            <span key={stage} className="inline-flex items-center gap-3">
+              {index > 0 && <ArrowRight className="size-3" />}
+              {stage}
+            </span>
+          ),
+        )}
+      </footer>
     </div>
-  );
-}
-
-function StoredAnalyses({ figures }: { figures: { documentId: string; blockId: string }[] }) {
-  const readings = useQueries({
-    queries: figures.map((figure) => ({
-      queryKey: ["interpretation", figure.documentId, figure.blockId],
-      queryFn: () => api.getFigureInterpretation!(figure.documentId, figure.blockId),
-      retry: false,
-    })),
-  });
-  const pending = readings.some((query) => query.isPending);
-  const stored = readings.flatMap((query) => (query.data ? [query.data] : []));
-  const discrepancies = stored.reduce(
-    (count, reading) =>
-      count + reading.tableChecks.filter((check) => check.status === "conflict").length,
-    0,
-  );
-  return (
-    <section className="grid gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-2">
-      <div className="bg-card p-5">
-        <p className="text-xs text-muted-foreground">Stored chart readings</p>
-        <p className="mt-2 font-serif text-3xl tabular">{pending ? "…" : stored.length}</p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Figures with a saved model reading. Unread figures are not counted.
-        </p>
-      </div>
-      <div className="bg-card p-5">
-        <p className="text-xs text-muted-foreground">Potential discrepancies</p>
-        <p className="mt-2 font-serif text-3xl tabular">{pending ? "…" : discrepancies}</p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Stored chart points that differ from one aligned reported fact. Not a verified finding.
-        </p>
-      </div>
-    </section>
   );
 }

@@ -64,7 +64,7 @@ export function EvidenceInspector({
   );
 
   return (
-    <div className="flex min-h-0 h-full flex-col">
+    <div className="flex min-h-0 flex-col">
       {selected ? (
         <section
           ref={detail}
@@ -98,7 +98,7 @@ export function EvidenceInspector({
               <BlockContent block={selectedBlock} />
             </div>
           ) : null}
-          {selectedBlock?.table && (
+          {selectedBlock?.table && selectedBlock.table.rows.length > 0 && (
             <p className="mt-2 text-xs text-muted-foreground">
               {selectedBlock.table.rows.length} extracted rows ·{" "}
               {selectedBlock.table.columns.length} columns
@@ -149,36 +149,39 @@ export function EvidenceInspector({
               ))}
             </dl>
           )}
-          <div className="mt-4 flex items-center justify-between gap-3">
-            {selected.confidence == null ? (
-              <p className="text-[11px] text-muted-foreground">
-                Confidence: not reported by parser
-              </p>
-            ) : (
-              <ConfidenceBar value={selected.confidence} />
-            )}
-            {IS_DEMO && <DemoBadge />}
-          </div>
-          {IS_DEMO && (
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Extraction is illustrative. No figure has been verified against source filings.
-            </p>
-          )}
-          {!IS_DEMO && selected.provenance && (
-            <dl className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
-              <div>
-                {selected.provenance.parser} · {selected.provenance.method}
-              </div>
-              <div>
-                p. {selected.provenance.page} · bbox {selected.provenance.bbox.l.toFixed(1)},{" "}
-                {selected.provenance.bbox.t.toFixed(1)}, {selected.provenance.bbox.r.toFixed(1)},{" "}
-                {selected.provenance.bbox.b.toFixed(1)} pt
-              </div>
-              {selected.category === "disclosure" && selected.detection?.rule && (
-                <div className="font-sans">{selected.detection.rule}</div>
+          <details className="mt-4 text-xs text-muted-foreground">
+            <summary className="cursor-pointer">Source & extraction details</summary>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              {selected.confidence == null ? (
+                <p className="text-[11px] text-muted-foreground">
+                  Confidence: not reported by parser
+                </p>
+              ) : (
+                <ConfidenceBar value={selected.confidence} />
               )}
-            </dl>
-          )}
+              {IS_DEMO && <DemoBadge />}
+            </div>
+            {IS_DEMO && (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Extraction is illustrative. No figure has been verified against source filings.
+              </p>
+            )}
+            {!IS_DEMO && selected.provenance && (
+              <dl className="mt-3 space-y-1 font-mono text-[11px] text-muted-foreground">
+                <div>
+                  {selected.provenance.parser} · {selected.provenance.method}
+                </div>
+                <div>
+                  p. {selected.provenance.page} · bbox {selected.provenance.bbox.l.toFixed(1)},{" "}
+                  {selected.provenance.bbox.t.toFixed(1)}, {selected.provenance.bbox.r.toFixed(1)},{" "}
+                  {selected.provenance.bbox.b.toFixed(1)} pt
+                </div>
+                {selected.category === "disclosure" && selected.detection?.rule && (
+                  <div className="font-sans">{selected.detection.rule}</div>
+                )}
+              </dl>
+            )}
+          </details>
           {related.length > 0 && (
             <div className="mt-4">
               <p className="eyebrow mb-2">Linked evidence</p>
@@ -201,9 +204,6 @@ export function EvidenceInspector({
       ) : (
         <section className="border-b p-4">
           <p className="text-sm font-medium">Source evidence</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Select a region to inspect its source on the PDF.
-          </p>
         </section>
       )}
 
@@ -225,7 +225,7 @@ export function EvidenceInspector({
         ))}
       </div>
 
-      <ul className="flex-1 overflow-y-auto">
+      <ul>
         {filtered.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No evidence in this category.</li>
         )}

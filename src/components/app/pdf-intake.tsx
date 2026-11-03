@@ -28,15 +28,15 @@ export function PdfIntake() {
 
 function SampleStart({ canActivate }: { canActivate: boolean }) {
   return (
-    <section data-pointer-surface className="intake-surface rounded-md border bg-card p-5 sm:p-6">
-      <p className="eyebrow">Start</p>
+    <section data-pointer-surface className="intake-surface border-y bg-card px-1 py-5">
+      <p className="eyebrow">SYNTHETIC SAMPLE</p>
       <h2 className="mt-2 text-xl font-semibold">
         {canActivate ? "Activate the live demo to upload a PDF" : "Open the sample report"}
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         {canActivate
-          ? "The document service is connected. Enter admin / admin to start a one-hour live session, then drop a financial PDF here. Until then you are viewing the sample."
-          : "This published preview is not connected to the document service, so a new PDF cannot be processed here. The sample annual report is ready to inspect, including its pages, tables, and charts."}
+          ? "Live entry is enabled. Activate a temporary session to upload; this view contains only synthetic sample data."
+          : "Synthetic report available for inspection. Live PDF processing is not active in this view."}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {canActivate && (
@@ -93,7 +93,7 @@ function LiveIntake() {
   };
 
   return (
-    <section className="rounded-md border bg-card p-5 sm:p-6">
+    <section className="border-y py-5">
       <label
         data-pointer-surface
         onDragOver={(event) => {
@@ -130,8 +130,7 @@ function LiveIntake() {
           {uploading ? "Uploading PDF…" : "Drop a financial PDF"}
         </span>
         <span className="max-w-xl text-sm text-muted-foreground">
-          One step. The file name becomes the report title, processing starts immediately, and the
-          report opens on its own.
+          PDF · optional issuer and period
         </span>
       </label>
       {progress !== null && (

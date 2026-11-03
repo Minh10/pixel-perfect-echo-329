@@ -49,7 +49,7 @@ function StatusCell({ doc }: { doc: FinDocument }) {
 
 export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
   return (
-    <div className="overflow-hidden rounded-md border bg-card">
+    <div className="overflow-hidden border-y bg-card">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -67,7 +67,7 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
               key={d.id}
               className="document-row hover:bg-primary-soft/50 focus-within:bg-primary-soft/50"
             >
-              <TableCell className="py-5 pl-5 whitespace-normal">
+              <TableCell className="py-4 pl-5 whitespace-normal">
                 <div className="flex items-center gap-3">
                   <FileText className="hidden size-5 shrink-0 text-muted-foreground sm:block" />
                   <div className="min-w-0">
@@ -75,7 +75,7 @@ export function DocumentsTable({ documents }: { documents: FinDocument[] }) {
                       <Link
                         to="/intelligence"
                         search={{ doc: d.id }}
-                        className="action-link inline-flex items-center gap-2 rounded-sm font-semibold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="action-link inline-flex max-w-full items-center gap-2 break-words rounded-sm font-semibold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         {d.title}
                         <ArrowUpRight className="hidden size-3.5 shrink-0 text-muted-foreground sm:block" />

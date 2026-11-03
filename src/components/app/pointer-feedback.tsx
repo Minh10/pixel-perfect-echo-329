@@ -62,7 +62,7 @@ export function PointerFeedback() {
             x: cx,
             y: cy,
             at: now,
-            strength: dx === 0 && dy === 0 ? 0.23 : 0.07,
+            strength: dx === 0 && dy === 0 ? 0.08 : 0.025,
           });
         }
       }

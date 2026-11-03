@@ -47,8 +47,19 @@ function DemoTrends({ embedded = false }: { embedded?: boolean }) {
           actions={<DemoBadge />}
         />
       )}
-      {embedded && <DemoBadge />}
-      <section className="rounded-md border bg-card p-5">
+      {embedded && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">Northwind Holdings · £ millions</p>
+          <DemoBadge />
+        </div>
+      )}
+      {embedded && (
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Synthetic five-year series · Revenue, operating profit and net profit. Not verified
+          financial findings.
+        </p>
+      )}
+      <section className={embedded ? "border-y py-4" : "rounded-md border bg-card p-5"}>
         <ChartContainer config={demoConfig} className="h-72 w-full">
           <BarChart data={data}>
             <CartesianGrid vertical={false} />
