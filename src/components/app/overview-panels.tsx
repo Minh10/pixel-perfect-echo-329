@@ -20,7 +20,7 @@ export function OverviewMetrics({
   pending,
 }: {
   documents: FinDocument[];
-  intelligence?: LibraryIntelligence;
+  intelligence?: LibraryIntelligence | undefined;
   pending: boolean;
 }) {
   const partial = intelligence?.unavailable;
@@ -91,7 +91,7 @@ export function OverviewPanels({
   pending,
   error,
 }: {
-  intelligence?: LibraryIntelligence;
+  intelligence?: LibraryIntelligence | undefined;
   pending: boolean;
   error: boolean;
 }) {

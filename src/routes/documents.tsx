@@ -74,12 +74,12 @@ function Documents() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={status} onValueChange={setStatus}>
           <TabsList aria-label="Document status">
-            {[
+            {([
               ["all", "All"],
               ["ready", "Ready"],
               ["processing", "Processing"],
               ["failed", "Failed"],
-            ].map(([value, label]) => (
+            ] as const).map(([value, label]) => (
               <TabsTrigger key={value} value={value}>
                 {label}{" "}
                 <span className="ml-1 text-xs text-muted-foreground">
